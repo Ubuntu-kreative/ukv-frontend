@@ -1,0 +1,21 @@
+/* Ubuntu Kreative Booking Styles */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Outfit:wght@300;400;500&display=swap');
+
+:root {
+  --bg:#0d0c09; --bg2:#141310; --bg3:#1c1a14; --bg4:#242118; --bg5:#2d2920;
+  --gold:#c8a84b; --gold2:#e2c96b; --gold-dim:rgba(200,168,75,0.12);
+  --cream:#ede6d3; --cream2:#d9d0bc; --muted:rgba(237,230,211,0.4); 
+  --muted2:rgba(237,230,211,0.15); --muted3:rgba(237,230,211,0.07);
+  --sage:#6b7d5e; --sage2:#94a886; --rust:#a34e2e;
+  --border:rgba(200,168,75,0.14); --border2:rgba(237,230,211,0.08);
+  --ff:'Cormorant Garamond',serif; --fb:'Outfit',sans-serif;
+}
+
+/* Base resets & styles from source */
+.ubuntu-wrapper { background: var(--bg); color: var(--cream); font-family: var(--fb); }
+.ec { background: var(--bg2); padding: 28px; position: relative; border: 1px solid transparent; transition: all 0.2s; }
+.ec:hover { background: var(--bg3); border-color: var(--gold-dim); }
+.ec-corner { position: absolute; width: 12px; height: 12px; border-color: rgba(200, 168, 75, .35); border-style: solid; }
+.ec-corner.tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+.ec-corner.br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+/* ... (Include all other classes provided in the source HTML) */
