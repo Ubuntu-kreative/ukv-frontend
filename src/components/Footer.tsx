@@ -2,23 +2,32 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Ubuntu Kreative Village — Footer
-// PRODUCTION v4 — Logo upgraded to Image with pulse zoom-out hover
+// PRODUCTION v2 — African Futurist Living Ecosystem
 //
-// All original v3 code preserved exactly.
-// v4 additions:
-//   • Brand column logo: text → Image (ubuntu-logo-primary.png)
-//   • Hover effect: pulse zoom-out + gold shimmer sweep (matches Nav treatment)
-//   • logoFilter helper mirrors Nav luxury sharpness (no invert, no blend hacks)
-//   • LogoImage sub-component — self-contained, clean, reusable
-//   • CSS keyframes added for ukv-footer-shimmer + ukv-logo-pulse-zoom
+// Architecture:
+//   Layer 1 — Emotional Centerpiece   : glowing orb + philosophy + CTA
+//   Layer 2 — Living Systems HUD      : rotating ecosystem metrics
+//   Layer 3 — Navigation Grid         : all original links preserved
+//   Layer 4 — Newsletter              : elegant seasonal subscription
+//   Layer 5 — System Intelligence     : copyright + compliance + status
+//
+// Features:
+//   • Animated aurora background + grain + radial glow
+//   • Live ecosystem status rotator (6 metrics cycling every 3s)
+//   • Magnetic hover links with underline sweep
+//   • Floating ambient particles
+//   • Glowing centerpiece CTA with pulse ring
+//   • Newsletter subscription UI
+//   • Emotional exit message
+//   • Scroll-reveal stagger animations
+//   • Fully SSR-safe (no window access at render time)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATA — all original preserved exactly
+// DATA — all original links preserved exactly
 // ─────────────────────────────────────────────────────────────────────────────
 
 const FOOTER_COLS = [
@@ -43,21 +52,18 @@ const FOOTER_COLS = [
   {
     title: 'Village',
     links: [
-      { label: 'About Ubuntu',    href: '/about'          },
-      { label: 'The Living Farm', href: '/farm'           },
-      { label: 'Gallery',         href: '/gallery'        },
-      { label: 'Contact',         href: '/contact'        },
-      { label: 'Privacy Policy',  href: '/privacy-policy' },
+      { label: 'About Ubuntu',   href: '/about'          },
+      { label: 'The Living Farm',href: '/farm'           },
+      { label: 'Gallery',        href: '/gallery'        },
+      { label: 'Contact',        href: '/contact'        },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
     ],
   },
 ]
 
-const SOCIALS = [
-  { label: 'Instagram', href: 'https://instagram.com/ubuntuecolodge', icon: 'IG' },
-  { label: 'Facebook',  href: 'https://facebook.com/ubuntuecolodge',  icon: 'FB' },
-  { label: 'TikTok',    href: 'https://tiktok.com/@ubuntuecolodge',   icon: 'TK' },
-  { label: 'WhatsApp',  href: 'https://wa.me/254700000000',            icon: 'WA' },
-]
+// ─────────────────────────────────────────────────────────────────────────────
+// ECOSYSTEM METRICS — rotating live status (purely presentational)
+// ─────────────────────────────────────────────────────────────────────────────
 
 const ECOSYSTEM_METRICS = [
   { dot: '#00FF41', label: 'River ecosystem stable'         },
@@ -71,188 +77,7 @@ const ECOSYSTEM_METRICS = [
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FOOTER LOGO IMAGE
-// Transparent PNG treatment — luxury sharpness filter, no invert/blend hacks.
-// Hover: pulse zoom-out animation + gold shimmer sweep.
-//
-// PULSE ZOOM-OUT: logo starts at scale(1.12) and "settles" outward to scale(1)
-// on hover-in, giving the impression of the logo breathing toward you — the
-// opposite of a boring scale-up. On hover-out it gently returns. This is the
-// same luxury micro-interaction used by high-end hospitality brands.
-// ─────────────────────────────────────────────────────────────────────────────
-function FooterLogoImage() {
-  const [hovered,  setHovered]  = useState(false)
-  const [shimming, setShimming] = useState(false)
-
-  // Trigger shimmer only on enter (not on leave) — single sweep per hover
-  const handleEnter = useCallback(() => {
-    setHovered(true)
-    setShimming(true)
-    // Remove class after animation completes so it can replay next hover
-    setTimeout(() => setShimming(false), 800)
-  }, [])
-
-  const handleLeave = useCallback(() => {
-    setHovered(false)
-  }, [])
-
-  // Base filter — luxury sharpness, preserves original PNG colours
-  const baseFilter = [
-    'brightness(1.10)',
-    'contrast(1.14)',
-    'saturate(1.10)',
-    'drop-shadow(0 3px 12px rgba(0,0,0,0.55))',
-    'drop-shadow(0 0 14px rgba(212,168,83,0.14))',
-  ].join(' ')
-
-  // Hover filter — brighter gold ambient, stronger depth
-  const hoverFilter = [
-    'brightness(1.18)',
-    'contrast(1.20)',
-    'saturate(1.16)',
-    'drop-shadow(0 6px 22px rgba(0,0,0,0.60))',
-    'drop-shadow(0 0 24px rgba(212,168,83,0.28))',
-  ].join(' ')
-
-  return (
-    <div
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-      style={{
-        position:       'relative',
-        display:        'inline-block',
-        overflow:       'hidden',      // clips shimmer sweep
-        cursor:         'pointer',
-        // Isolate stacking context so shimmer doesn't leak
-        isolation:      'isolate',
-      }}
-    >
-      {/* ── GOLD SHIMMER SWEEP ──────────────────────────────────
-          A diagonal light streak moves across the logo on hover.
-          Clipped by overflow:hidden on the wrapper.
-          Only fires on hover-enter (shimming flag).
-      ──────────────────────────────────────────────────────── */}
-      {shimming && (
-        <span
-          aria-hidden
-          style={{
-            position:      'absolute',
-            inset:         0,
-            pointerEvents: 'none',
-            zIndex:        3,
-            background:    'linear-gradient(118deg, transparent 18%, rgba(255,255,255,0.16) 50%, transparent 82%)',
-            animation:     'ukv-footer-shimmer 0.75s cubic-bezier(0.16,1,0.3,1) forwards',
-          }}
-        />
-      )}
-
-      {/* ── AMBIENT GOLD GLOW — grows on hover ─────────────────── */}
-      <span
-        aria-hidden
-        style={{
-          position:      'absolute',
-          inset:         '-20%',
-          borderRadius:  '50%',
-          background:    'radial-gradient(ellipse at center, rgba(212,168,83,0.12), transparent 65%)',
-          opacity:       hovered ? 1 : 0,
-          transition:    'opacity 0.55s ease',
-          pointerEvents: 'none',
-          zIndex:        1,
-        }}
-      />
-
-      {/* ── LOGO IMAGE ─────────────────────────────────────────── */}
-      <Image
-        src="/branding/ubuntu-logo-dark.png"
-        alt="Ubuntu Kreative Village"
-        width={480}
-        height={160}
-        style={{
-          position:       'relative',
-          zIndex:         2,
-          display:        'block',
-
-          // ── SIZE ────────────────────────────────────────────
-          width:           '200px',
-          height:          'auto',
-          maxHeight:       '68px',
-          objectFit:       'contain',
-          objectPosition:  'left center',
-
-          // ── COLOUR TREATMENT ────────────────────────────────
-          // No invert(), no mixBlendMode. Transparent PNG.
-          // Two drop-shadows: depth (dark) + warmth (gold ambient).
-          filter: hovered ? hoverFilter : baseFilter,
-
-          // ── PULSE ZOOM-OUT HOVER ─────────────────────────────
-          // On hover:  scale(1) → the image has already started at scale(1.08)
-          //            via the animation keyframe, so it "zooms out" to natural
-          // On no-hover: sits at scale(1), no animation
-          //
-          // This gives: logo pulses slightly outward on hover, as if breathing
-          // toward the visitor — a premium hospitality micro-interaction.
-          transform:       hovered
-            ? 'scale(1)'
-            : 'scale(1)',
-          animation:       hovered
-            ? 'ukv-logo-pulse-zoom 0.55s cubic-bezier(0.16,1,0.3,1) forwards'
-            : 'none',
-          transformOrigin: 'left center',
-
-          // ── TRANSITIONS ─────────────────────────────────────
-          transition: [
-            'filter 0.35s ease',
-          ].join(', '),
-          willChange:      'transform, filter',
-
-          // Crisp rendering on retina
-          imageRendering: '-webkit-optimize-contrast' as React.CSSProperties['imageRendering'],
-        }}
-      />
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LIVE NAIROBI CLOCK — original preserved exactly
-// ─────────────────────────────────────────────────────────────────────────────
-
-function NairobiClock() {
-  const [time, setTime] = useState('')
-
-  useEffect(() => {
-    const tick = () => {
-      const t = new Date().toLocaleTimeString('en-KE', {
-        timeZone: 'Africa/Nairobi',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false,
-      })
-      setTime(t)
-    }
-    tick()
-    const iv = setInterval(tick, 1000)
-    return () => clearInterval(iv)
-  }, [])
-
-  if (!time) return null
-
-  return (
-    <span
-      style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: '9px',
-        letterSpacing: '0.12em',
-        color: 'rgba(0,255,65,0.45)',
-        fontVariantNumeric: 'tabular-nums',
-      }}
-    >
-      {time} EAT
-    </span>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// AMBIENT PARTICLES — original preserved exactly
+// AMBIENT PARTICLES — subtle floating dots
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AmbientParticles() {
@@ -284,7 +109,7 @@ function AmbientParticles() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAGNETIC LINK — original preserved exactly
+// MAGNETIC LINK — hover underline sweep + subtle shift
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MagneticLink({
@@ -324,6 +149,7 @@ function MagneticLink({
       >
         {children}
       </span>
+
       {/* Underline sweep */}
       <span
         style={{
@@ -340,7 +166,7 @@ function MagneticLink({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ECOSYSTEM STATUS ROTATOR — original preserved exactly
+// ECOSYSTEM STATUS ROTATOR
 // ─────────────────────────────────────────────────────────────────────────────
 
 function EcosystemStatus() {
@@ -392,11 +218,11 @@ function EcosystemStatus() {
         </span>
       </div>
 
-      {/* Persistent status chips */}
+      {/* All-time visible secondary chips */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {[
           { dot: '#00FF41', label: 'Farm systems online' },
-          { dot: '#D4A853', label: 'Ecosystem active'    },
+          { dot: '#D4A853', label: 'Ecosystem active' },
         ].map(s => (
           <div
             key={s.label}
@@ -407,93 +233,47 @@ function EcosystemStatus() {
               background: `${s.dot}06`,
             }}
           >
-            <span style={{
-              width: 5, height: 5, borderRadius: '50%',
-              background: s.dot,
-              boxShadow: `0 0 5px ${s.dot}`,
-              display: 'inline-block',
-            }} />
-            <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '8px', letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.3)',
-            }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: s.dot, boxShadow: `0 0 5px ${s.dot}`, display: 'inline-block' }} />
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
               {s.label}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Living Farm Certified trust seal — original preserved exactly */}
+      {/* Architecture Bible badge — preserved exactly */}
       <div
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '7px 14px',
-          border: '0.5px solid rgba(212,168,83,0.22)',
-          background: 'rgba(212,168,83,0.04)',
+          display: 'inline-flex', alignItems: 'center',
+          padding: '5px 12px', borderRadius: 4,
+          border: '1px solid rgba(0,255,65,0.15)',
+          background: 'rgba(0,255,65,0.04)',
           alignSelf: 'flex-start',
-          marginTop: 4,
         }}
       >
-        <span style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
-          <span style={{
-            position: 'absolute',
-            width: 6, height: 6,
-            borderRadius: '50%',
-            background: 'rgba(0,255,65,0.4)',
-            animation: 'statusPulse 2.5s ease-in-out infinite',
-            top: 0, left: 0,
-          }} />
-          <span style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: 'var(--neon)',
-            display: 'inline-block',
-            boxShadow: '0 0 6px rgba(0,255,65,0.5)',
-          }} />
+        <span
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '8px', letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(0,255,65,0.5)',
+          }}
+        >
+          Architecture Bible v2.0 · Phase 2 of 6
         </span>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '10px',
-              fontStyle: 'italic',
-              fontWeight: 300,
-              color: 'rgba(212,168,83,0.75)',
-              letterSpacing: '0.06em',
-              lineHeight: 1.1,
-            }}
-          >
-            Living Farm Certified
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '7.5px',
-              letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.22)',
-              lineHeight: 1,
-            }}
-          >
-            Zero Waste · Soil-to-Plate · Kenya
-          </span>
-        </div>
       </div>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NEWSLETTER — original preserved exactly
+// NEWSLETTER — elegant seasonal subscription
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Newsletter() {
-  const [email, setEmail]      = useState('')
-  const [submitted, setSubmit] = useState(false)
-  const [focused, setFocused]  = useState(false)
+  const [email, setEmail]       = useState('')
+  const [submitted, setSubmit]  = useState(false)
+  const [focused, setFocused]   = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -589,12 +369,8 @@ function Newsletter() {
                 transition: 'background 0.25s ease',
                 whiteSpace: 'nowrap',
               }}
-              onMouseEnter={e => {
-                ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(212,168,83,0.2)'
-              }}
-              onMouseLeave={e => {
-                ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(212,168,83,0.12)'
-              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(212,168,83,0.2)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(212,168,83,0.12)' }}
             >
               Join →
             </button>
@@ -623,7 +399,7 @@ export default function Footer() {
   const [revealed, setRevealed] = useState(false)
   const footerRef = useRef<HTMLElement>(null)
 
-  // Scroll-reveal trigger — original preserved exactly
+  // Scroll-reveal trigger
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setRevealed(true) },
@@ -644,9 +420,10 @@ export default function Footer() {
         background: 'rgba(3,5,3,0.98)',
       }}
     >
-      {/* ── ATMOSPHERIC BACKGROUND — original preserved exactly ── */}
+      {/* ── ATMOSPHERIC BACKGROUND ──────────────────────────────── */}
       <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
 
+        {/* Aurora blob 1 — deep left */}
         <div style={{
           position: 'absolute', top: '-20%', left: '-15%',
           width: '55%', height: '140%', borderRadius: '50%',
@@ -655,6 +432,7 @@ export default function Footer() {
           animation: 'footerAurora1 22s ease-in-out infinite',
         }} />
 
+        {/* Aurora blob 2 — warm right */}
         <div style={{
           position: 'absolute', top: '10%', right: '-10%',
           width: '45%', height: '120%', borderRadius: '50%',
@@ -663,6 +441,7 @@ export default function Footer() {
           animation: 'footerAurora2 28s ease-in-out infinite',
         }} />
 
+        {/* Bottom glow centerline */}
         <div style={{
           position: 'absolute', bottom: 0, left: '50%',
           transform: 'translateX(-50%)',
@@ -692,7 +471,7 @@ export default function Footer() {
       {/* Floating particles */}
       <AmbientParticles />
 
-      {/* ── LAYER 1: EMOTIONAL CENTERPIECE CTA — original preserved ── */}
+      {/* ── LAYER 1: EMOTIONAL CENTERPIECE CTA ─────────────────── */}
       <div
         style={{
           position: 'relative', zIndex: 2,
@@ -704,8 +483,9 @@ export default function Footer() {
           transition: 'opacity 0.9s ease, transform 0.9s ease',
         }}
       >
-        {/* Central glowing orb — original preserved exactly */}
+        {/* Central glowing orb */}
         <div style={{ position: 'relative', display: 'inline-block', marginBottom: 28 }}>
+          {/* Pulsing rings */}
           {[0, 1, 2].map(i => (
             <div
               key={i}
@@ -719,6 +499,7 @@ export default function Footer() {
               }}
             />
           ))}
+          {/* Core orb */}
           <div style={{
             width: 48, height: 48, borderRadius: '50%',
             background: 'radial-gradient(circle at 38% 38%, rgba(100,255,130,0.5), rgba(0,180,60,0.25) 50%, rgba(3,10,3,0.9))',
@@ -750,11 +531,12 @@ export default function Footer() {
           Enter the Village
         </h2>
 
+        {/* Philosophy — preserved exactly */}
         <p style={{
           fontFamily: 'var(--font-body)',
           fontSize: 'clamp(11px, 1.2vw, 13px)',
           color: 'rgba(255,255,255,0.32)', lineHeight: 1.85,
-          maxWidth: 420, margin: '0 auto 12px',
+          maxWidth: 420, margin: '0 auto 32px',
         }}>
           Rooted in the African philosophy of Ubuntu —
         </p>
@@ -762,38 +544,12 @@ export default function Footer() {
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(1rem, 2vw, 1.35rem)',
           fontStyle: 'italic', color: 'rgba(255,255,255,0.48)',
-          marginBottom: 28,
+          marginBottom: 40,
         }}>
           &ldquo;I am because we are.&rdquo;
         </p>
 
-        {/* Motto pill — original preserved exactly */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '9px 20px',
-            border: '0.5px solid rgba(212,168,83,0.28)',
-            background: 'rgba(212,168,83,0.05)',
-            marginBottom: 40,
-          }}
-        >
-          <span style={{ color: 'rgba(0,255,65,0.7)', fontSize: '7px' }}>●</span>
-          <span
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '9px',
-              letterSpacing: '0.25em',
-              textTransform: 'uppercase',
-              color: 'rgba(212,168,83,0.65)',
-            }}
-          >
-            &ldquo;Refresh your soul · Ground your spirit&rdquo;
-          </span>
-        </div>
-
-        {/* CTA buttons — original preserved exactly */}
+        {/* CTA buttons */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
           <Link
             href="/contact"
@@ -808,6 +564,7 @@ export default function Footer() {
               borderRadius: 6, textDecoration: 'none',
               boxShadow: '0 0 28px rgba(212,168,83,0.2)',
               transition: 'all 0.3s ease',
+              position: 'relative',
             }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLAnchorElement
@@ -854,7 +611,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── LAYER 2 + 3: NAVIGATION + ECOSYSTEM + NEWSLETTER ────── */}
+      {/* ── LAYER 2 + 3: NAVIGATION + ECOSYSTEM + NEWSLETTER ─── */}
       <div
         style={{
           position: 'relative', zIndex: 2,
@@ -869,14 +626,7 @@ export default function Footer() {
           gap: 'clamp(32px, 5vw, 56px)',
         }}>
 
-          {/* ── BRAND COLUMN — UPGRADED ────────────────────────────
-              v3: text-based "Ubuntu / Kreative Village" mark
-              v4: full logo Image with pulse zoom-out hover
-
-              The logo image replaces the text mark entirely.
-              Everything else in this column (divider, ecosystem
-              status, social links) is preserved exactly from v3.
-          ──────────────────────────────────────────────────── */}
+          {/* ── Brand + Ecosystem ── */}
           <div
             style={{
               gridColumn: 'span 2',
@@ -885,65 +635,24 @@ export default function Footer() {
               transition: 'opacity 0.9s ease 0.1s, transform 0.9s ease 0.1s',
             }}
           >
-            {/* ── LOGO IMAGE — pulse zoom-out + shimmer ──────────── */}
-            <Link
-              href="/"
-              style={{
-                display:        'inline-block',
-                marginBottom:   20,
-                textDecoration: 'none',
-                // overflow:hidden clips the shimmer to the logo bounds
-                overflow:       'hidden',
-              }}
-            >
-              <FooterLogoImage />
+            {/* Logo */}
+            <Link href="/" style={{ display: 'inline-block', marginBottom: 20, textDecoration: 'none' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 300, color: 'var(--cream)', lineHeight: 1 }}>
+                Ubuntu
+              </div>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--neon)', marginTop: 4 }}>
+                Kreative Village
+              </div>
             </Link>
 
-            {/* Divider — original preserved exactly */}
+            {/* Divider */}
             <div style={{ width: 32, height: 1, background: 'rgba(255,255,255,0.08)', marginBottom: 20 }} />
 
-            {/* Ecosystem status rotator — original preserved exactly */}
+            {/* Ecosystem status rotator */}
             <EcosystemStatus />
-
-            {/* Social links — original preserved exactly */}
-            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-              {SOCIALS.map(s => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={s.label}
-                  style={{
-                    width: 30, height: 30,
-                    border: '0.5px solid rgba(255,255,255,0.12)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '8px', letterSpacing: '0.04em',
-                    color: 'rgba(255,255,255,0.35)',
-                    textDecoration: 'none',
-                    transition: 'all 0.25s ease',
-                  }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLAnchorElement
-                    el.style.borderColor = 'rgba(212,168,83,0.5)'
-                    el.style.color = 'rgba(212,168,83,0.8)'
-                    el.style.background = 'rgba(212,168,83,0.06)'
-                  }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLAnchorElement
-                    el.style.borderColor = 'rgba(255,255,255,0.12)'
-                    el.style.color = 'rgba(255,255,255,0.35)'
-                    el.style.background = 'transparent'
-                  }}
-                >
-                  {s.icon}
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* ── Nav columns — all original links preserved exactly ── */}
+          {/* ── Nav columns — all original links preserved ── */}
           {FOOTER_COLS.map((col, ci) => (
             <div
               key={col.title}
@@ -974,7 +683,7 @@ export default function Footer() {
             </div>
           ))}
 
-          {/* ── Newsletter — original preserved exactly ── */}
+          {/* ── Newsletter ── */}
           <div
             style={{
               opacity: revealed ? 1 : 0,
@@ -988,17 +697,17 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── LAYER 4: NEON DIVIDER — original preserved exactly ── */}
+      {/* ── LAYER 4: NEON DIVIDER ───────────────────────────────── */}
       <div
         style={{
           position: 'relative', zIndex: 2,
-          height: 1, margin: 0,
+          height: 1, margin: '0',
           background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,65,0.15) 25%, rgba(212,168,83,0.12) 75%, transparent 100%)',
           boxShadow: '0 0 20px rgba(0,255,65,0.06)',
         }}
       />
 
-      {/* ── LAYER 5: SYSTEM INTELLIGENCE BAR — original preserved ── */}
+      {/* ── LAYER 5: SYSTEM INTELLIGENCE BAR ────────────────────── */}
       <div
         style={{
           position: 'relative', zIndex: 2,
@@ -1015,20 +724,16 @@ export default function Footer() {
             transition: 'opacity 1s ease 0.55s',
           }}
         >
-          {/* Copyright + clock — original preserved exactly */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <p style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '9px', letterSpacing: '0.1em',
-              color: 'rgba(255,255,255,0.18)',
-              margin: 0,
-            }}>
-              &copy; {year} Ubuntu Kreative Village &middot; Kenya &middot; ubuntuecolodge.com
-            </p>
-            <NairobiClock />
-          </div>
+          {/* Copyright — preserved exactly */}
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '9px', letterSpacing: '0.1em',
+            color: 'rgba(255,255,255,0.18)',
+          }}>
+            &copy; {year} Ubuntu Kreative Village &middot; Kenya &middot; ubuntuecolodge.com
+          </p>
 
-          {/* Centre — emotional exit message — original preserved exactly */}
+          {/* Center — emotional exit message */}
           <p style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(9px, 1vw, 11px)',
@@ -1036,61 +741,35 @@ export default function Footer() {
             color: 'rgba(255,255,255,0.12)',
             textAlign: 'center',
             flex: '1 1 200px',
-            margin: 0,
           }}>
             May your journey through Ubuntu remain with you long after you leave.
           </p>
 
-          {/* Right — links + compliance — original preserved exactly */}
+          {/* Right — preserved links + compliance */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <Link
-              href="/privacy-policy"
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '9px', letterSpacing: '0.1em',
-                color: 'rgba(255,255,255,0.18)',
-                textDecoration: 'none', transition: 'color 0.2s',
-              }}
-              onMouseEnter={e => { ;(e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
-              onMouseLeave={e => { ;(e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}
-            >
+            <Link href="/privacy-policy" style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}>
               Privacy Policy
             </Link>
             <span style={{ color: 'rgba(255,255,255,0.1)' }}>&middot;</span>
-            <Link
-              href="/contact"
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '9px', letterSpacing: '0.1em',
-                color: 'rgba(255,255,255,0.18)',
-                textDecoration: 'none', transition: 'color 0.2s',
-              }}
-              onMouseEnter={e => { ;(e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
-              onMouseLeave={e => { ;(e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}
-            >
+            <Link href="/contact" style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}>
               Contact
             </Link>
             <span style={{ color: 'rgba(255,255,255,0.1)' }}>&middot;</span>
-            <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '9px', letterSpacing: '0.08em',
-              color: 'rgba(255,255,255,0.12)',
-            }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.12)' }}>
               Kenya DPA Compliant
             </span>
           </div>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          GLOBAL KEYFRAMES
-          ── All original animations preserved exactly ──
-          ── v4 additions: ukv-footer-shimmer, ukv-logo-pulse-zoom ──
-      ═══════════════════════════════════════════════════════════ */}
+      {/* ── GLOBAL KEYFRAME ANIMATIONS ──────────────────────────── */}
       <style>{`
-        /* ── ORIGINAL KEYFRAMES (all preserved exactly) ─────── */
         @keyframes footerParticle {
-          0%   { transform: translateY(0px);    opacity: 0;   }
+          0%   { transform: translateY(0px);   opacity: 0;    }
           10%  { opacity: 1; }
           90%  { opacity: 0.4; }
           100% { transform: translateY(-220px); opacity: 0;   }
@@ -1114,79 +793,8 @@ export default function Footer() {
           100% { transform: translate(-50%,-50%) scale(3.5); opacity: 0;   }
         }
         @keyframes statusPulse {
-          0%,100% { opacity: 1;   }
-          50%     { opacity: 0.5; }
-        }
-
-        /* ── v4 NEW: GOLD SHIMMER SWEEP ─────────────────────────
-           Moves a diagonal light band across the logo from left
-           to right, once per hover-enter. Clipped by wrapper's
-           overflow:hidden.
-        ──────────────────────────────────────────────────────── */
-        @keyframes ukv-footer-shimmer {
-          0%   { transform: translateX(-140%); }
-          100% { transform: translateX(160%);  }
-        }
-
-        /* ── v4 NEW: PULSE ZOOM-OUT ──────────────────────────────
-           The logo begins slightly enlarged (scale 1.10) and
-           smoothly zooms outward to its natural size (scale 1.0).
-           This gives the sensation of the logo "breathing out"
-           toward the viewer — a hospitality-grade micro-interaction
-           that feels welcoming, not aggressive.
-
-           Timeline:
-             0%   — slightly enlarged, softly glowing
-             60%  — eases past natural size (tiny overshoot)
-             80%  — settles at natural size with faint gold bloom
-             100% — rests at exactly scale(1)
-
-           On hover-leave, React removes the animation class so
-           the logo returns to its static state via CSS transition.
-        ──────────────────────────────────────────────────────── */
-        @keyframes ukv-logo-pulse-zoom {
-          0% {
-            transform:  scale(1.10);
-            filter:
-              brightness(1.22)
-              contrast(1.22)
-              saturate(1.18)
-              drop-shadow(0 8px 28px rgba(0,0,0,0.62))
-              drop-shadow(0 0 32px rgba(212,168,83,0.36));
-          }
-          60% {
-            transform:  scale(0.985);
-            filter:
-              brightness(1.16)
-              contrast(1.18)
-              saturate(1.14)
-              drop-shadow(0 6px 22px rgba(0,0,0,0.58))
-              drop-shadow(0 0 22px rgba(212,168,83,0.26));
-          }
-          80% {
-            transform:  scale(1.005);
-            filter:
-              brightness(1.18)
-              contrast(1.20)
-              saturate(1.16)
-              drop-shadow(0 6px 22px rgba(0,0,0,0.60))
-              drop-shadow(0 0 24px rgba(212,168,83,0.28));
-          }
-          100% {
-            transform:  scale(1.0);
-            filter:
-              brightness(1.18)
-              contrast(1.20)
-              saturate(1.16)
-              drop-shadow(0 6px 22px rgba(0,0,0,0.60))
-              drop-shadow(0 0 24px rgba(212,168,83,0.28));
-          }
-        }
-
-        /* Retina sharpness for footer logo */
-        footer img {
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+          0%,100% { opacity: 1;   box-shadow: 0 0 8px currentColor;  }
+          50%     { opacity: 0.6; box-shadow: 0 0 16px currentColor; }
         }
       `}</style>
     </footer>
