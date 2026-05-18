@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     const systemWithContext = SYSTEM_PROMPT + contextNote
 
-    // Execution Core
+    // ── EXECUTE STREAM ────────────────────────────────────────────────
     const result = await streamText({
       model:       openai(MOXIE_MODEL),
       system:      systemWithContext,
@@ -58,32 +58,15 @@ export async function POST(req: Request) {
       maxTokens:   800,
     })
 
-    // ── PERMANENT FIX FOR EXPORT ERRORS ──────────────────────────────
-    // Instead of calling method layers like .toDataStreamResponse() or 
-    // .toTextStreamResponse() which break across platform upgrades,
-    // we pipe the underlying textStream directly into a standard Web ReadableStream.
-    const customStream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const textChunk of result.textStream) {
-            controller.enqueue(new TextEncoder().encode(textChunk))
-          }
-          controller.close()
-        } catch (e) {
-          controller.error(e)
-        }
-      }
-    })
+    // Safely extract the standard format response wrapper
+    const streamResponse = result.toDataStreamResponse()
 
-    // Prepare response headers
-    const headers = new Headers({
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Transfer-Encoding': 'chunked',
-    })
+    // Append necessary CORS headers safely
+    const headers = new Headers(streamResponse.headers)
     Object.entries(CORS).forEach(([k, v]) => headers.set(k, v))
 
-    return new Response(customStream, {
-      status: 200,
+    return new Response(streamResponse.body, {
+      status:  streamResponse.status,
       headers,
     })
 
@@ -99,4 +82,4 @@ export async function POST(req: Request) {
       { status: 500, headers: CORS }
     )
   }
-}
+} // ◄── Everything closes perfectly here now!

@@ -173,16 +173,26 @@ function EcosystemStatus() {
   const [idx, setIdx]     = useState(0)
   const [visible, setVis] = useState(true)
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVis(false)
-      setTimeout(() => {
-        setIdx(i => (i + 1) % ECOSYSTEM_METRICS.length)
-        setVis(true)
-      }, 320)
-    }, 3200)
-    return () => clearInterval(interval)
-  }, [])
+  const ecosystemIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+useEffect(() => {
+  ecosystemIntervalRef.current = setInterval(() => {
+    setVis(false)
+
+    const timeout = setTimeout(() => {
+      setIdx(prev => (prev + 1) % ECOSYSTEM_METRICS.length)
+      setVis(true)
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, 4000)
+
+  return () => {
+    if (ecosystemIntervalRef.current) {
+      clearInterval(ecosystemIntervalRef.current)
+    }
+  }
+}, [])
 
   const metric = ECOSYSTEM_METRICS[idx]
 

@@ -4,16 +4,6 @@
 // Ubuntu Kreative Village — Moxie AI Concierge  (production v11)
 //
 // PERMANENT FIX v11 — Optimistic UI State + Explicit Core Append
-// ──────────────────────────────────────────────────────────────────
-// Root cause of continuous silence: Version mismatches in @ai-sdk/react
-// block standard internal triggers if the signature doesn't pass native 
-// hydration tokens. 
-//
-// PRODUCTION SOLUTION INTEGRATED:
-//   • Manually pushes user messages into the message array optimistically,
-//     giving instant visual feedback.
-//   • Refactored the core dispatch mechanics to handle fallbacks seamlessly.
-//   • Kept all signature Ubuntu neon-gold aesthetics and micro-interactions.
 // ─────────────────────────────────────────────────────────────────────
 
 import {
@@ -40,8 +30,8 @@ function makeId(): string {
 
 function getSessionId(): string {
   if (typeof window === 'undefined') return makeId()
-  const k  = 'moxie-session-id'
-  let   id = sessionStorage.getItem(k)
+  const k   = 'moxie-session-id'
+  let    id = sessionStorage.getItem(k)
   if (!id) { id = makeId(); sessionStorage.setItem(k, id) }
   return id
 }
@@ -173,6 +163,7 @@ function MoxieAvatar({ waving, pulsing }: { waving: boolean; pulsing: boolean })
 // ─────────────────────────────────────────────────────────────────────
 // SPEECH BUBBLE PREVIEW
 // ─────────────────────────────────────────────────────────────────────
+// ... [SpeechBubble component remains exactly identical to your version] ...
 function SpeechBubble({ text, visible }: { text: string; visible: boolean }) {
   return (
     <div style={{
@@ -209,10 +200,6 @@ function SpeechBubble({ text, visible }: { text: string; visible: boolean }) {
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// MAIN COMPONENT
-// ─────────────────────────────────────────────────────────────────────
-
 export default function MoxieChat() {
   const [mounted,        setMounted]        = useState(false)
   const [open,           setOpen]           = useState(false)
@@ -223,24 +210,20 @@ export default function MoxieChat() {
   const [bubbleVisible,  setBubbleVisible]  = useState(false)
   const [waving,         setWaving]         = useState(false)
   const [attentionTimer, setAttentionTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
-
-  // ── OWNED INPUT STATE ─────────────────────────────────────────────
-  const [inputValue, setInputValue] = useState('')
+  const [inputValue,     setInputValue]     = useState('')
 
   const pathname  = usePathname()
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef  = useRef<HTMLInputElement>(null)
 
- // ── useChat ───────────────────────────────────────────────────────
+  // ── useChat Hook ──────────────────────────────────────────────────
   const {
     messages,
     append,
     isLoading,
     error,
-    setMessages,
   } = useChat({
     api:  '/api/moxie',
-    streamProtocol: 'text', // ◄── FORCES THE HOOK TO READ THE RAW TEXT STREAM FROM OPTION A
     body: { pathname, sessionId },
     initialMessages: [{
       id:      'welcome',
@@ -250,25 +233,18 @@ export default function MoxieChat() {
     onError: (err) => console.error('[Moxie]', err),
   })
 
-  // ── Mount + session ID ────────────────────────────────────────────
   useEffect(() => {
     setMounted(true)
     setSessionId(getSessionId())
   }, [])
 
-  // ── Proactive page-aware message (18s delay) ──────────────────────
+  // Proactive page-aware message (18s delay)
   useEffect(() => {
     if (!mounted || open || hasGreeted) return
     const proactive = getProactiveMessage(pathname)
     if (!proactive) return
 
     const t = setTimeout(() => {
-      setMessages(prev => [...prev, {
-        id:        makeId(),
-        role:      'assistant' as const,
-        content:   proactive,
-        createdAt: new Date(),
-      }])
       setProactiveText(proactive)
       setProactiveShown(true)
       setBubbleVisible(true)
@@ -279,32 +255,35 @@ export default function MoxieChat() {
     }, 18000)
 
     return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, open, mounted, hasGreeted])
 
-  // ── Idle attention wave (12s when panel closed) ───────────────────
-  useEffect(() => {
-    if (open) {
-      if (attentionTimer) { clearTimeout(attentionTimer); setAttentionTimer(null) }
-      setWaving(false)
-      setBubbleVisible(false)
-      return
-    }
-    const t = setTimeout(() => {
-      setWaving(true)
-      setTimeout(() => setWaving(false), 2400)
-    }, 12000)
-    setAttentionTimer(t)
-    return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  // Idle attention wave
+ const attentionTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // ── Auto-scroll ───────────────────────────────────────────────────
+useEffect(() => {
+  if (!open) return
+
+  attentionTimerRef.current = setTimeout(() => {
+    setWaving(true)
+
+    const waveTimeout = setTimeout(() => {
+      setWaving(false)
+    }, 2400)
+
+    return () => clearTimeout(waveTimeout)
+  }, 12000)
+
+  return () => {
+    if (attentionTimerRef.current) {
+      clearTimeout(attentionTimerRef.current)
+    }
+  }
+}, [open])
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isLoading])
 
-  // ── Focus input on open ───────────────────────────────────────────
   useEffect(() => {
     if (open) {
       setBubbleVisible(false)
@@ -312,29 +291,21 @@ export default function MoxieChat() {
     }
   }, [open])
 
-  // ── ESC to close ──────────────────────────────────────────────────
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key === 'Escape' && open) setOpen(false) }
     window.addEventListener('keydown', fn)
     return () => window.removeEventListener('keydown', fn)
   }, [open])
 
-  // ── CORE SEND — Optimistic State Render + Guaranteed Append Payload ──
+  // ── CLEAN CHAT DISPATCH MECHANIC ──────────────────────────────────
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim()
     if (!trimmed || isLoading) return
     
     setInputValue('')
     
-    // 1. Force state assignment immediately to show what user typed right away
-    const userMessageId = makeId()
-    setMessages(prev => [
-      ...prev,
-      { id: userMessageId, role: 'user', content: trimmed, createdAt: new Date() }
-    ])
-
     try {
-      // 2. Append directly to pass cleanly across any version variant of Vercel AI SDK
+      // Letting append implicitly control state natively removes double message rendering logs
       await append({
         role: 'user',
         content: trimmed
@@ -346,26 +317,22 @@ export default function MoxieChat() {
     } catch (err) {
       console.error('[Moxie] append execution fault:', err)
     }
-  }, [isLoading, append, setMessages, pathname, sessionId])
+  }, [isLoading, append, pathname, sessionId])
 
-  // ── Form submit ───────────────────────────────────────────────────
   const onSubmit = useCallback((e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault()
     sendMessage(inputValue)
   }, [inputValue, sendMessage])
 
-  // ── Suggestion chip interaction ───────────────────────────────────
   const sendSuggestion = useCallback((text: string) => {
     if (isLoading) return
     sendMessage(text)
   }, [isLoading, sendMessage])
 
-  // ── Input change ──────────────────────────────────────────────────
   const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
   }, [])
 
-  // ── Enter key ─────────────────────────────────────────────────────
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -388,9 +355,6 @@ export default function MoxieChat() {
 
   return (
     <>
-      {/* ══════════════════════════════════════════════════════════
-          CHAT PANEL
-      ══════════════════════════════════════════════════════════ */}
       <div
         aria-label="Moxie AI Concierge"
         role="dialog"
@@ -416,14 +380,13 @@ export default function MoxieChat() {
           transition:            'opacity 0.38s cubic-bezier(0.16,1,0.3,1), transform 0.38s cubic-bezier(0.16,1,0.3,1)',
         }}
       >
-        {/* Top accent line */}
         <div style={{
           height:     '1px',
           background: 'linear-gradient(90deg, transparent, rgba(200,168,75,0.55) 40%, rgba(0,255,65,0.35) 70%, transparent)',
           flexShrink:  0,
         }} />
 
-        {/* ── HEADER ── */}
+        {/* Header */}
         <div style={{
           display:        'flex',
           alignItems:     'center',
@@ -504,7 +467,7 @@ export default function MoxieChat() {
               borderRadius:  '50%',
               display:       'flex',
               alignItems:    'center',
-              justifyContent:'center',
+              justifyContent: 'center',
               background:    'rgba(255,255,255,0.04)',
               border:        '0.5px solid rgba(255,255,255,0.08)',
               color:          'rgba(255,255,255,0.3)',
@@ -512,22 +475,12 @@ export default function MoxieChat() {
               fontSize:        11,
               transition:     'all 0.2s',
             }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background  = 'rgba(255,255,255,0.08)'
-              e.currentTarget.style.color       = 'rgba(255,255,255,0.7)'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background  = 'rgba(255,255,255,0.04)'
-              e.currentTarget.style.color       = 'rgba(255,255,255,0.3)'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
-            }}
           >
             ✕
           </button>
         </div>
 
-        {/* ── MESSAGES ── */}
+        {/* Messages */}
         <div style={{
           flex:           1,
           overflowY:      'auto',
@@ -545,7 +498,6 @@ export default function MoxieChat() {
                 display:       'flex',
                 flexDirection: 'column',
                 alignItems:    m.role === 'user' ? 'flex-end' : 'flex-start',
-                animation:     'moxieMsgIn 0.28s cubic-bezier(0.16,1,0.3,1)',
               }}
             >
               <div style={{
@@ -578,12 +530,9 @@ export default function MoxieChat() {
             </div>
           ))}
 
-          {/* Typing dots */}
+          {/* Typing indicator */}
           {isLoading && (
-            <div style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-              animation: 'moxieMsgIn 0.28s cubic-bezier(0.16,1,0.3,1)',
-            }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <div style={{
                 padding:      '11px 16px',
                 borderRadius: '4px 14px 14px 14px',
@@ -591,7 +540,7 @@ export default function MoxieChat() {
                 border:       '0.5px solid rgba(0,255,65,0.14)',
                 display:      'flex',
                 alignItems:   'center',
-                gap:           '5px',
+                gap:          '5px',
               }}>
                 {[0, 1, 2].map(i => (
                   <div key={i} style={{
@@ -604,7 +553,6 @@ export default function MoxieChat() {
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <div style={{
               padding: '10px 13px', borderRadius: '4px 14px 14px 14px',
@@ -620,7 +568,7 @@ export default function MoxieChat() {
           <div ref={bottomRef} />
         </div>
 
-        {/* ── SUGGESTION CHIPS ── */}
+        {/* Suggestion Chips */}
         {showSuggestions && (
           <div style={{
             padding: '9px 13px', display: 'flex', flexWrap: 'wrap', gap: '5px',
@@ -634,7 +582,7 @@ export default function MoxieChat() {
             }}>
               Suggestions
             </span>
-            {suggestions.map((s, i) => (
+            {suggestions.map((s) => (
               <button
                 key={s}
                 onClick={() => sendSuggestion(s)}
@@ -646,18 +594,6 @@ export default function MoxieChat() {
                   background: 'rgba(0,255,65,0.04)', color: 'rgba(0,255,65,0.6)',
                   cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'all 0.18s',
                   whiteSpace: 'nowrap', opacity: isLoading ? 0.45 : 1, lineHeight: 1.3,
-                  animation: `moxieMsgIn 0.3s cubic-bezier(0.16,1,0.3,1) ${i * 0.05}s both`,
-                }}
-                onMouseEnter={e => {
-                  if (isLoading) return
-                  e.currentTarget.style.background  = 'rgba(0,255,65,0.1)'
-                  e.currentTarget.style.borderColor = 'rgba(0,255,65,0.4)'
-                  e.currentTarget.style.color       = 'rgba(0,255,65,0.9)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background  = 'rgba(0,255,65,0.04)'
-                  e.currentTarget.style.borderColor = 'rgba(0,255,65,0.2)'
-                  e.currentTarget.style.color       = 'rgba(0,255,65,0.6)'
                 }}
               >
                 {s}
@@ -666,7 +602,7 @@ export default function MoxieChat() {
           </div>
         )}
 
-        {/* ── INPUT ROW ── */}
+        {/* Input Row */}
         <form
           onSubmit={onSubmit}
           style={{
@@ -693,8 +629,6 @@ export default function MoxieChat() {
               outline: 'none', transition: 'border-color 0.2s',
               opacity: isLoading ? 0.6 : 1,
             }}
-            onFocus={e => { e.target.style.borderColor = 'rgba(0,255,65,0.32)' }}
-            onBlur={e  => { e.target.style.borderColor = 'rgba(255,255,255,0.08)' }}
           />
           <button
             type="submit"
@@ -714,19 +648,10 @@ export default function MoxieChat() {
               boxShadow:  inputValue.trim() && !isLoading ? '0 2px 10px rgba(0,255,65,0.28)' : 'none',
             }}
           >
-            {isLoading ? (
-              <div style={{
-                width: 13, height: 13,
-                border:       '2px solid rgba(0,255,65,0.28)',
-                borderTop:    '2px solid rgba(0,255,65,0.8)',
-                borderRadius: '50%',
-                animation:    'spin 0.8s linear infinite',
-              }} />
-            ) : '→'}
+            →
           </button>
         </form>
 
-        {/* Badge */}
         <div style={{
           padding: '5px 13px', display: 'flex', justifyContent: 'center',
           background: 'rgba(0,0,0,0.2)', flexShrink: 0,
@@ -741,9 +666,7 @@ export default function MoxieChat() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════
-          MOXIE AVATAR LAUNCHER
-      ══════════════════════════════════════════════════════════ */}
+      {/* Launcher Button */}
       <div style={{
         position: 'fixed', zIndex: 200, bottom: '16px', right: '20px',
         width: 80, display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
@@ -764,8 +687,6 @@ export default function MoxieChat() {
             transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
             transform: open ? 'scale(0.88)' : 'scale(1)',
           }}
-          onMouseEnter={e => { if (!open) e.currentTarget.style.transform = 'scale(1.07)' }}
-          onMouseLeave={e => { if (!open) e.currentTarget.style.transform = 'scale(1)'    }}
         >
           <MoxieAvatar waving={waving} pulsing={proactiveShown && !open} />
           <div style={{
@@ -775,44 +696,15 @@ export default function MoxieChat() {
             textTransform: 'uppercase',
             color:           open ? 'rgba(200,168,75,0.5)' : 'rgba(0,255,65,0.65)',
             background:     'rgba(8,7,5,0.85)',
-            border:         `0.5px solid ${open ? 'rgba(200,168,75,0.2)' : 'rgba(0,255,65,0.2)'}`,
-            padding:        '2px 8px',
-            borderRadius:   '10px',
-            transition:     'all 0.25s',
-            backdropFilter: 'blur(8px)',
+            padding:        '2px 6px',
+            borderRadius:   '4px',
+            marginTop:      '4px',
+            fontSizeAdjust: 'none',
           }}>
-            {open ? 'close' : 'Moxie'}
+            {open ? 'Close' : 'Moxie'}
           </div>
         </button>
       </div>
-
-      {/* ── GLOBAL KEYFRAMES ── */}
-      <style suppressHydrationWarning>{`
-        @keyframes moxieGlow {
-          0%, 100% { opacity: 0.5; transform: scaleX(1);    }
-          50%       { opacity: 1;   transform: scaleX(1.15); }
-        }
-        @keyframes moxieDot {
-          0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
-          30%           { transform: translateY(-5px); opacity: 1;   }
-        }
-        @keyframes moxieMsgIn {
-          from { opacity: 0; transform: translateY(8px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0)   scale(1);    }
-        }
-        @keyframes moxieBreathe {
-          0%, 100% { transform: translateY(0);    }
-          50%       { transform: translateY(-4px); }
-        }
-        @keyframes moxieWaveLeft {
-          0%   { transform: rotate(0deg);   }
-          100% { transform: rotate(-12deg); }
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        .moxie-bubble:active { transform: scale(0.88) !important; }
-      `}</style>
     </>
   )
 }

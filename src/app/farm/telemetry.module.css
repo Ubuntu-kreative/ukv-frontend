@@ -1,0 +1,315 @@
+/* =========================================================
+   components/farm/telemetry.module.css
+   Ubuntu Kreative Village
+   Live Farm Telemetry System
+========================================================= */
+
+.telemetrySection {
+  position: relative;
+
+  padding: 120px 0;
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   Background
+========================================================= */
+
+.telemetryBackground {
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(0,255,65,0.04),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(212,168,83,0.05),
+      transparent 45%
+    );
+
+  pointer-events: none;
+}
+
+.scanLines::after {
+  content: '';
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,255,65,0.018) 2px,
+      rgba(0,255,65,0.018) 4px
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   Grid
+========================================================= */
+
+.telemetryGrid {
+  position: relative;
+  z-index: 2;
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+
+  gap: 24px;
+}
+
+/* =========================================================
+   Card
+========================================================= */
+
+.telemetryCard {
+  position: relative;
+
+  overflow: hidden;
+
+  border-radius: 24px;
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.04),
+      rgba(255,255,255,0.02)
+    );
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  padding: 28px;
+
+  transition:
+    transform .4s cubic-bezier(.23,1,.32,1),
+    border-color .4s ease,
+    box-shadow .4s ease;
+}
+
+.telemetryCard:hover {
+  transform: translateY(-8px);
+
+  border-color: rgba(0,255,65,0.18);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.55),
+    0 0 40px rgba(0,255,65,0.08);
+}
+
+.telemetryCard::before {
+  content: '';
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,0.08),
+      transparent 55%
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   Header
+========================================================= */
+
+.telemetryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 24px;
+}
+
+.telemetryTitle {
+  color: rgba(245,240,232,0.92);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(0,255,65,0.22);
+
+  background: rgba(0,255,65,0.08);
+
+  color: #00ff41;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 999px;
+
+  background: #00ff41;
+
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%,100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(0,255,65,0.35);
+  }
+
+  50% {
+    opacity: .4;
+    box-shadow: 0 0 18px rgba(0,255,65,0.55);
+  }
+}
+
+/* =========================================================
+   Metric
+========================================================= */
+
+.metricValue {
+  color: #f5f0e8;
+
+  font-size: 42px;
+  line-height: 1;
+
+  font-family: var(--font-display);
+
+  margin-bottom: 14px;
+}
+
+.metricLabel {
+  color: rgba(245,240,232,0.45);
+
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+
+/* =========================================================
+   Footer
+========================================================= */
+
+.telemetryFooter {
+  margin-top: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.telemetryStatus {
+  color: rgba(245,240,232,0.45);
+
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+
+.telemetryLink {
+  color: #d4a853;
+
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+
+  transition:
+    transform .25s ease,
+    opacity .25s ease;
+}
+
+.telemetryLink:hover {
+  transform: translateX(3px);
+  opacity: .8;
+}
+
+/* =========================================================
+   Waveform
+========================================================= */
+
+.waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+
+  height: 36px;
+
+  margin-top: 22px;
+}
+
+.waveBar {
+  width: 5px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #00ff41,
+      rgba(0,255,65,0.2)
+    );
+
+  animation: waveDance 1.4s ease-in-out infinite;
+}
+
+.waveBar:nth-child(1) { animation-delay: .1s; }
+.waveBar:nth-child(2) { animation-delay: .2s; }
+.waveBar:nth-child(3) { animation-delay: .3s; }
+.waveBar:nth-child(4) { animation-delay: .4s; }
+.waveBar:nth-child(5) { animation-delay: .5s; }
+
+@keyframes waveDance {
+  0%,100% {
+    height: 8px;
+    opacity: .45;
+  }
+
+  50% {
+    height: 32px;
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   Mobile
+========================================================= */
+
+@media (max-width: 768px) {
+  .telemetrySection {
+    padding: 80px 0;
+  }
+
+  .telemetryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metricValue {
+    font-size: 34px;
+  }
+}
