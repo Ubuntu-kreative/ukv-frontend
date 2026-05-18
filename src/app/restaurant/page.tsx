@@ -14,6 +14,8 @@ import Footer from '@/components/Footer'
 import MoxieChat from '@/components/MoxieChat'
 import { useCartStore } from '@/context/cartStore'
 import { create } from 'zustand'
+import { client } from '@/lib/sanity'
+import { menuItemsQuery } from '@/lib/queries'
 
 // ─────────────────────────────────────────────────────────────────────
 // TYPES

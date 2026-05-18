@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.64",
+    "@ai-sdk/react": "^3.0.186",
     "@gsap/react": "^2.1.2",
     "@sentry/nextjs": "^10.50.0",
     "@stripe/stripe-js": "^9.3.1",

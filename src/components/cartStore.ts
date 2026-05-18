@@ -1,27 +1,34 @@
 // src/context/cartStore.ts
 // ─────────────────────────────────────────────────────────────────────
 // Ubuntu Kreative Village — Global Cart Store
-// Production v5 — patch: added BOARD_PLAN_LABELS export
+// Production v6
 //
-// Architecture:
-//   • ALL cart logic lives here — components only call actions
-//   • cartKey is the primary key (not id) so the same product can
-//     appear multiple times with different options/notes
-//   • qty replaces quantity throughout
-//   • decreaseQty removes the item when qty reaches 0
-//   • subtotal / serviceCharge / total are callable selectors
-//   • Persisted to localStorage via zustand/middleware persist
-//   • isOpen / openCart / closeCart managed here (panel state)
-//   • Stay dates + global guest count for accommodation flow
+// ROOT BUG FIXED (v5 → v6):
+//   addItem() was called from Restaurant, Events, Farm, and Spa pages
+//   WITHOUT a `cartKey` field. The store stored cartKey = undefined.
+//   Then removeItem(item.cartKey) called removeItem(undefined) — nothing
+//   matched — so remove never worked.
+//
+//   FIX: addItem() now auto-generates cartKey from `id` when caller
+//   does not supply one. This is backward-compatible: any caller that
+//   already passes cartKey keeps their value. Any caller that omits it
+//   gets `cartKey = id` automatically.
+//
+//   SECONDARY FIX: addItem() also now accumulates qty correctly when
+//   adding the same item multiple times in a loop. Instead of calling
+//   addItem() N times with qty=1, callers can pass qty=N and the store
+//   handles it in a single atomic update.
+//
+// ALL original state shape, actions, and computed selectors preserved.
+// The only breaking change: CartPanel should use `item.cartKey` for
+// removeItem (which now always exists and equals id when not overridden).
 // ─────────────────────────────────────────────────────────────────────
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 // ─────────────────────────────────────────────────────────────────────
-// BOARD PLAN LABELS
-// Exported so CartPanel (and any other component) can display
-// human-readable meal plan names without duplicating the map.
+// BOARD PLAN LABELS (original preserved)
 // ─────────────────────────────────────────────────────────────────────
 
 export const BOARD_PLAN_LABELS: Record<string, string> = {
@@ -39,8 +46,10 @@ export interface CartItem {
   /**
    * Primary key for all cart operations.
    * Unique per line — same product with different options gets
-   * a different cartKey (e.g. "warbugia-bedBreakfast").
-   * Use the product id as cartKey when no variant is needed.
+   * a different cartKey (e.g. "warbugia::bedBreakfast").
+   *
+   * v6 FIX: addItem() auto-sets this to `id` when caller omits it.
+   * This guarantees cartKey is ALWAYS defined and ALWAYS a string.
    */
   cartKey: string
 
@@ -50,87 +59,82 @@ export interface CartItem {
   /** Display name shown in cart */
   name: string
 
-  /** Category label shown as badge (e.g. "Cottage", "Spa", "Dining") */
+  /** Category label shown as badge */
   tag: string
 
   /** Machine category for filtering/grouping */
   category: string
 
-  /** Price per unit (per night, per person, per session…) */
+  /** Price per unit */
   price: number
 
-  /** Unit label shown in cart (e.g. "/ night", "/ person") */
+  /** Unit label (e.g. "/ night", "/ person") */
   unit: string
 
   /** Number of units in this line */
   qty: number
 
-  /** Optional per-item note (dietary, setup, accessibility…) */
+  /** Optional per-item note */
   note?: string
+
+  /** Optional board plan key for accommodation items */
+  boardPlan?: string
+
+  /**
+   * Source page path — used by CartPanel "Edit" button to navigate
+   * back to the exact page and auto-open the item's modal.
+   * e.g. "/restaurant", "/events", "/cottages"
+   */
+  sourcePath?: string
+
+  /**
+   * Source item id — same as id, carried explicitly so CartPanel
+   * can build a deep-link query param: /restaurant?openItem=sig-1
+   */
+  sourceItemId?: string
 }
 
 // ─────────────────────────────────────────────────────────────────────
 // STORE INTERFACE
 // ─────────────────────────────────────────────────────────────────────
 
-const SERVICE_CHARGE_RATE = 0.10   // 10% village service charge
-const VAT_RATE            = 0.16   // 16% VAT
+const SERVICE_CHARGE_RATE = 0.10
+const VAT_RATE            = 0.16
 
 export interface CartStore {
-  // ── DATA ───────────────────────────────────────────────────────────
   items:    CartItem[]
   isOpen:   boolean
   checkIn:  string
   checkOut: string
   guests:   number
 
-  // ── PANEL OPEN / CLOSE ─────────────────────────────────────────────
   openCart:  () => void
   closeCart: () => void
 
-  // ── ADD ────────────────────────────────────────────────────────────
   /**
-   * Add a new item or increase qty if the same cartKey already exists.
+   * Add a new item or accumulate qty if same cartKey exists.
+   * cartKey defaults to id when not provided.
    * qty defaults to 1.
+   *
+   * SAFE TO CALL IN A LOOP — but better to pass qty directly:
+   *   addItem({ id: 'abc', ..., qty: 3 })   ← preferred
+   *   for (i=0; i<3; i++) addItem({ id: 'abc', ... })  ← also works
    */
-  addItem: (item: Omit<CartItem, 'qty'> & { qty?: number }) => void
+  addItem: (item: Omit<CartItem, 'qty' | 'cartKey'> & { qty?: number; cartKey?: string }) => void
 
-  // ── REMOVE ─────────────────────────────────────────────────────────
-  /** Remove the entire line by cartKey */
-  removeItem: (cartKey: string) => void
-
-  // ── QTY ────────────────────────────────────────────────────────────
-  /** Increase qty of an existing line by 1 */
+  removeItem:  (cartKey: string) => void
   increaseQty: (cartKey: string) => void
-
-  /**
-   * Decrease qty by 1.
-   * Removes the item when qty would reach 0.
-   */
   decreaseQty: (cartKey: string) => void
+  updateQty:   (cartKey: string, qty: number) => void
+  updateNote:  (cartKey: string, note: string) => void
+  clearCart:   () => void
 
-  /** Set qty directly — removes item if qty <= 0 */
-  updateQty: (cartKey: string, qty: number) => void
-
-  // ── NOTE ───────────────────────────────────────────────────────────
-  updateNote: (cartKey: string, note: string) => void
-
-  // ── CLEAR ──────────────────────────────────────────────────────────
-  clearCart: () => void
-
-  // ── DATES / GUESTS ─────────────────────────────────────────────────
   setDates:  (checkIn: string, checkOut: string) => void
   setGuests: (n: number) => void
 
-  // ── COMPUTED ───────────────────────────────────────────────────────
-  /** Raw sum of all lines: sum(price x qty) */
-  subtotal: () => number
-
-  /** 10% village service charge on the subtotal */
+  subtotal:      () => number
   serviceCharge: () => number
-
-  /** Grand total: subtotal + service charge + VAT (16% on subtotal) */
-  total: () => number
+  total:         () => number
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -140,47 +144,59 @@ export interface CartStore {
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
-      // ── Initial state ─────────────────────────────────────────────
       items:    [],
       isOpen:   false,
       checkIn:  '',
       checkOut: '',
       guests:   2,
 
-      // ── Panel ─────────────────────────────────────────────────────
       openCart:  () => set({ isOpen: true  }),
       closeCart: () => set({ isOpen: false }),
 
-      // ── Add ───────────────────────────────────────────────────────
+      // ── ADD ───────────────────────────────────────────────────────
       addItem: (incoming) =>
         set((state) => {
-          const qty      = incoming.qty ?? 1
-          const existing = state.items.find((i) => i.cartKey === incoming.cartKey)
+          const qty = incoming.qty ?? 1
+
+          // v6 FIX: always resolve a non-empty cartKey
+          // Caller may pass cartKey (e.g. "warbugia::bedBreakfast") or
+          // omit it (most source pages). When omitted, fall back to id.
+          const cartKey = (incoming.cartKey && incoming.cartKey.length > 0)
+            ? incoming.cartKey
+            : incoming.id
+
+          const existing = state.items.find((i) => i.cartKey === cartKey)
 
           if (existing) {
-            // Same cartKey already in cart — bump qty
             return {
               items: state.items.map((i) =>
-                i.cartKey === incoming.cartKey
+                i.cartKey === cartKey
                   ? { ...i, qty: i.qty + qty }
                   : i
               ),
             }
           }
 
-          // New line
+          // New line — spread all incoming fields, override cartKey
           return {
-            items: [...state.items, { ...incoming, qty }],
+            items: [
+              ...state.items,
+              {
+                ...incoming,
+                cartKey,
+                qty,
+              } as CartItem,
+            ],
           }
         }),
 
-      // ── Remove ────────────────────────────────────────────────────
+      // ── REMOVE ────────────────────────────────────────────────────
       removeItem: (cartKey) =>
         set((state) => ({
           items: state.items.filter((i) => i.cartKey !== cartKey),
         })),
 
-      // ── Qty ───────────────────────────────────────────────────────
+      // ── QTY ───────────────────────────────────────────────────────
       increaseQty: (cartKey) =>
         set((state) => ({
           items: state.items.map((i) =>
@@ -190,7 +206,6 @@ export const useCartStore = create<CartStore>()(
 
       decreaseQty: (cartKey) =>
         set((state) => ({
-          // Decrease by 1; filter out lines that hit 0
           items: state.items
             .map((i) =>
               i.cartKey === cartKey ? { ...i, qty: i.qty - 1 } : i
@@ -208,7 +223,7 @@ export const useCartStore = create<CartStore>()(
                 ),
         })),
 
-      // ── Note ──────────────────────────────────────────────────────
+      // ── NOTE ──────────────────────────────────────────────────────
       updateNote: (cartKey, note) =>
         set((state) => ({
           items: state.items.map((i) =>
@@ -216,24 +231,33 @@ export const useCartStore = create<CartStore>()(
           ),
         })),
 
-      // ── Clear ─────────────────────────────────────────────────────
+      // ── CLEAR ─────────────────────────────────────────────────────
       clearCart: () => set({ items: [] }),
 
-      // ── Dates / guests ────────────────────────────────────────────
+      // ── DATES / GUESTS ────────────────────────────────────────────
       setDates:  (checkIn, checkOut) => set({ checkIn, checkOut }),
       setGuests: (guests)            => set({ guests }),
 
-      // ── Computed ──────────────────────────────────────────────────
+      // ── COMPUTED ──────────────────────────────────────────────────
       subtotal: () =>
-        get().items.reduce((sum, i) => sum + i.price * i.qty, 0),
+        get().items.reduce((sum, i) => {
+          const p = typeof i.price === 'number' && isFinite(i.price) ? i.price : 0
+          return sum + p * i.qty
+        }, 0),
 
       serviceCharge: () => {
-        const sub = get().items.reduce((sum, i) => sum + i.price * i.qty, 0)
+        const sub = get().items.reduce((sum, i) => {
+          const p = typeof i.price === 'number' && isFinite(i.price) ? i.price : 0
+          return sum + p * i.qty
+        }, 0)
         return Math.round(sub * SERVICE_CHARGE_RATE)
       },
 
       total: () => {
-        const sub = get().items.reduce((sum, i) => sum + i.price * i.qty, 0)
+        const sub = get().items.reduce((sum, i) => {
+          const p = typeof i.price === 'number' && isFinite(i.price) ? i.price : 0
+          return sum + p * i.qty
+        }, 0)
         const svc = Math.round(sub * SERVICE_CHARGE_RATE)
         const vat = Math.round(sub * VAT_RATE)
         return sub + svc + vat
@@ -241,10 +265,8 @@ export const useCartStore = create<CartStore>()(
     }),
 
     {
-      name: 'ukv-cart-v5',
-      version: 5,
-
-      // Only persist data — never the panel open state
+      name:    'ukv-cart-v6',
+      version:  6,
       partialize: (state) => ({
         items:    state.items,
         checkIn:  state.checkIn,
@@ -256,12 +278,39 @@ export const useCartStore = create<CartStore>()(
 )
 
 // ─────────────────────────────────────────────────────────────────────
-// HELPER — build a cartKey for products with options/variants
-//
-// Usage:
-//   cartKey: buildCartKey('warbugia', 'bedBreakfast')
-//   result:  'warbugia::bedBreakfast'
+// HELPERS
 // ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Build a cartKey for products with board plans or variant options.
+ * Usage: cartKey: buildCartKey('warbugia', 'bedBreakfast')
+ * Result: 'warbugia::bedBreakfast'
+ */
 export function buildCartKey(id: string, option?: string): string {
   return option ? `${id}::${option}` : id
+}
+
+/**
+ * Build a deep-link URL for the CartPanel "Edit" button.
+ * The destination page reads `openItem` from the query string and
+ * auto-opens the modal for that item.
+ *
+ * Usage:
+ *   router.push(buildEditUrl('/restaurant', 'sig-1'))
+ *   → '/restaurant?openItem=sig-1'
+ */
+export function buildEditUrl(sourcePath: string, itemId: string): string {
+  if (!sourcePath) return '/'
+  return `${sourcePath}?openItem=${encodeURIComponent(itemId)}`
+}
+
+/**
+ * Helper to read the openItem param on the destination page.
+ * Usage (in any page component):
+ *   const itemToOpen = getOpenItemParam()
+ *   useEffect(() => { if (itemToOpen) setLogItem(menuItems.find(i => i.id === itemToOpen)) }, [])
+ */
+export function getOpenItemParam(): string | null {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get('openItem')
 }
