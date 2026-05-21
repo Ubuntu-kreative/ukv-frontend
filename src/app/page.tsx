@@ -433,14 +433,30 @@ function Philosophy() {
         </blockquote>
 
         {/* Improvement #13: more breathing room, reduced tracking */}
-        <p className="font-body text-[13px] leading-[2.1] reveal" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.04em' }}>
-          Rooted in the African philosophy of Ubuntu —{' '}
-          <em className="font-display not-italic" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.05rem' }}>
-            &ldquo;Refresh your soul, ground your spirit&rdquo;
-          </em>{' '}
-          — our village is more than a destination. It is a community, a story, and a living system.
-        </p>
-
+        <p
+  className="font-body text-[15px] leading-[2] reveal max-w-[720px]"
+  style={{
+    color: 'rgba(255,255,255,0.58)',
+    letterSpacing: '0.015em',
+    fontWeight: 300,
+  }}
+>
+  Rooted in the African philosophy of Ubuntu —{' '}
+  
+  <em
+    className="font-display italic"
+    style={{
+      color: 'rgba(255,255,255,0.82)',
+      fontSize: '1.08rem',
+      fontWeight: 400,
+    }}
+  >
+    “Refresh your soul, ground your spirit”
+  </em>{' '}
+  
+  — our village is more than a destination.
+  It is a community, a story, and a living system.
+</p>
         {/* Improvement #8: small Adinkra glyph ornament */}
         <div className="flex justify-center mt-14 reveal">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ opacity: 0.18 }}>

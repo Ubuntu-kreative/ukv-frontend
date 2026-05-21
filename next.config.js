@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
+
 const nextConfig = {
+
+  // ── Images ────────────────────────────────────────────────
   images: {
+    qualities: [75, 90, 100],
     remotePatterns: [
       {
         protocol: 'https',
@@ -28,23 +32,23 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           {
-            key: 'X-Frame-Options',
+            key:   'X-Frame-Options',
             value: 'DENY',
           },
           {
-            key: 'X-Content-Type-Options',
+            key:   'X-Content-Type-Options',
             value: 'nosniff',
           },
           {
-            key: 'Referrer-Policy',
+            key:   'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
           {
-            key: 'Permissions-Policy',
+            key:   'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
           {
-            key: 'X-DNS-Prefetch-Control',
+            key:   'X-DNS-Prefetch-Control',
             value: 'on',
           },
         ],
@@ -53,7 +57,7 @@ const nextConfig = {
         source: '/api/(.*)',
         headers: [
           {
-            key: 'Cache-Control',
+            key:   'Cache-Control',
             value: 'no-store, max-age=0',
           },
         ],
@@ -65,39 +69,30 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/home',
+        source:      '/home',
         destination: '/',
-        permanent: true,
+        permanent:    true,
       },
       {
-        source: '/hideaways',
+        source:      '/hideaways',
         destination: '/cottages',
-        permanent: true,
+        permanent:    true,
       },
       {
-        source: '/rooms',
+        source:      '/rooms',
         destination: '/cottages',
-        permanent: true,
+        permanent:    true,
       },
     ]
   },
 
-  env: {
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-    NEXT_PUBLIC_STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_KEY,
-  },
-
-  // ── TEMP BUILD FIX FOR DEPLOYMENT ─────────────────────────
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
-
+  // ── Logging ───────────────────────────────────────────────
   logging: {
     fetches: {
       fullUrl: true,
     },
   },
+
 }
 
 module.exports = nextConfig

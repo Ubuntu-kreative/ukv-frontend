@@ -1,0 +1,294 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { getWeather, buildWeatherContext, conditionToIcon, type WeatherData } from '@/lib/moxie/weather'
+
+interface RhythmEntry {
+  time: string
+  label: string
+  description: string
+  category: 'wellness' | 'dining' | 'nature' | 'culture' | 'rest'
+  isActive?: boolean
+}
+
+const CATEGORY_COLORS: Record<RhythmEntry['category'], string> = {
+  wellness: 'text-emerald-400',
+  dining: 'text-amber-400',
+  nature: 'text-green-400',
+  culture: 'text-purple-300',
+  rest: 'text-blue-300',
+}
+
+function buildDailyRhythm(suggestedExperiences: string[]): RhythmEntry[] {
+  const currentHour = new Date().getHours()
+
+  const schedule: RhythmEntry[] = [
+    {
+      time: '05:30',
+      label: 'Dawn Ritual',
+      description: 'Guided sunrise breathwork on the eastern terrace as the valley wakes.',
+      category: 'wellness',
+    },
+    {
+      time: '07:00',
+      label: 'Forest Bathing Walk',
+      description: 'A slow immersive walk through the indigenous forest. No phones. No rush.',
+      category: 'nature',
+    },
+    {
+      time: '08:30',
+      label: 'Farm Breakfast',
+      description: 'Seasonal harvest breakfast prepared with produce from the village farm.',
+      category: 'dining',
+    },
+    {
+      time: '10:00',
+      label: suggestedExperiences[0] ?? 'Morning Experience',
+      description: 'Curated by Moxie based on today\'s sanctuary conditions.',
+      category: 'wellness',
+    },
+    {
+      time: '13:00',
+      label: 'Midday Nourishment',
+      description: 'Slow lunch in the open-air pavilion. The afternoon light is generous.',
+      category: 'dining',
+    },
+    {
+      time: '15:30',
+      label: suggestedExperiences[1] ?? 'Afternoon Exploration',
+      description: 'When the heat softens — the best time for unhurried discovery.',
+      category: 'nature',
+    },
+    {
+      time: '17:30',
+      label: 'Sundowner Ritual',
+      description: 'Gather at the fire circle as the sun touches the horizon.',
+      category: 'culture',
+    },
+    {
+      time: '19:30',
+      label: 'Sanctuary Dinner',
+      description: 'A communal evening meal. The menu follows the season.',
+      category: 'dining',
+    },
+    {
+      time: '21:00',
+      label: 'Night Rest',
+      description: 'The village quiets. The stars appear. Sleep is sacred here.',
+      category: 'rest',
+    },
+  ]
+
+  // Mark current active entry
+  return schedule.map((entry) => {
+    const [hours] = entry.time.split(':').map(Number)
+    return { ...entry, isActive: currentHour >= hours && currentHour < hours + 2 }
+  })
+}
+
+export default function DailyRhythm() {
+  const [weather, setWeather] = useState<WeatherData | null>(null)
+  const [rhythm, setRhythm] = useState<RhythmEntry[]>([])
+  const [selectedEntry, setSelectedEntry] = useState<RhythmEntry | null>(null)
+  const [currentTime, setCurrentTime] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(
+        new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+      )
+    }
+    updateTime()
+    const timer = setInterval(updateTime, 30_000)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    getWeather()
+      .then((w) => {
+        setWeather(w)
+        const context = buildWeatherContext(w)
+        setRhythm(buildDailyRhythm(context.suggestedExperiences))
+      })
+      .catch(() => {
+        setRhythm(buildDailyRhythm([]))
+      })
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  const weatherContext = weather ? buildWeatherContext(weather) : null
+
+  return (
+    <section
+      className="relative py-20 md:py-28 px-6 md:px-12 bg-obsidian overflow-hidden"
+      aria-label="Today's Sanctuary Rhythm"
+    >
+      <div className="absolute inset-0 moxie-grid-overlay opacity-5 pointer-events-none" aria-hidden="true" />
+
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6"
+        >
+          <div>
+            <p className="moxie-section-label mb-3">Sanctuary Intelligence</p>
+            <h2 className="moxie-section-title text-[clamp(2rem,5vw,3.5rem)]">
+              Today's Rhythm
+            </h2>
+            {weatherContext && (
+              <p className="mt-3 text-white/40 text-sm max-w-lg leading-relaxed">
+                {weatherContext.greeting}
+              </p>
+            )}
+          </div>
+
+          {/* Weather card */}
+          {weather && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="moxie-glass-gold flex items-center gap-5 px-6 py-4 shrink-0"
+            >
+              <span className="text-3xl" aria-hidden="true">
+                {conditionToIcon(weather.condition)}
+              </span>
+              <div>
+                <div className="text-xl font-mono text-gold font-light">
+                  {weather.temperatureC}°C
+                </div>
+                <div className="text-xs font-mono text-white/30 uppercase tracking-widest mt-1">
+                  {currentTime} · LOCAL
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+
+        <hr className="moxie-section-divider mb-14" />
+
+        {/* Main layout: timeline + detail */}
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* Timeline */}
+          <div className="flex-1 rhythm-timeline">
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="rhythm-item animate-pulse">
+                    <div className="h-3 w-1/4 bg-white/5 rounded mb-2" />
+                    <div className="h-4 w-2/3 bg-white/5 rounded" />
+                  </div>
+                ))
+              : rhythm.map((entry, i) => (
+                  <motion.div
+                    key={entry.time}
+                    initial={{ opacity: 0, x: -12 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    className={`rhythm-item ${entry.isActive ? 'rhythm-item--active' : ''}`}
+                    onClick={() => setSelectedEntry(entry === selectedEntry ? null : entry)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && setSelectedEntry(entry === selectedEntry ? null : entry)}
+                    aria-expanded={selectedEntry === entry}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs font-mono text-white/25 w-10 shrink-0 tabular-nums">
+                        {entry.time}
+                      </span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`text-sm font-medium ${
+                              entry.isActive ? 'text-gold' : 'text-white/70'
+                            } transition-colors duration-300`}
+                          >
+                            {entry.label}
+                          </span>
+                          {entry.isActive && (
+                            <span className="text-[10px] font-mono tracking-widest text-gold/50 uppercase">
+                              now
+                            </span>
+                          )}
+                        </div>
+                        <span
+                          className={`text-[10px] font-mono uppercase tracking-widest ${CATEGORY_COLORS[entry.category]}`}
+                        >
+                          {entry.category}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+          </div>
+
+          {/* Detail panel */}
+          <div className="lg:w-80 shrink-0">
+            <div className="sticky top-24">
+              <AnimatePresence mode="wait">
+                {selectedEntry ? (
+                  <motion.div
+                    key={selectedEntry.time}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.4 }}
+                    className="moxie-glow-card p-6"
+                  >
+                    <p className="moxie-section-label mb-3">{selectedEntry.time}</p>
+                    <h3 className="font-display text-2xl text-white font-light mb-4">
+                      {selectedEntry.label}
+                    </h3>
+                    <p className="text-white/50 text-sm leading-relaxed">
+                      {selectedEntry.description}
+                    </p>
+                    {weather && (
+                      <p className="mt-4 text-xs text-white/25 italic leading-relaxed">
+                        {weather.sanctuaryNote}
+                      </p>
+                    )}
+                    <button className="mt-6 w-full py-3 rounded-xl border border-gold/20 text-xs font-mono tracking-widest text-gold/60 hover:border-gold/40 hover:text-gold/80 transition-all duration-300 uppercase">
+                      Reserve This Experience
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="placeholder"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="p-6 border border-white/[0.04] rounded-2xl"
+                  >
+                    <p className="text-white/20 text-sm italic text-center leading-relaxed py-8">
+                      Select a moment in the day to explore it further.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Clothing note */}
+              {weatherContext && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="mt-4 px-4 py-3 rounded-xl border border-white/[0.04] bg-white/[0.02]"
+                >
+                  <p className="text-[11px] text-white/30 leading-relaxed">
+                    🌿 {weatherContext.clothingNote}
+                  </p>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

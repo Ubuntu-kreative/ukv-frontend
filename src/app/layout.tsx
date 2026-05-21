@@ -1,33 +1,46 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import Script from 'next/script'
 import ClientLayout from '@/components/ClientLayout'
-import { CartProvider } from '@/context/CartContext' // ✅ Cart context provider
+import { CartProvider } from '@/context/CartContext'
 import { CartPanel } from '@/components/cart/CartPanel'
 import { Toaster } from 'react-hot-toast'
-import { Cormorant_Garamond, Outfit } from 'next/font/google'
+import {
+  Cormorant_Garamond,
+  Jost,
+  Playfair_Display,
+} from 'next/font/google'
 import StatusBar from '@/components/StatusBar'
 
-
-// ── Fonts ─────────────────────────────────────────────────────
 const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '600'],
-  style: ['normal', 'italic'],
+  subsets:  ['latin'],
+  weight:   ['300', '400', '600'],
+  style:    ['normal', 'italic'],
   variable: '--font-display',
-  display: 'swap',
+  display:  'swap',
+  preload:  true,
 })
 
-const outfit = Outfit({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
+const jost = Jost({
+  subsets:  ['latin'],
+  weight:   ['200', '300', '400', '500'],
   variable: '--font-body',
-  display: 'swap',
+  display:  'swap',
+  preload:  true,
 })
 
-// ── Metadata ──────────────────────────────────────────────────
+const playfair = Playfair_Display({
+  subsets:  ['latin'],
+  weight:   ['400', '700'],
+  style:    ['italic'],
+  variable: '--font-accent',
+  display:  'swap',
+  preload:  false,
+})
+
 export const metadata: Metadata = {
   title: {
-    default: 'Ubuntu Kreative Village | Eco Lodge & Farm Retreat · Kenya',
+    default:  'Ubuntu Kreative Village | Eco Lodge & Farm Retreat · Kenya',
     template: '%s | Ubuntu Kreative Village',
   },
   description:
@@ -43,109 +56,160 @@ export const metadata: Metadata = {
     'sustainable lodge Africa',
     'ubuntu ecolodge',
   ],
-  authors: [{ name: 'Ubuntu Kreative Village', url: 'https://ubuntuecolodge.com' }],
-  creator: 'Ubuntu Kreative Village',
+  authors:     [{ name: 'Ubuntu Kreative Village', url: 'https://ubuntuecolodge.com' }],
+  creator:     'Ubuntu Kreative Village',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || 'https://ubuntuecolodge.com'
   ),
   manifest: '/manifest.json',
   openGraph: {
-    title: 'Ubuntu Kreative Village',
-    description:
-      'Where nature heals & traditions revive. A living farm retreat in Kenya.',
-    url: 'https://ubuntuecolodge.com',
-    siteName: 'Ubuntu Kreative Village',
-    locale: 'en_KE',
-    type: 'website',
+    title:       'Ubuntu Kreative Village',
+    description: 'Where nature heals & traditions revive. A living farm retreat in Kenya.',
+    url:         'https://ubuntuecolodge.com',
+    siteName:    'Ubuntu Kreative Village',
+    locale:      'en_KE',
+    type:        'website',
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Ubuntu Kreative Village',
+    card:        'summary_large_image',
+    title:       'Ubuntu Kreative Village',
     description: 'Where nature heals & traditions revive. Kenya eco lodge.',
-    creator: '@ubuntukreative',
+    creator:     '@ubuntukreative',
   },
   robots: {
-    index: true,
+    index:  true,
     follow: true,
     googleBot: {
-      index: true,
-      follow: true,
+      index:              true,
+      follow:             true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
-      'max-snippet': -1,
+      'max-snippet':       -1,
     },
   },
   icons: {
-    icon: '/icons/icon-192.png',
+    icon:  '/icons/icon-192.png',
     apple: '/icons/icon-192.png',
   },
 }
 
-// ── Extra metadata from second snippet ─────────────────────────
-export const simpleMetadata: Metadata = {
-  title: 'Ubuntu Kreative Village — Kenya Eco Lodge',
-  description:
-    'A living farm retreat in Kenya where Pokomo Cottages, Arohamai Spa, and farm-to-fork dining converge in one immersive village experience.',
-  keywords: 'eco lodge Kenya, farm retreat, Pokomo cottages, Arohamai Spa, Ubuntu Kreative Village',
-}
-
-// ── Viewport ──────────────────────────────────────────────────
 export const viewport: Viewport = {
-  width: 'device-width',
+  width:        'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#0A0A0A',
+  themeColor:   '#0A0A0A',
 }
 
-// ── Root Layout ───────────────────────────────────────────────
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${outfit.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${cormorant.variable} ${jost.variable} ${playfair.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        {/* Preconnect to Google Fonts for faster load */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        {/* Preconnect to Mux for video streaming */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://stream.mux.com" />
       </head>
-      <body className="bg-[#0d0c09] text-[#ede6d3] font-body antialiased overflow-x-hidden noise-overlay">
-        {/* Ambient grain overlay */}
+      <body
+        className="bg-[#0d0c09] text-[#ede6d3] font-body antialiased overflow-x-hidden noise-overlay"
+        suppressHydrationWarning
+      >
+        {/* ── Cursor ── */}
+        <Script
+          id="ukv-cursor"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{ __html: `
+            (function() {
+              if (window.matchMedia('(hover: none)').matches) return;
+              if (document.getElementById('ukv-cursor-dot')) return;
+              var dot = document.createElement('div');
+              dot.id = 'ukv-cursor-dot';
+              dot.style.cssText = 'position:fixed;top:-100px;left:-100px;width:8px;height:8px;background:#00FF41;border-radius:50%;pointer-events:none;z-index:2147483647;transition:width .25s,height .25s,background .25s;';
+              var ring = document.createElement('div');
+              ring.id = 'ukv-cursor-ring';
+              ring.style.cssText = 'position:fixed;top:-100px;left:-100px;width:36px;height:36px;border:1.5px solid rgba(0,255,65,0.5);border-radius:50%;pointer-events:none;z-index:2147483646;transition:width .35s,height .35s,border-color .3s;';
+              var style = document.createElement('style');
+              style.textContent = '*,*::before,*::after{cursor:none!important}';
+              document.head.appendChild(style);
+              document.body.appendChild(dot);
+              document.body.appendChild(ring);
+              var mx=0,my=0,rx=0,ry=0;
+              window.addEventListener('mousemove',function(e){
+                mx=e.clientX;my=e.clientY;
+                dot.style.left=(mx-4)+'px';
+                dot.style.top=(my-4)+'px';
+              },{passive:true});
+              (function tick(){
+                rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+                ring.style.left=(rx-18)+'px';
+                ring.style.top=(ry-18)+'px';
+                requestAnimationFrame(tick);
+              })();
+              var HOVER='a,button,input,select,textarea,label';
+              document.addEventListener('mouseover',function(e){
+                if(!e.target.closest)return;
+                if(!e.target.closest(HOVER))return;
+                dot.style.width='5px';dot.style.height='5px';dot.style.background='#D4A853';
+                ring.style.width='48px';ring.style.height='48px';
+              },{passive:true});
+              document.addEventListener('mouseout',function(e){
+                if(!e.target.closest)return;
+                if(!e.target.closest(HOVER))return;
+                dot.style.width='8px';dot.style.height='8px';dot.style.background='#00FF41';
+                ring.style.width='36px';ring.style.height='36px';
+              },{passive:true});
+            })();
+          ` }}
+        />
+
+        {/* ── Ambient grain overlay ── */}
         <div
+          aria-hidden="true"
           className="fixed inset-0 pointer-events-none z-[1] opacity-[0.025]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            backgroundSize: '256px 256px',
+            backgroundSize:  '256px 256px',
           }}
         />
 
-        {/* ✅ CartProvider added here to provide context to Nav + children */}
         <CartProvider>
-          {/* ✅ Wrap children in ClientLayout so global effects + cursor run */}
           <ClientLayout>{children}</ClientLayout>
         </CartProvider>
 
-        {/* Cart panel + toaster notifications */}
         <CartPanel />
+
         <Toaster
           position="bottom-center"
           toastOptions={{
+            duration: 3500,
             style: {
-              background: '#1c1a14',
-              color: '#ede6d3',
-              border: '0.5px solid rgba(200,168,75,0.35)',
-              borderRadius: '0',
-              fontFamily: 'var(--font-body)',
-              fontSize: '12px',
-              letterSpacing: '0.05em',
-              padding: '10px 20px',
+              background:    '#1c1a14',
+              color:         '#ede6d3',
+              border:        '0.5px solid rgba(200,168,75,0.35)',
+              borderRadius:  '0',
+              fontFamily:    'var(--font-body)',
+              fontSize:      '12px',
+              letterSpacing: '0.06em',
+              padding:       '10px 20px',
+              boxShadow:     '0 8px 32px rgba(0,0,0,0.6)',
+            },
+            success: {
+              iconTheme: {
+                primary:   'rgba(200,168,75,0.9)',
+                secondary: '#1c1a14',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary:   '#c05a3a',
+                secondary: '#1c1a14',
+              },
             },
           }}
         />
