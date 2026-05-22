@@ -106,17 +106,32 @@ export default function DailyRhythm() {
   }, [])
 
   useEffect(() => {
-    getWeather()
-      .then((w) => {
-        setWeather(w)
-        const context = buildWeatherContext(w)
-        setRhythm(buildDailyRhythm(context.suggestedExperiences))
-      })
-      .catch(() => {
-        setRhythm(buildDailyRhythm([]))
-      })
-      .finally(() => setIsLoading(false))
-  }, [])
+  let mounted = true
+
+  getWeather()
+    .then((w) => {
+      if (!mounted) return
+
+      setWeather(w)
+
+      const context = buildWeatherContext(w)
+      setRhythm(buildDailyRhythm(context.suggestedExperiences))
+    })
+    .catch(() => {
+      if (!mounted) return
+
+      setRhythm(buildDailyRhythm([]))
+    })
+    .finally(() => {
+      if (mounted) {
+        setIsLoading(false)
+      }
+    })
+
+  return () => {
+    mounted = false
+  }
+}, [])
 
   const weatherContext = weather ? buildWeatherContext(weather) : null
 

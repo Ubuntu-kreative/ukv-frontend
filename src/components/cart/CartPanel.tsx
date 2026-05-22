@@ -1,14 +1,7 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Ubuntu Kreative Village — CartPanel  (production v9.2)
-//
-// v9.2 ADDITION:
-//   • Imports createTestOrder from @/lib/testOrder
-//   • Adds temporary "Test Supabase Order" button below "Clear cart" in cart step
-//     (visually unobtrusive — dev-only style, easy to remove later)
-//
-// ALL v9.1 FIXES PRESERVED (see below)
+// Ubuntu Kreative Village — CartPanel  (production v1.4)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
@@ -42,14 +35,12 @@ function safeKey(item: any): string {
     ? item.cartKey
     : (item.id || `item-${Math.random()}`)
 }
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safeQty(item: any): number {
   const q = item.qty ?? item.quantity ?? 1
   const n = Number(q)
   return isFinite(n) && n > 0 ? n : 1
 }
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safePrice(p: any): number {
   const n = Number(p)
@@ -533,7 +524,7 @@ export function CartPanel() {
           specialRequests:specialReq, message,
           payment:
             payMethod==='mpesa' ? { method:'mpesa', phone:stkPhone||normalisePhone(mpPhone) } :
-            payMethod==='card'  ? { method:'card', cardNumber:cardNum.replace(/\s/g,''), expiry, cvv } :
+            payMethod==='card'  ? { method:'card' } :
                                   { method:'room' },
           subtotal:sub, serviceCharge:svc, vat:vatAmt, totalAmount:grand,
         }),
@@ -545,7 +536,7 @@ export function CartPanel() {
       const ref = generateRef(type==='booking'?'UKV':'INQ')
       setConfirmed({ ref, type }); clearCart()
     } finally { setLoading(false) }
-  }, [name,email,phone,items,checkIn,checkOut,guests,specialReq,message,payMethod,stkPhone,mpPhone,cardNum,expiry,cvv,sub,svc,vatAmt,grand,clearCart])
+  }, [name,email,phone,items,checkIn,checkOut,guests,specialReq,message,payMethod,stkPhone,mpPhone,sub,svc,vatAmt,grand,clearCart])
 
   const handleStkPush = useCallback(async () => {
     if (!validatePayment()) return
@@ -555,10 +546,8 @@ export function CartPanel() {
       const res = await fetch('/api/mpesa/stkpush', {
         method:'POST', headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({
-          // Daraja STK fields — matches your /api/mpesa/stkpush route
           phone:            normalised,
           amount:           Math.ceil(grand),
-          // Booking context — saved to Supabase orders table
           accountReference: MPESA_ACCOUNT,
           transactionDesc:  `Ubuntu Booking – ${items.map(i=>i.name).join(', ').slice(0,80)}`,
           guestName:        name,
@@ -589,11 +578,8 @@ export function CartPanel() {
   const handlePayNow = useCallback(async () => {
     if (!validateDetails()) return
     if (!validatePayment()) return
-    if (payMethod==='mpesa') { await handleStkPush() }
-    else if (payMethod==='card') {
-      setStep('processing')
-      setTimeout(async () => { await handleConfirmBooking('booking') }, 2200)
-    } else { await handleConfirmBooking('booking') }
+    if (payMethod === 'mpesa') { await handleStkPush() }
+    else { await handleConfirmBooking('booking') }
   }, [validateDetails, validatePayment, payMethod, handleStkPush, handleConfirmBooking])
 
   const handleInquiry = useCallback(async () => {
@@ -630,11 +616,11 @@ export function CartPanel() {
         .item-action-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;border:none;font-family:var(--font-body);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
       `}</style>
 
-      {/* BACKDROP — z-[200] above nav */}
+      {/* BACKDROP */}
       <div className="fixed inset-0 z-[200]" onClick={closeCart}
         style={{ background:'rgba(0,0,0,0.7)', backdropFilter:'blur(8px)' }} />
 
-      {/* PANEL — z-[201] above backdrop */}
+      {/* PANEL */}
       <div
         className="cart-panel-bounce fixed top-0 right-0 bottom-0 z-[201] flex flex-col"
         style={{ width:'min(500px,100vw)', background:'var(--bg2,#0e0e0c)', borderLeft:'0.5px solid var(--border,rgba(255,255,255,0.08))', boxShadow:'-20px 0 80px rgba(0,0,0,0.6)' }}
@@ -784,7 +770,6 @@ export function CartPanel() {
                             return (
                               <div key={`${cat}-${key}`} className="py-4" style={{ borderBottom:'0.5px solid rgba(255,255,255,0.04)' }}>
                                 <div className="flex gap-3 items-start">
-                                  {/* Qty badge + ±1 */}
                                   <div style={{ flexShrink:0, display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
                                     <div style={{ width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, background:`${meta.accent}15`, border:`0.5px solid ${meta.accent}30` }}>
                                       <span style={{ fontFamily:'var(--font-display)', fontSize:qty>9?'0.75rem':'1rem', fontWeight:300, color:meta.accent }}>×{qty}</span>
@@ -794,7 +779,6 @@ export function CartPanel() {
                                       onDecrease={() => decreaseQty(key)}
                                     />
                                   </div>
-                                  {/* Details */}
                                   <div className="flex-1 min-w-0">
                                     <p className="text-[8px] tracking-[0.14em] uppercase mb-0.5" style={{ color:'var(--sage2)', fontFamily:'var(--font-body)' }}>
                                       {item.boardPlan ? `${item.tag} · ${BOARD_PLAN_LABELS[item.boardPlan] ?? item.boardPlan}` : (item.tag || '')}
@@ -808,12 +792,10 @@ export function CartPanel() {
                                         : <>KES {price.toLocaleString()}{item.unit && <span style={{ color:'rgba(255,255,255,0.2)' }}> {item.unit}</span>}</>}
                                     </p>
                                   </div>
-                                  {/* Line total + actions */}
                                   <div className="flex flex-col items-end gap-2 shrink-0">
                                     <p className="text-[18px] font-light" style={{ fontFamily:'var(--font-display)', color:meta.accent }}>
                                       KES {lineAmt.toLocaleString()}
                                     </p>
-                                    {/* Edit button — only if sourcePath was saved */}
                                     {item.sourcePath && (
                                       <button
                                         onClick={() => { closeCart(); router.push(buildEditUrl(item.sourcePath!, item.id)) }}
@@ -824,7 +806,6 @@ export function CartPanel() {
                                         ✎ Edit
                                       </button>
                                     )}
-                                    {/* Remove */}
                                     <button
                                       onClick={() => { removeItem(key); toast(`${item.name} removed`, { icon:'✕' }) }}
                                       className="item-action-btn"
@@ -835,7 +816,6 @@ export function CartPanel() {
                                     </button>
                                   </div>
                                 </div>
-                                {/* Note */}
                                 <div className="mt-2 ml-[52px]">
                                   {activeNoteKey === key ? (
                                     <input autoFocus type="text"
@@ -955,6 +935,7 @@ export function CartPanel() {
                         </div>
                       </div>
 
+                      {/* ── M-PESA ── */}
                       {payMethod === 'mpesa' && (
                         <div className="p-4 space-y-3" style={{ background:'var(--bg3)', border:'0.5px solid rgba(200,168,75,0.25)' }}>
                           <p className="text-[9px] tracking-[0.18em] uppercase" style={{ color:'var(--gold)', fontFamily:'var(--font-body)' }}>M-Pesa Express (STK Push)</p>
@@ -981,34 +962,22 @@ export function CartPanel() {
                         </div>
                       )}
 
+                      {/* ── CARD (coming soon) ── */}
                       {payMethod === 'card' && (
-                        <div className="space-y-3">
-                          <FormField label="Card Number *" error={errs.cardNum}>
-                            <input className={`input-dark font-mono${errs.cardNum?' err':''}`} placeholder="4242 4242 4242 4242" value={cardNum}
-                              onChange={e => { setCardNum(formatCardNumber(e.target.value)); clearErr('cardNum') }}
-                              onBlur={() => { if (cardNum && !isValidCard(cardNum)) setErr('cardNum','Enter a valid card number') }}
-                              maxLength={19} inputMode="numeric" />
-                          </FormField>
-                          <div className="grid grid-cols-2 gap-2">
-                            <FormField label="Expiry *" error={errs.expiry}>
-                              <input className={`input-dark font-mono${errs.expiry?' err':''}`} placeholder="MM/YY" value={expiry}
-                                onChange={e => { setExpiry(formatExpiry(e.target.value)); clearErr('expiry') }}
-                                onBlur={() => { if (expiry && !isValidExpiry(expiry)) setErr('expiry','Enter a valid future expiry') }}
-                                maxLength={5} inputMode="numeric" />
-                            </FormField>
-                            <FormField label="CVV *" error={errs.cvv}>
-                              <input className={`input-dark font-mono${errs.cvv?' err':''}`} placeholder="123" value={cvv}
-                                onChange={e => { setCvv(e.target.value.replace(/\D/g,'').slice(0,4)); clearErr('cvv') }}
-                                onBlur={() => { if (cvv && !isValidCvv(cvv)) setErr('cvv','3 or 4 digit CVV required') }}
-                                maxLength={4} type="password" inputMode="numeric" />
-                            </FormField>
-                          </div>
-                          <p style={{ fontSize:'9px', color:'rgba(255,255,255,0.2)', fontFamily:'var(--font-body)', letterSpacing:'0.06em' }}>
-                            🔒 Card details are encrypted and never stored
+                        <div className="p-4" style={{ background:'var(--bg3)', border:'0.5px solid var(--border2)' }}>
+                          <p className="text-[9px] tracking-[0.18em] uppercase mb-3" style={{ color:'var(--gold)', fontFamily:'var(--font-body)' }}>
+                            Pay by Card
+                          </p>
+                          <p className="text-[11px] leading-[1.65] mb-4" style={{ color:'var(--muted)' }}>
+                            Card payments are coming soon. Please use M-Pesa or Room Charge in the meantime.
+                          </p>
+                          <p style={{ fontSize:'8px', color:'rgba(255,255,255,0.18)', fontFamily:'var(--font-body)', letterSpacing:'0.06em' }}>
+                            🔒 When available: Encrypted · PCI-DSS compliant · Powered by Stripe
                           </p>
                         </div>
                       )}
 
+                      {/* ── ROOM CHARGE ── */}
                       {payMethod === 'room' && (
                         <div className="p-4" style={{ background:'var(--bg3)', border:'0.5px solid var(--border2)' }}>
                           <p className="text-[11px] leading-[1.65]" style={{ color:'var(--muted)' }}>
@@ -1047,7 +1016,6 @@ export function CartPanel() {
                       style={{ color:'var(--muted)', background:'none', border:'none', cursor:'pointer', fontFamily:'var(--font-body)' }}>
                       Clear cart
                     </button>
-
                   </>
                 )}
                 {step === 'details' && (
@@ -1062,13 +1030,18 @@ export function CartPanel() {
                     </button>
                   </>
                 )}
-                {step === 'pay' && tab === 'pay' && (
+                {step === 'pay' && tab === 'pay' && payMethod !== 'card' && (
                   <button onClick={handlePayNow} disabled={loading} className="btn-gold w-full"
                     style={{ padding:'14px 28px', fontSize:'10px', letterSpacing:'0.22em', opacity:loading?0.6:1 }}>
-                    {loading?'Processing…'
-                      :payMethod==='mpesa'?`Send M-Pesa Prompt · KES ${grand.toLocaleString()}`
-                      :payMethod==='card' ?`Confirm & Pay · KES ${grand.toLocaleString()}`
-                      :                   `Confirm Room Charge · KES ${grand.toLocaleString()}`}
+                    {loading ? 'Processing…'
+                      : payMethod==='mpesa' ? `Send M-Pesa Prompt · KES ${grand.toLocaleString()}`
+                      :                      `Confirm Room Charge · KES ${grand.toLocaleString()}`}
+                  </button>
+                )}
+                {step === 'pay' && tab === 'pay' && payMethod === 'card' && (
+                  <button disabled className="btn-gold w-full"
+                    style={{ padding:'14px 28px', fontSize:'10px', letterSpacing:'0.22em', opacity:0.4, cursor:'not-allowed' }}>
+                    Card Payments Coming Soon
                   </button>
                 )}
                 {step === 'pay' && tab === 'inquiry' && (
@@ -1081,8 +1054,6 @@ export function CartPanel() {
             )}
           </>
         )}
-
-
       </div>
     </>
   )

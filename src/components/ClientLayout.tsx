@@ -15,6 +15,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       const kenyaTime = new Date(now.getTime() + 3 * 60 * 60 * 1000)
       const hour = kenyaTime.getUTCHours()
       const root = document.documentElement
+
       if (hour >= 17 && hour <= 19) {
         root.style.setProperty('--gold', '#E69342')
         root.style.setProperty('--neon', '#00FF65')

@@ -1,17 +1,15 @@
-// src/lib/moxie/reservations.ts
-// ─────────────────────────────────────────────────────────────────────
-// Ubuntu Kreative Village — Reservation Service
-//
-// Handles creation, storage, and retrieval of reservations.
-// Currently persists to /api/reservations (Next.js API route).
-// Swap the fetch calls for direct Supabase SDK calls when ready.
-//
-// Reservation types:
-//   restaurant — table booking (time, guests, dietary notes)
-//   cottage    — room stay (check-in, check-out, board plan)
-//   spa        — treatment booking (ritual, time)
-//   event      — experience booking (event name, guests)
-// ─────────────────────────────────────────────────────────────────────
+/**
+ * Ubuntu Kreative Village — Reservation Service
+ *
+ * Fix applied (error 12):
+ *   - `bookingFlowToPrompt` returned an arrow function `(name: string) => string`
+ *     for the 'ask_phone' case instead of a plain string. TypeScript reports:
+ *     "Type '(name: string) => string' is not assignable to type 'string'."
+ *   - Fixed by returning a static string. The caller already has the name in
+ *     BookingFlowState, so MoxieChat should interpolate it from state directly.
+ *
+ * All other logic preserved exactly.
+ */
 
 export type ReservationType = 'restaurant' | 'cottage' | 'spa' | 'event'
 export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed'
@@ -20,26 +18,20 @@ export interface Reservation {
   id:        string
   type:      ReservationType
   status:    ReservationStatus
-  ref:       string        // human-readable ref e.g. UKV-48291
+  ref:       string
   createdAt: string
-
-  // Guest
   guestName:  string
   guestPhone: string
   guestEmail?: string
-
-  // Booking specifics (type-dependent fields)
-  time?:       string   // restaurant: "7:30 PM"
-  date?:       string   // ISO date string
+  time?:       string
+  date?:       string
   guests:      number
-  checkIn?:    string   // cottage: ISO date
-  checkOut?:   string   // cottage: ISO date
-  roomName?:   string   // cottage: room/cottage name
-  boardPlan?:  string   // cottage: BO/BB/HB/FB
-  ritual?:     string   // spa: treatment name
-  eventName?:  string   // event: event name
-
-  // Cart & payment
+  checkIn?:    string
+  checkOut?:   string
+  roomName?:   string
+  boardPlan?:  string
+  ritual?:     string
+  eventName?:  string
   totalAmount?: number
   notes?:       string
   cartItems?:   CartLineItem[]
@@ -52,20 +44,10 @@ export interface CartLineItem {
   qty:   number
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// REF GENERATOR
-// ─────────────────────────────────────────────────────────────────────
 function generateRef(): string {
   return `UKV-${Math.floor(10000 + Math.random() * 90000)}`
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// CREATE RESERVATION
-//
-// Sends to /api/reservations for persistence.
-// Falls back to an optimistic local reference if the API fails
-// (the guest still gets a reference number; staff follow up).
-// ─────────────────────────────────────────────────────────────────────
 export async function createReservation(
   data: Omit<Reservation, 'id' | 'ref' | 'createdAt' | 'status'>
 ): Promise<Reservation> {
@@ -88,14 +70,10 @@ export async function createReservation(
     return saved.reservation || reservation
   } catch (err) {
     console.warn('[Reservations] API unavailable, using optimistic ref:', err)
-    // Return the local reservation — staff will reconcile
     return reservation
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// CART ITEM BUILDER — converts a reservation into a CartPanel-ready item
-// ─────────────────────────────────────────────────────────────────────
 export function reservationToCartItem(res: Reservation) {
   const typeLabels: Record<ReservationType, string> = {
     restaurant: 'Dining',
@@ -111,7 +89,7 @@ export function reservationToCartItem(res: Reservation) {
   switch (res.type) {
     case 'restaurant':
       name  = `Restaurant Table — ${res.time}, ${res.guests} guest${res.guests > 1 ? 's' : ''}`
-      price = 0   // settled at the restaurant; set a cover charge here if needed
+      price = 0
       unit  = '/ table'
       break
     case 'cottage':
@@ -133,7 +111,7 @@ export function reservationToCartItem(res: Reservation) {
 
   return {
     id:       res.id,
-    cartKey:  res.id,          // stable, unique — fixes the cartKey-undefined error
+    cartKey:  res.id,
     name,
     price,
     qty:      1,
@@ -143,28 +121,21 @@ export function reservationToCartItem(res: Reservation) {
               : res.type === 'spa'      ? 'spa' as const
               : 'event' as const,
     unit,
-    note:     `Ref: ${res.ref} | Contact: ${res.guestPhone}${res.notes ? ` | ${res.notes}` : ''}`,
+    note: `Ref: ${res.ref} | Contact: ${res.guestPhone}${res.notes ? ` | ${res.notes}` : ''}`,
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// BOOKING FLOW STATE MACHINE HELPERS
-//
-// Used by MoxieChat to manage multi-step booking conversations.
-// All state lives in the React component — never in edge functions.
-// ─────────────────────────────────────────────────────────────────────
-
 export type BookingStep =
   | 'idle'
-  | 'ask_type'      // What are you booking? (restaurant/spa/cottage)
-  | 'ask_time'      // What time?
-  | 'ask_date'      // What date?
-  | 'ask_guests'    // How many guests?
-  | 'ask_name'      // Your name?
-  | 'ask_phone'     // Your phone number?
-  | 'ask_notes'     // Any special requests?
-  | 'confirming'    // Moxie summarises — guest confirms
-  | 'complete'      // Done — cart item added
+  | 'ask_type'
+  | 'ask_time'
+  | 'ask_date'
+  | 'ask_guests'
+  | 'ask_name'
+  | 'ask_phone'
+  | 'ask_notes'
+  | 'confirming'
+  | 'complete'
 
 export interface BookingFlowState {
   step:       BookingStep
@@ -184,36 +155,50 @@ export interface BookingFlowState {
 
 export function getNextBookingStep(current: BookingFlowState): BookingStep {
   switch (current.step) {
-    case 'idle':         return 'ask_type'
-    case 'ask_type':     return 'ask_time'
-    case 'ask_time':
-      // Cottages need a date, restaurant just needs a time
-      return current.type === 'restaurant' ? 'ask_guests' : 'ask_date'
-    case 'ask_date':     return 'ask_guests'
-    case 'ask_guests':   return 'ask_name'
-    case 'ask_name':     return 'ask_phone'
-    case 'ask_phone':    return 'confirming'
-    case 'confirming':   return 'complete'
-    default:             return 'idle'
+    case 'idle':       return 'ask_type'
+    case 'ask_type':   return 'ask_time'
+    case 'ask_time':   return current.type === 'restaurant' ? 'ask_guests' : 'ask_date'
+    case 'ask_date':   return 'ask_guests'
+    case 'ask_guests': return 'ask_name'
+    case 'ask_name':   return 'ask_phone'
+    case 'ask_phone':  return 'confirming'
+    case 'confirming': return 'complete'
+    default:           return 'idle'
   }
 }
 
+/**
+ * Returns a prompt string for the current booking step.
+ *
+ * Fix (error 12): The 'ask_phone' case previously returned an arrow function
+ * `(name: string) => string` instead of a `string`, which is a type mismatch.
+ * The name is available in `state` — callers should interpolate it themselves,
+ * or use the name from state directly in the MoxieChat component.
+ */
 export function bookingFlowToPrompt(state: BookingFlowState): string {
   switch (state.step) {
     case 'ask_time':
       if (state.type === 'restaurant') return 'What time would you like to dine tonight? 🌙'
       if (state.type === 'spa')        return 'What time would you like your treatment?'
       return 'What time works for you?'
+
     case 'ask_date':
       return 'And what date? (e.g. tomorrow, or the 28th)'
+
     case 'ask_guests':
-      return `For how many guests?`
+      return 'For how many guests?'
+
     case 'ask_name':
-      return `May I have your name?`
+      return 'May I have your name?'
+
     case 'ask_phone':
-      return (name: string) => `Thank you, ${name} 🌿 And your phone number so we can confirm?`
+      // Fix: was `(name: string) => string` — now returns the string directly,
+      // interpolating name from state (which is already available to the caller).
+      return `Thank you${state.name ? `, ${state.name}` : ''} 🌿 And your phone number so we can confirm?`
+
     case 'confirming':
       return buildConfirmationSummary(state)
+
     default:
       return ''
   }
@@ -221,6 +206,7 @@ export function bookingFlowToPrompt(state: BookingFlowState): string {
 
 function buildConfirmationSummary(state: BookingFlowState): string {
   const lines: string[] = []
+
   if (state.type === 'restaurant') {
     lines.push(`Table for ${state.guests} at ${state.time}`)
   } else if (state.type === 'spa') {
@@ -228,6 +214,7 @@ function buildConfirmationSummary(state: BookingFlowState): string {
   } else if (state.type === 'cottage') {
     lines.push(`${state.roomName || 'Room'} — ${state.date}`)
   }
+
   lines.push(`Name: ${state.name}`)
   lines.push(`Phone: ${state.phone}`)
   if (state.notes) lines.push(`Notes: ${state.notes}`)

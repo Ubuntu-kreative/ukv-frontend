@@ -1,20 +1,22 @@
 /* =========================================================
    UBUNTU KREATIVE VILLAGE — globals.css
-   Production Ready · Next.js 16 · Merged & Deduplicated
-   
-   Font stack:
-     Display  — Cormorant Garamond (serif, editorial)
-     Body     — Jost (geometric sans, precise at small sizes)
-     Accent   — Playfair Display italic (quotes, ritual names)
-     Mono     — Space Mono (telemetry, code, references)
+   Production Ready · Next.js 16
+
+   Typography System:
+     Display  — Cormorant Garamond  (serif, editorial luxury)
+     Body     — DM Sans             (humanist sans, precise at caps)
+     Accent   — Playfair Display    (italic only, pull-quotes, rituals)
+     Mono     — DM Mono             (telemetry, prices, references)
+
+   Design philosophy: Singita · Aman · Azalai
+   Every font decision communicates: refined, grounded, African luxury.
 ========================================================= */
 
 /* =========================================================
-   GOOGLE FONTS
-   Must stay at the very top — before @tailwind directives
+   GOOGLE FONTS  — must precede @tailwind
 ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&family=Playfair+Display:ital,wght@1,400;1,700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=Playfair+Display:ital,wght@1,400;1,500;1,700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
 
 /* =========================================================
    TAILWIND
@@ -31,16 +33,17 @@
 :root {
 
   /* ── Brand Colors ─────────────────────────────────────── */
-
   --neon:     #00FF41;
   --neon-dim: #00C832;
 
   --gold:       #c8a84b;
-  --gold-light: #F0C878;
+  --gold-light: #f0c878;
   --gold2:      #e2c96b;
+  --gold-muted: rgba(200, 168, 75, 0.55);
 
   --cream:  #ede6d3;
   --cream2: #d9d0bc;
+  --cream3: #c8bea8;
 
   --obsidian:       #0A0A0A;
   --obsidian-mid:   #111111;
@@ -60,7 +63,6 @@
   --rust:  #a34e2e;
 
   /* ── Transparency ─────────────────────────────────────── */
-
   --glass-bg:           rgba(255, 255, 255, 0.04);
   --glass-border:       rgba(255, 255, 255, 0.08);
   --glass-border-hover: rgba(0, 255, 65, 0.3);
@@ -75,17 +77,46 @@
   --border:  rgba(200, 168, 75, 0.14);
   --border2: rgba(237, 230, 211, 0.08);
 
-  /* ── Typography ───────────────────────────────────────── */
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body:    'Jost', 'Helvetica Neue', sans-serif;
+  /* ── Typography — runtime CSS vars from Next.js font loader ── */
+  /*    Fallbacks below are compile-time only; injected vars take precedence */
+  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-body:    'DM Sans', 'Helvetica Neue', system-ui, sans-serif;
   --font-accent:  'Playfair Display', Georgia, serif;
-  --font-mono:    'Space Mono', monospace;
+  --font-mono:    'DM Mono', 'ui-monospace', 'Menlo', monospace;
+
+  /* ── Type scale ───────────────────────────────────────── */
+  /* Base: 14px body / 13px mobile */
+  --text-2xs:   0.625rem;    /* 10px  — badges, nano labels         */
+  --text-xs:    0.6875rem;   /* 11px  — secondary metadata           */
+  --text-sm:    0.8125rem;   /* 13px  — captions, fine print         */
+  --text-base:  0.9375rem;   /* 15px  — primary body                 */
+  --text-lg:    1.0625rem;   /* 17px  — card descriptions            */
+  --text-xl:    1.25rem;     /* 20px  — section sub-heads            */
+  --text-2xl:   1.5625rem;   /* 25px  — modal titles, card headlines */
+  --text-3xl:   2rem;        /* 32px  — section headers              */
+  --text-4xl:   2.75rem;     /* 44px  — page heroes (tablet)         */
+  --text-5xl:   3.75rem;     /* 60px  — page heroes (desktop)        */
+  --text-hero:  clamp(3.5rem, 9vw, 7.5rem);   /* Full hero display  */
+
+  /* ── Leading (line-height) ────────────────────────────── */
+  --lead-tight:   0.85;   /* Display headings — optical tight */
+  --lead-snug:    1.15;   /* Sub-heads, card names            */
+  --lead-normal:  1.55;   /* UI labels, nav                   */
+  --lead-relaxed: 1.75;   /* Body paragraphs, descriptions    */
+  --lead-loose:   2.0;    /* Footnotes, fine print            */
+
+  /* ── Tracking (letter-spacing) ────────────────────────── */
+  --track-tight:  -0.025em;   /* Display headlines: condensed    */
+  --track-snug:   -0.01em;    /* Sub-heads, card names           */
+  --track-normal:  0;          /* Body paragraphs                 */
+  --track-wide:    0.06em;     /* Buttons, short body labels      */
+  --track-caps:    0.14em;     /* ALL-CAPS labels, nav links      */
+  --track-spread:  0.22em;     /* Badges, status text, eyebrows   */
+  --track-ultra:   0.38em;     /* Ultra-spaced display moments    */
 
   /* ── Effects ──────────────────────────────────────────── */
-
   --glass-blur: 20px;
   --cursor-size: 12px;
-
 }
 
 /* =========================================================
@@ -102,6 +133,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Optical sizing on by default — allows fonts to adapt to display size */
+  font-optical-sizing: auto;
 }
 
 body {
@@ -110,52 +143,182 @@ body {
   font-family:             var(--font-body);
   font-size:               14px;
   font-weight:             300;
-  line-height:             1.7;
+  line-height:             var(--lead-relaxed);
   overflow-x:              hidden;
   -webkit-font-smoothing:  antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering:          optimizeLegibility;
-  font-feature-settings:   'kern' 1, 'liga' 1, 'calt' 1;
+  font-feature-settings:   'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
   font-optical-sizing:     auto;
+  /* Prevent text inflation on iOS */
+  -webkit-text-size-adjust: 100%;
 }
 
 /* =========================================================
-   TYPOGRAPHY
+   TYPOGRAPHY SYSTEM
+   ─────────────────────────────────────────────────────────
+   Hierarchy design:
+     font-display → headlines, room names, dish names, hero text
+     font-body    → nav links, body copy, labels, CTAs
+     font-accent  → pull-quotes, spa ritual names (sparingly)
+     font-mono    → prices (KES), freshness %, farm telemetry
 ========================================================= */
 
-.font-display,
+/* ── Display — Cormorant Garamond ── */
+.font-display {
+  font-family:         var(--font-display);
+  font-weight:         300;
+  letter-spacing:      var(--track-tight);
+  line-height:         var(--lead-tight);
+  font-optical-sizing: auto;
+  /* Enable old-style numerals in Cormorant for elegance */
+  font-feature-settings: 'onum' 1, 'kern' 1, 'liga' 1;
+}
+
+/* h1–h3 inherit display by default so page sections get it automatically */
 h1, h2, h3 {
   font-family:         var(--font-display);
   font-weight:         300;
-  letter-spacing:      -0.01em;
+  letter-spacing:      var(--track-tight);
+  line-height:         var(--lead-tight);
+  font-optical-sizing: auto;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+h4, h5, h6 {
+  font-family:    var(--font-body);
+  font-weight:    500;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  line-height:    var(--lead-normal);
+}
+
+/* ── Body — DM Sans ── */
+.font-body {
+  font-family:         var(--font-body);
   font-optical-sizing: auto;
 }
 
-.font-body {
-  font-family: var(--font-body);
-}
-
+/* ── Accent — Playfair Display (italic only, use sparingly) ── */
 .font-accent {
   font-family:    var(--font-accent);
   font-style:     italic;
   font-weight:    400;
   letter-spacing: 0.01em;
+  line-height:    var(--lead-relaxed);
 }
 
+/* ── Mono — DM Mono ── */
 .font-mono {
-  font-family: var(--font-mono);
+  font-family:           var(--font-mono);
+  font-feature-settings: 'tnum' 1, 'zero' 1;  /* tabular nums + slashed zero */
 }
 
-.tracking-label  { letter-spacing: 0.14em; }
-.tracking-caps   { letter-spacing: 0.20em; }
-.tracking-status { letter-spacing: 0.28em; }
+/* ── Utility tracking classes ── */
+/* Map to the tracking scale above — used throughout pages */
+.tracking-caps    { letter-spacing: var(--track-caps);   }
+.tracking-spread  { letter-spacing: var(--track-spread); }
+.tracking-ultra   { letter-spacing: var(--track-ultra);  }
+.tracking-tight   { letter-spacing: var(--track-tight);  }
+.tracking-wide    { letter-spacing: var(--track-wide);   }
+
+/* ── Luxury display scale utilities ── */
+.text-display-hero { font-size: var(--text-hero); }
+.text-display-5xl  { font-size: var(--text-5xl);  }
+.text-display-4xl  { font-size: var(--text-4xl);  }
+.text-display-3xl  { font-size: var(--text-3xl);  }
+
+/* ── Refined paragraph styling ── */
+p {
+  /* DM Sans has better paragraph rhythm than Jost */
+  line-height:   var(--lead-relaxed);
+  font-weight:   300;
+  /* Optical paragraph margin — removes need for mb-4 on most prose */
+  margin-bottom: 0;
+}
+
+/* ── Lead paragraph (intro text) ── */
+.lead {
+  font-size:   var(--text-lg);
+  line-height: var(--lead-relaxed);
+  color:       rgba(237, 230, 211, 0.68);
+  font-weight: 300;
+}
+
+/* ── Small caps — for sub-labels, eyebrows ── */
+.small-caps {
+  font-family:    var(--font-body);
+  font-size:      0.625rem;
+  letter-spacing: var(--track-spread);
+  text-transform: uppercase;
+  font-weight:    500;
+  color:          rgba(237, 230, 211, 0.35);
+}
+
+/* ── Price display — always DM Mono with tabular nums ── */
+.price {
+  font-family:           var(--font-mono);
+  font-feature-settings: 'tnum' 1;
+  letter-spacing:        0.01em;
+}
+
+/* ── Luxury blockquote ── */
+blockquote,
+.quote-luxury {
+  font-family:    var(--font-accent);
+  font-style:     italic;
+  font-size:      clamp(1rem, 2.2vw, 1.35rem);
+  line-height:    var(--lead-relaxed);
+  color:          rgba(237, 230, 211, 0.75);
+  font-weight:    400;
+  letter-spacing: 0.01em;
+}
+
+/* ── Editorial pull-quote (for spa, about, hero sub) ── */
+.editorial-sub {
+  font-family:    var(--font-display);
+  font-style:     italic;
+  font-weight:    300;
+  font-size:      clamp(1.15rem, 2.8vw, 2rem);
+  line-height:    1.35;
+  letter-spacing: -0.005em;
+  color:          rgba(237, 230, 211, 0.60);
+}
+
+/* ── Eyebrow label (small caps above headings) ── */
+.eyebrow {
+  font-family:    var(--font-body);
+  font-size:      0.5625rem;             /* 9px */
+  letter-spacing: var(--track-ultra);
+  text-transform: uppercase;
+  font-weight:    500;
+  color:          rgba(200, 168, 75, 0.55);
+}
+
+/* ── Nav label — the most-used typography pattern on the site ── */
+.nav-label {
+  font-family:    var(--font-body);
+  font-size:      0.5rem;                /* 8px */
+  letter-spacing: var(--track-spread);
+  text-transform: uppercase;
+  font-weight:    500;
+  line-height:    var(--lead-normal);
+}
+
+/* ── Mono label — for farm telemetry, freshness scores, IDs ── */
+.mono-label {
+  font-family:    var(--font-mono);
+  font-size:      0.5625rem;
+  letter-spacing: var(--track-spread);
+  text-transform: uppercase;
+}
 
 /* =========================================================
    SELECTION
 ========================================================= */
 
 ::selection {
-  background: rgba(200, 168, 75, 0.25);
+  background: rgba(200, 168, 75, 0.22);
   color:      var(--cream);
 }
 
@@ -183,12 +346,12 @@ h1, h2, h3 {
 
 .cursor-dot,
 .cursor-ring {
-  position:      fixed;
-  top:           0;
-  left:          0;
+  position:       fixed;
+  top:            0;
+  left:           0;
   pointer-events: none;
-  transform:     translate(-50%, -50%);
-  z-index:       999999;
+  transform:      translate(-50%, -50%);
+  z-index:        999999;
 }
 
 .cursor-dot {
@@ -221,10 +384,7 @@ h1, h2, h3 {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  body,
-  body * {
-    cursor: none !important;
-  }
+  body, body * { cursor: none !important; }
 }
 
 /* =========================================================
@@ -232,11 +392,11 @@ h1, h2, h3 {
 ========================================================= */
 
 .glass {
-  background:           var(--glass-bg);
-  border:               1px solid var(--glass-border);
-  backdrop-filter:      blur(var(--glass-blur));
+  background:              var(--glass-bg);
+  border:                  1px solid var(--glass-border);
+  backdrop-filter:         blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius:        16px;
+  border-radius:           16px;
   transition:
     border-color 0.4s ease,
     box-shadow   0.4s ease,
@@ -264,37 +424,40 @@ h1, h2, h3 {
    NOISE OVERLAY
 ========================================================= */
 
-.noise-overlay {
-  position: relative;
-}
+.noise-overlay { position: relative; }
 
 /* =========================================================
    INPUTS
+   ─────────────────────────────────────────────────────────
+   DM Sans reads better in form fields than Jost at 12–14px.
+   The 400 weight in DM Sans matches the optical weight of
+   Jost 500 on dark backgrounds.
 ========================================================= */
 
 .input-dark {
   width:          100%;
   background:     var(--bg3);
   border:         0.5px solid rgba(200, 168, 75, 0.2);
-  border-radius:  0;
+  border-radius:  10px;
   color:          var(--cream);
   font-family:    var(--font-body);
   font-size:      12px;
-  font-weight:    300;
-  letter-spacing: 0.04em;
+  font-weight:    400;
+  letter-spacing: 0.02em;
   outline:        none;
   padding:        10px 14px;
   transition:     border-color 0.2s ease, background 0.2s ease;
 }
 
 .input-dark::placeholder {
-  color:       var(--muted);
+  color:       rgba(237, 230, 211, 0.28);
   font-weight: 300;
+  font-style:  italic;
 }
 
 .input-dark:focus {
-  border-color: rgba(200, 168, 75, 0.5);
-  background:   rgba(255, 255, 255, 0.06);
+  border-color: rgba(200, 168, 75, 0.45);
+  background:   rgba(255, 255, 255, 0.055);
 }
 
 .input-dark option {
@@ -304,6 +467,10 @@ h1, h2, h3 {
 
 /* =========================================================
    BUTTONS
+   ─────────────────────────────────────────────────────────
+   Tracking reduced from 0.20em to 0.16em — DM Sans has
+   wider glyphs than Jost, so less letter-spacing is needed
+   for the same visual weight. Pill border-radius throughout.
 ========================================================= */
 
 .btn-neon,
@@ -315,11 +482,11 @@ h1, h2, h3 {
   gap:             8px;
   position:        relative;
   overflow:        hidden;
-  padding:         12px 28px;
+  padding:         11px 28px;
   font-family:     var(--font-body);
   font-size:       10px;
-  font-weight:     500;
-  letter-spacing:  0.20em;
+  font-weight:     600;
+  letter-spacing:  0.16em;
   text-transform:  uppercase;
   text-decoration: none;
   white-space:     nowrap;
@@ -327,10 +494,12 @@ h1, h2, h3 {
   transition:      all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+/* ── Neon ── */
 .btn-neon {
-  border:     1px solid var(--neon);
-  color:      var(--neon);
-  background: transparent;
+  border:        1px solid var(--neon);
+  color:         var(--neon);
+  background:    transparent;
+  border-radius: 100px;
 }
 
 .btn-neon::before {
@@ -349,14 +518,15 @@ h1, h2, h3 {
   color:      var(--obsidian);
   box-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
 }
-
 .btn-neon:hover::before { transform: translateX(0); }
 
+/* ── Gold — primary CTA ── */
 .btn-gold {
-  border:     0.5px solid rgba(200, 168, 75, 0.4);
-  background: rgba(200, 168, 75, 0.9);
-  color:      var(--obsidian);
-  width:      100%;
+  border:        0.5px solid rgba(200, 168, 75, 0.4);
+  background:    rgba(200, 168, 75, 0.9);
+  color:         var(--obsidian);
+  width:         100%;
+  border-radius: 100px;
 }
 
 .btn-gold::before {
@@ -375,20 +545,17 @@ h1, h2, h3 {
   background: rgba(200, 168, 75, 1);
   box-shadow: 0 0 30px rgba(212, 168, 83, 0.4);
 }
-
 .btn-gold:hover:not(:disabled)::before { transform: translateX(0); }
+.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-gold:disabled {
-  opacity: 0.5;
-  cursor:  not-allowed;
-}
-
+/* ── Outline cream — secondary CTA ── */
 .btn-outline-cream {
-  background:   transparent;
-  border:       0.5px solid rgba(237, 230, 211, 0.25);
-  color:        rgba(237, 230, 211, 0.65);
-  text-align:   center;
-  width:        100%;
+  background:    transparent;
+  border:        0.5px solid rgba(237, 230, 211, 0.25);
+  color:         rgba(237, 230, 211, 0.65);
+  text-align:    center;
+  width:         100%;
+  border-radius: 100px;
 }
 
 .btn-outline-cream:hover {
@@ -403,7 +570,7 @@ h1, h2, h3 {
 .food-card {
   position:      relative;
   overflow:      hidden;
-  border-radius: 16px;
+  border-radius: 20px;
   background:    rgba(255, 255, 255, 0.03);
   border:        1px solid rgba(255, 255, 255, 0.07);
   transition:    all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -424,9 +591,7 @@ h1, h2, h3 {
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.food-card:hover .food-img {
-  transform: scale(1.08);
-}
+.food-card:hover .food-img { transform: scale(1.08); }
 
 /* =========================================================
    ANIMATIONS
@@ -457,10 +622,9 @@ h1, h2, h3 {
   50%       { transform: translateY(-8px); }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
+/* Moxie-specific */
 @keyframes moxieGlow    { 0%,100%{opacity:.5;transform:scaleX(1)} 50%{opacity:1;transform:scaleX(1.15)} }
 @keyframes moxieBreathe { 0%,100%{transform:scale(1) translateY(0)} 50%{transform:scale(1.02) translateY(-3px)} }
 @keyframes moxieWaveLeft{ 0%{transform:rotate(0deg)} 100%{transform:rotate(-20deg)} }
@@ -468,43 +632,41 @@ h1, h2, h3 {
 @keyframes moxieMsgIn   { from{opacity:0;transform:translateY(8px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
 @keyframes moxiePulse   { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:.8;transform:scale(1.12)} }
 
+/* Cottages page shimmer */
+@keyframes shimmerGoldText {
+  0%, 100% { background-position: 0%   50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+/* Scroll indicator dot */
+@keyframes scrollDot {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%       { transform: translateY(6px); opacity: 0.2; }
+}
+
+/* ── Utility animation classes ── */
 .animate-fade-up   { animation: fadeUp    0.6s cubic-bezier(0.23, 1, 0.32, 1) both; }
-.animate-slide-in  { animation: slide-in  0.38s cubic-bezier(0.16, 1, 0.3,  1); }
+.animate-slide-in  { animation: slide-in  0.38s cubic-bezier(0.16, 1, 0.3, 1); }
 .animate-shimmer   { animation: shimmer   2s infinite; }
 .animate-float     { animation: float     6s ease-in-out infinite; }
 .moxie-bubble:active { transform: scale(0.88) !important; }
 
 /* =========================================================
-   RESPONSIVE
+   NO-SCROLLBAR UTILITY (used throughout site)
 ========================================================= */
 
-@media (max-width: 768px) {
-  body {
-    font-size: 13px;
-  }
-
-  .btn-neon,
-  .btn-gold,
-  .btn-outline-cream {
-    width: 100%;
-  }
-
-  .moxie-bubble {
-    bottom: 20px;
-    right:  20px;
-  }
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* =========================================================
    COTTAGES PAGE — VISUAL POLISH
-   Pre-production upgrade: card depth, rounded corners,
-   hero shimmer, pill badges, glass bar, modal scrollbars
+   (stays from previous upgrade session, unchanged)
 ========================================================= */
 
-/* ── BADGE / PILL ──────────────────────────────────────── */
+/* ── BADGE / PILL ── */
 .log-badge {
   font-size:              9px !important;
-  letter-spacing:         0.18em;
+  letter-spacing:         0.16em;
   padding:                4px 12px !important;
   border-radius:          100px !important;
   border-width:           0.5px !important;
@@ -514,7 +676,7 @@ h1, h2, h3 {
   transition:             opacity 0.2s ease;
 }
 
-/* ── CARD DEPTH + LIFT ─────────────────────────────────── */
+/* ── CARD DEPTH + LIFT ── */
 .stay-card-shadow {
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.03),
@@ -534,7 +696,7 @@ h1, h2, h3 {
   transform: translateY(-4px) scale(1.005);
 }
 
-/* ── HERO GRADIENT TEXT ────────────────────────────────── */
+/* ── HERO GRADIENT TEXT ── */
 .hero-word-accent {
   background: linear-gradient(
     130deg,
@@ -550,15 +712,9 @@ h1, h2, h3 {
   background-size:         200% 200%;
   animation:               shimmerGoldText 6s ease-in-out infinite;
 }
-@keyframes shimmerGoldText {
-  0%, 100% { background-position: 0%   50%; }
-  50%       { background-position: 100% 50%; }
-}
 
-/* ── DECORATIVE OPENING QUOTE ──────────────────────────── */
-.story-quote {
-  position: relative;
-}
+/* ── DECORATIVE OPENING QUOTE ── */
+.story-quote { position: relative; }
 .story-quote::before {
   content:        '\201C';
   position:       absolute;
@@ -572,54 +728,45 @@ h1, h2, h3 {
   user-select:    none;
 }
 
-/* ── STICKY BAR GLASS ──────────────────────────────────── */
+/* ── STICKY BAR GLASS ── */
 .sticky-glass {
   backdrop-filter:        blur(22px) saturate(180%);
   -webkit-backdrop-filter:blur(22px) saturate(180%);
   background:             rgba(0, 0, 0, 0.78) !important;
 }
 
-/* ── MODAL SCROLLBAR ───────────────────────────────────── */
+/* ── MODAL SCROLLBAR ── */
 .modal-scroll::-webkit-scrollbar       { width: 3px; }
 .modal-scroll::-webkit-scrollbar-track { background: transparent; }
 .modal-scroll::-webkit-scrollbar-thumb {
   background:    rgba(200,168,75,0.18);
   border-radius: 3px;
 }
-.modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(200,168,75,0.38);
-}
+.modal-scroll::-webkit-scrollbar-thumb:hover { background: rgba(200,168,75,0.38); }
 
-/* ── VERTICAL PRICING DIVIDER ──────────────────────────── */
+/* ── VERTICAL PRICING DIVIDER ── */
 .price-col::after {
   content:    '';
   position:   absolute;
   right:      0; top: 15%; height: 70%;
   width:      0.5px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(255,255,255,0.07) 50%,
-    transparent
-  );
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.07) 50%, transparent);
 }
 .price-col:last-child::after { display: none; }
 
-/* ── RATES TABLE ROW HOVER ─────────────────────────────── */
-.rate-row td          { transition: background 0.18s ease; }
-.rate-row:hover td    { background:  rgba(200,168,75,0.03); }
+/* ── RATES TABLE ROW HOVER ── */
+.rate-row td       { transition: background 0.18s ease; }
+.rate-row:hover td { background:  rgba(200,168,75,0.03); }
 
-/* ── ACCORDION HOVER ───────────────────────────────────── */
+/* ── ACCORDION ── */
 .accordion-item {
   border-radius: 10px !important;
   overflow:      hidden;
   transition:    border-color 0.25s ease;
 }
-.accordion-item:hover {
-  border-color: rgba(255,255,255,0.09) !important;
-}
+.accordion-item:hover { border-color: rgba(255,255,255,0.09) !important; }
 
-/* ── PRICE SUMMARY CARD ────────────────────────────────── */
+/* ── PRICE SUMMARY CARD ── */
 .price-summary-card {
   border-radius: 14px !important;
   background:    rgba(255,255,255,0.018) !important;
@@ -627,7 +774,7 @@ h1, h2, h3 {
   padding:       1rem;
 }
 
-/* ── FLOATING CART BUTTON ──────────────────────────────── */
+/* ── FLOATING CART BUTTON ── */
 .cart-float {
   border-radius: 12px !important;
   box-shadow:
@@ -635,7 +782,7 @@ h1, h2, h3 {
     0 2px 8px  rgba(0,0,0,0.4) !important;
 }
 
-/* ── DATE INPUT CALENDAR ICON ──────────────────────────── */
+/* ── DATE INPUT CALENDAR ICON ── */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter:  invert(0.3) sepia(1) saturate(2) hue-rotate(10deg);
   opacity: 0.5;
@@ -643,23 +790,37 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 input[type="date"]:focus,
 select:focus {
-  outline:       none;
-  box-shadow:    0 0 0 1px rgba(200,168,75,0.28);
-  border-radius: 4px;
+  outline:    none;
+  box-shadow: 0 0 0 1px rgba(200,168,75,0.28);
 }
 
-/* ── MOBILE REFINEMENTS ────────────────────────────────── */
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+  body { font-size: 13px; }
+
+  .btn-neon,
+  .btn-gold,
+  .btn-outline-cream { width: 100%; }
+
+  .moxie-bubble { bottom: 20px; right: 20px; }
+}
+
 @media (max-width: 640px) {
-  .stay-card-shadow:hover {
-    transform: none;
-  }
+  .stay-card-shadow:hover { transform: none; }
+
   .log-badge {
     font-size: 8px !important;
     padding:   3px 9px !important;
   }
 }
 
-/* ── REDUCED MOTION ────────────────────────────────────── */
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
 @media (prefers-reduced-motion: reduce) {
   .stay-card-shadow,
   .stay-card-shadow:hover,
@@ -669,3 +830,13 @@ select:focus {
     transform:  none !important;
   }
 }
+
+/* =========================================================
+   TYPOGRAPHY DEBUG HELPER (remove before final production)
+   Uncomment to audit font rendering across the site:
+
+   * { outline: 1px solid rgba(255,0,0,0.05); }
+   .font-display { outline: 1px solid rgba(212,168,83,0.2); }
+   .font-body    { outline: 1px solid rgba(0,255,65,0.1);   }
+   .font-mono    { outline: 1px solid rgba(100,100,255,0.1); }
+========================================================= */

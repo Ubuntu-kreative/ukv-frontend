@@ -1,3 +1,27 @@
+// src/lib/moxie/sanctuaryStatus.ts
+// ─────────────────────────────────────────────────────────────────────────────
+// Ubuntu Kreative Village — Moxie Visual Operating System
+// Sanctuary Design Engine — CSS exported as a TypeScript module
+//
+// Usage:
+//   import { sanctuaryStyles } from '@/lib/moxie/sanctuaryStatus'
+//
+//   // In a Client Component:
+//   <style dangerouslySetInnerHTML={{ __html: sanctuaryStyles }} />
+//
+//   // Or inject once in layout via useEffect:
+//   useEffect(() => {
+//     const el = document.createElement('style')
+//     el.id = 'sanctuary-styles'
+//     el.textContent = sanctuaryStyles
+//     if (!document.getElementById('sanctuary-styles')) {
+//       document.head.appendChild(el)
+//     }
+//   }, [])
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const sanctuaryStyles = `
+
 /* ============================================================
    MOXIE VISUAL OPERATING SYSTEM
    Ubuntu Kreative Village — Sanctuary Design Engine
@@ -20,7 +44,6 @@
   --glow-gold: 0 0 60px rgba(212, 175, 55, 0.2);
   --glow-gold-strong: 0 0 100px rgba(212, 175, 55, 0.35);
   --glow-green: 0 0 60px rgba(61, 107, 79, 0.3);
-
   --font-display: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   --font-body: 'Instrument Sans', 'DM Sans', system-ui, sans-serif;
@@ -57,7 +80,8 @@
 .bg-obsidian { background-color: var(--obsidian); }
 
 .bg-gradient-radial-hero {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse 80% 60% at 50% 0%,
       rgba(212, 175, 55, 0.06) 0%,
       transparent 60%
@@ -153,7 +177,7 @@
 
 @keyframes moxie-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
 }
 
 /* ---------- SECTION TITLES ---------- */
@@ -313,15 +337,15 @@
 }
 
 /* ---------- TYPOGRAPHY UTILITIES ---------- */
-.font-display { font-family: var(--font-display); }
-.font-mono { font-family: var(--font-mono); }
-.text-gold { color: var(--gold); }
+.font-display  { font-family: var(--font-display); }
+.font-mono     { font-family: var(--font-mono); }
+.text-gold     { color: var(--gold); }
 .text-gold-dim { color: rgba(212, 175, 55, 0.5); }
-.border-gold { border-color: var(--gold); }
-.bg-gold { background-color: var(--gold); }
+.border-gold   { border-color: var(--gold); }
+.bg-gold       { background-color: var(--gold); }
 .text-obsidian { color: var(--obsidian); }
 
-/* ---------- CHAT COMPONENT (future) ---------- */
+/* ---------- CHAT COMPONENT ---------- */
 .moxie-chat-bubble {
   background: var(--obsidian-raised);
   border: 1px solid rgba(212, 175, 55, 0.08);
@@ -345,4 +369,77 @@
   .sanctuary-status-grid {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+`
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sanctuary Status Data Types
+// Used by the admin dashboard and Moxie telemetry panel
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type TelemetryStatus = 'live' | 'synced' | 'warning' | 'offline'
+
+export interface SanctuaryMetric {
+  id:       string
+  label:    string
+  value:    string | number
+  unit?:    string
+  status:   TelemetryStatus
+  trend?:   'up' | 'down' | 'stable'
+  detail?:  string
+}
+
+export interface SanctuaryStatusPayload {
+  farm:       SanctuaryMetric[]
+  restaurant: SanctuaryMetric[]
+  spa:        SanctuaryMetric[]
+  rooms:      SanctuaryMetric[]
+  events:     SanctuaryMetric[]
+  lastSync:   string  // ISO timestamp
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Default telemetry snapshot
+// Replace with live Supabase reads in production
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const defaultSanctuaryStatus: SanctuaryStatusPayload = {
+  farm: [
+    { id: 'animals',   label: 'Animals tracked',    value: 24,       unit: 'live',    status: 'live',   trend: 'stable' },
+    { id: 'soil',      label: 'Soil moisture',       value: '68%',                     status: 'live',   detail: 'Field A — optimal' },
+    { id: 'harvest',   label: 'Next harvest',        value: 'Kale',   unit: '3 days',  status: 'synced', trend: 'stable' },
+    { id: 'apiary',    label: 'Apiary',              value: 'Active',                  status: 'live',   detail: 'Extraction due' },
+  ],
+  restaurant: [
+    { id: 'covers',    label: 'Covers tonight',      value: 8,        unit: 'tables',  status: 'live' },
+    { id: 'special',   label: "Tonight's special",   value: 'Boma goat stew',          status: 'live',   detail: 'Animal #UKV-047' },
+    { id: 'kitchen',   label: 'Kitchen status',      value: 'Open',                    status: 'live',   detail: 'Opens 7:00 PM' },
+  ],
+  spa: [
+    { id: 'slots',     label: 'Slots open today',    value: 3,        unit: 'rituals', status: 'live' },
+    { id: 'mud',       label: 'Volcanic Mud Ritual',  value: '2:00 PM',                status: 'live',   detail: '1 slot remaining' },
+    { id: 'forest',    label: 'Forest Massage',       value: '4:00 PM',                status: 'live',   detail: '1 slot remaining' },
+    { id: 'couples',   label: 'Couples Ritual',       value: 'Saturday',               status: 'synced' },
+  ],
+  rooms: [
+    { id: 'available', label: 'Sanctuaries available', value: 6,      unit: 'rooms',   status: 'synced' },
+    { id: 'checkins',  label: 'Check-ins today',       value: 2,                       status: 'live' },
+    { id: 'checkouts', label: 'Check-outs today',      value: 1,                       status: 'live' },
+  ],
+  events: [
+    { id: 'upcoming',  label: 'Events this month',   value: 4,                         status: 'synced' },
+    { id: 'next',      label: 'Next event',          value: 'Fire Dinner',             status: 'synced', detail: 'Last Saturday monthly' },
+    { id: 'moon',      label: 'New Moon Circle',     value: 'Monthly',                 status: 'synced' },
+  ],
+  lastSync: new Date().toISOString(),
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CSS Injector Component helper string
+// Use this to render the styles once in a Client Component or layout
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function getSanctuaryStyleTag(): string {
+  return `<style id="sanctuary-design-system">${sanctuaryStyles}</style>`
 }

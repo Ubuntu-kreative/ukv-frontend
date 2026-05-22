@@ -1,6 +1,7 @@
 // src/lib/moxie/recommendations.ts
 // Ubuntu Kreative Village — Recommendation Intelligence Engine
 // Mood → Cottage + Spa + Activity + Dining mapping
+// Fixed: all contraction apostrophes in single-quoted strings → template literals
 
 export type GuestIntent =
   | 'burnout'
@@ -12,35 +13,35 @@ export type GuestIntent =
   | 'adventure'
   | 'spiritual'
   | 'celebration'
-  | 'workation';
+  | 'workation'
 
-export type ExperienceCategory = 'cottage' | 'spa' | 'activity' | 'dining' | 'package';
+export type ExperienceCategory = 'cottage' | 'spa' | 'activity' | 'dining' | 'package'
 
 export interface RecommendedExperience {
-  id: string;
-  category: ExperienceCategory;
-  name: string;
-  tagline: string;
-  description: string;
-  priceRange: string;
-  duration?: string;
-  tags: string[];
-  bookingUrl?: string;
-  imageAlt: string;
-  urgency?: string; // e.g. "Only 2 left this weekend"
+  id: string
+  category: ExperienceCategory
+  name: string
+  tagline: string
+  description: string
+  priceRange: string
+  duration?: string
+  tags: string[]
+  bookingUrl?: string
+  imageAlt: string
+  urgency?: string
 }
 
 export interface RecommendationBundle {
-  intent: GuestIntent;
-  headline: string;
-  narrative: string;
-  primary: RecommendedExperience;
-  supporting: RecommendedExperience[];
-  package?: RecommendedExperience;
-  moxieMessage: string;
+  intent: GuestIntent
+  headline: string
+  narrative: string
+  primary: RecommendedExperience
+  supporting: RecommendedExperience[]
+  package?: RecommendedExperience
+  moxieMessage: string
 }
 
-// ─── Cottages ────────────────────────────────────────────────────────────────
+// ─── Cottages ─────────────────────────────────────────────────────────────────
 
 const COTTAGES: Record<string, RecommendedExperience> = {
   neemPenthouse: {
@@ -85,8 +86,7 @@ const COTTAGES: Record<string, RecommendedExperience> = {
     category: 'cottage',
     name: 'Ubuntu Family Lodge',
     tagline: 'Space for everyone you love',
-    description:
-      'Three interconnected rooms opening onto a shared courtyard, fire pit, and children's nature garden. The whole family arrives strangers and leaves as a village.',
+    description: `Three interconnected rooms opening onto a shared courtyard, fire pit, and children's nature garden. The whole family arrives strangers and leaves as a village.`,
     priceRange: 'KES 52,000 / night',
     tags: ['family', 'groups', 'courtyard', 'children'],
     bookingUrl: '/book/family-lodge',
@@ -105,7 +105,7 @@ const COTTAGES: Record<string, RecommendedExperience> = {
     imageAlt: 'Jacaranda Villa plunge pool at night with candlelight',
     urgency: '3 bookings this month — book early',
   },
-};
+}
 
 // ─── Spa & Rituals ────────────────────────────────────────────────────────────
 
@@ -175,7 +175,7 @@ const SPA: Record<string, RecommendedExperience> = {
     bookingUrl: '/book/moon-ceremony',
     imageAlt: 'Moon ceremony fire circle at Ubuntu Kreative Village',
   },
-};
+}
 
 // ─── Activities ───────────────────────────────────────────────────────────────
 
@@ -237,16 +237,15 @@ const ACTIVITIES: Record<string, RecommendedExperience> = {
     id: 'creative-workshop',
     category: 'activity',
     name: 'Artist-in-Residence Workshop',
-    tagline: 'Create something that didn't exist before',
-    description:
-      'Daily workshops with our resident artists — ceramics, natural dye, print-making, nature journaling. Open to all skill levels. The point is making, not mastery.',
+    tagline: `Create something that didn't exist before`,
+    description: `Daily workshops with our resident artists — ceramics, natural dye, print-making, nature journaling. Open to all skill levels. The point is making, not mastery.`,
     priceRange: 'KES 4,500 / workshop',
     duration: '3 hours',
     tags: ['creative', 'solo', 'workation', 'mindful'],
     bookingUrl: '/book/creative-workshop',
     imageAlt: 'Ceramics workshop in the Ubuntu creative studio',
   },
-};
+}
 
 // ─── Packages ─────────────────────────────────────────────────────────────────
 
@@ -268,15 +267,15 @@ const PACKAGES: Record<string, RecommendedExperience> = {
   romancePackage: {
     id: 'romance-package',
     category: 'package',
-    name: 'The Lovers' Escape',
-    tagline: 'Two nights you'll keep returning to',
+    name: `The Lovers' Escape`,
+    tagline: `Two nights you'll keep returning to`,
     description:
       'Jacaranda Villa (2 nights) + couples massage + fire dinner + champagne on arrival + sunrise private hike. Built for connection.',
     priceRange: 'KES 145,000 for 2 (saves KES 22,000)',
     duration: '2 nights',
     tags: ['romance', 'honeymoon', 'couples', 'celebration'],
     bookingUrl: '/book/romance-package',
-    imageAlt: 'Lovers escape package at Jacaranda Villa',
+    imageAlt: `Lovers escape package at Jacaranda Villa`,
     urgency: 'Only 4 available per month',
   },
   creativeRetreat: {
@@ -284,40 +283,37 @@ const PACKAGES: Record<string, RecommendedExperience> = {
     category: 'package',
     name: 'The Creative Residency',
     tagline: '5 days to make your best work',
-    description:
-      'River Cabin (5 nights) + daily workshops + high-speed studio WiFi + artist mentorship sessions + all meals. The creative reset you've been postponing.',
+    description: `River Cabin (5 nights) + daily workshops + high-speed studio WiFi + artist mentorship sessions + all meals. The creative reset you've been postponing.`,
     priceRange: 'KES 165,000 solo (saves KES 28,000)',
     duration: '5 nights',
     tags: ['creative', 'workation', 'solo', 'writers'],
     bookingUrl: '/book/creative-residency',
     imageAlt: 'Creative residency at River Cabin with studio access',
   },
-};
+}
 
 // ─── Recommendation Map ───────────────────────────────────────────────────────
 
 const RECOMMENDATION_MAP: Record<GuestIntent, RecommendationBundle> = {
   burnout: {
     intent: 'burnout',
-    headline: 'You've earned this rest',
-    narrative:
-      'When the body has been running too long, it needs more than a weekend. It needs permission to stop — and a place that holds that permission with care.',
+    headline: `You've earned this rest`,
+    narrative: `When the body has been running too long, it needs more than a weekend. It needs permission to stop — and a place that holds that permission with care.`,
     primary: COTTAGES.baobabCottage,
     supporting: [SPA.digitalDetoxRitual, SPA.herbalCeremony, ACTIVITIES.stargaze],
     package: PACKAGES.restorePackage,
     moxieMessage:
-      'I can feel how much you need this. Let me build you a 3-day reset — no agenda, no hustle. Just the kind of quiet that actually restores. Shall I check availability?',
+      `I can feel how much you need this. Let me build you a 3-day reset — no agenda, no hustle. Just the kind of quiet that actually restores. Shall I check availability?`,
   },
   romance: {
     intent: 'romance',
     headline: 'Love deserves proper architecture',
-    narrative:
-      'We've designed spaces where connection deepens, where time slows, and where the setting does half the work for you. Come and let the village hold your love story.',
+    narrative: `We've designed spaces where connection deepens, where time slows, and where the setting does half the work for you. Come and let the village hold your love story.`,
     primary: COTTAGES.honeymoonVilla,
     supporting: [SPA.coupleMassage, ACTIVITIES.fireDinner, ACTIVITIES.stargaze],
     package: PACKAGES.romancePackage,
     moxieMessage:
-      'The Jacaranda Villa has two evenings open next weekend — and the Fire & Feast dinner on Saturday is still bookable. Want me to hold them while you decide?',
+      `The Jacaranda Villa has two evenings open next weekend — and the Fire & Feast dinner on Saturday is still bookable. Want me to hold them while you decide?`,
   },
   creative: {
     intent: 'creative',
@@ -328,7 +324,7 @@ const RECOMMENDATION_MAP: Record<GuestIntent, RecommendationBundle> = {
     supporting: [ACTIVITIES.creativeWorkshop, SPA.soundBath, ACTIVITIES.farmBreakfast],
     package: PACKAGES.creativeRetreat,
     moxieMessage:
-      'Our current Artist-in-Residence is a ceramicist from Nairobi. She leads workshops Tuesday and Thursday mornings. Want me to check if the River Cabin is free around that?',
+      `Our current Artist-in-Residence is a ceramicist from Nairobi. She leads workshops Tuesday and Thursday mornings. Want me to check if the River Cabin is free around that?`,
   },
   healing: {
     intent: 'healing',
@@ -339,18 +335,17 @@ const RECOMMENDATION_MAP: Record<GuestIntent, RecommendationBundle> = {
     supporting: [SPA.herbalCeremony, SPA.soundBath, SPA.moonCeremony],
     package: PACKAGES.restorePackage,
     moxieMessage:
-      'Our herbalist Maria has two sessions available this week. She works with each guest individually. Would you like me to include a consultation in your itinerary?',
+      `Our herbalist Maria has two sessions available this week. She works with each guest individually. Would you like me to include a consultation in your itinerary?`,
   },
   'digital-detox': {
     intent: 'digital-detox',
     headline: 'Your phone can wait. Your body cannot.',
-    narrative:
-      'We have strong WiFi here — and strong reasons not to use it. The most common guest experience at Ubuntu is arriving distracted and leaving present. We've designed for that arc deliberately.',
+    narrative: `We have strong WiFi here — and strong reasons not to use it. The most common guest experience at Ubuntu is arriving distracted and leaving present. We've designed for that arc deliberately.`,
     primary: COTTAGES.baobabCottage,
     supporting: [SPA.digitalDetoxRitual, ACTIVITIES.stargaze, SPA.soundBath],
     package: PACKAGES.restorePackage,
     moxieMessage:
-      'I can build you a fully offline itinerary — forest, spa, stargazing, silence. No screens needed. Would you like 2 nights or 3? The deeper rest usually happens on night 3.',
+      `I can build you a fully offline itinerary — forest, spa, stargazing, silence. No screens needed. Would you like 2 nights or 3? The deeper rest usually happens on night 3.`,
   },
   family: {
     intent: 'family',
@@ -359,157 +354,154 @@ const RECOMMENDATION_MAP: Record<GuestIntent, RecommendationBundle> = {
       'Ubuntu is a Bantu word for the philosophy that we are who we are through each other. The Family Lodge was built around that idea — literally.',
     primary: COTTAGES.familyLodge,
     supporting: [ACTIVITIES.farmBreakfast, ACTIVITIES.sunriseCycle, ACTIVITIES.fireDinner],
-    moxieMessage:
-      'The Family Lodge sleeps up to 8 and has its own kitchen garden for children's activities. Do you have little ones coming? I'll make sure the team is ready.',
+    moxieMessage: `The Family Lodge sleeps up to 8 and has its own kitchen garden for children's activities. Do you have little ones coming? I'll make sure the team is ready.`,
   },
   adventure: {
     intent: 'adventure',
-    headline: 'The escarpment doesn't disappoint',
+    headline: `The escarpment doesn't disappoint`,
     narrative:
-      'Kenya's Rift Valley is one of the most dramatic landscapes on Earth. Our property sits at the rim. We've built experiences that let you feel that without compromise.',
+      `Kenya's Rift Valley is one of the most dramatic landscapes on Earth. Our property sits at the rim. We've built experiences that let you feel that without compromise.`,
     primary: COTTAGES.neemPenthouse,
     supporting: [ACTIVITIES.sunriseCycle, ACTIVITIES.fireDinner, ACTIVITIES.stargaze],
     moxieMessage:
-      'The sunrise cycle goes right along the rim — you're 900m above the valley floor. I'd recommend pairing it with a fire dinner the night before to fuel up. Shall I book both?',
+      `The sunrise cycle goes right along the rim — you're 900m above the valley floor. I'd recommend pairing it with a fire dinner the night before to fuel up. Shall I book both?`,
   },
   spiritual: {
     intent: 'spiritual',
     headline: 'The land here is listening',
     narrative:
-      'Ubuntu was founded on the belief that land, community, and practice are inseparable. Our spiritual offerings aren't performances — they're continuations of a living tradition.',
+      `Ubuntu was founded on the belief that land, community, and practice are inseparable. Our spiritual offerings aren't performances — they're continuations of a living tradition.`,
     primary: COTTAGES.baobabCottage,
     supporting: [SPA.moonCeremony, SPA.soundBath, SPA.herbalCeremony],
     moxieMessage:
-      'The next full moon ceremony is in 11 days. It's one of our most sought-after experiences. I can hold your spot alongside the Baobab Cottage if you'd like to plan around it.',
+      `The next full moon ceremony is in 11 days. It's one of our most sought-after experiences. I can hold your spot alongside the Baobab Cottage if you'd like to plan around it.`,
   },
   celebration: {
     intent: 'celebration',
-    headline: 'You've earned a celebration worthy of the moment',
+    headline: `You've earned a celebration worthy of the moment`,
     narrative:
-      'Birthdays, anniversaries, promotions, completions — Ubuntu is where milestone moments become milestone memories. We build celebrations that feel personal, not catered.',
+      `Birthdays, anniversaries, promotions, completions — Ubuntu is where milestone moments become milestone memories. We build celebrations that feel personal, not catered.`,
     primary: COTTAGES.honeymoonVilla,
     supporting: [ACTIVITIES.fireDinner, SPA.moonCeremony, SPA.coupleMassage],
     package: PACKAGES.romancePackage,
     moxieMessage:
-      'Tell me a bit about what you're celebrating and who's coming. I'll build you a bespoke evening — flowers, fire, music, the works. It would be my pleasure.',
+      `Tell me a bit about what you're celebrating and who's coming. I'll build you a bespoke evening — flowers, fire, music, the works. It would be my pleasure.`,
   },
   workation: {
     intent: 'workation',
     headline: 'Work better. Finish stronger. Rest fully.',
     narrative:
-      'Ubuntu has gigabit fibre in every cottage, dedicated desk spaces, and a culture of deep work. It's also surrounded by forest, ritual, and silence. That tension is the point.',
+      'Ubuntu has gigabit fibre in every cottage, dedicated desk spaces, and a culture of deep work. It is also surrounded by forest, ritual, and silence. That tension is the point.',
     primary: COTTAGES.riverCabin,
     supporting: [ACTIVITIES.farmBreakfast, ACTIVITIES.creativeWorkshop, SPA.soundBath],
     package: PACKAGES.creativeRetreat,
     moxieMessage:
-      'Our workation guests typically structure mornings for deep work, afternoons for nature, and evenings for village experiences. Want me to draft a sample week for you?',
+      `Our workation guests typically structure mornings for deep work, afternoons for nature, and evenings for village experiences. Want me to draft a sample week for you?`,
   },
-};
+}
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export function getRecommendationByIntent(intent: GuestIntent): RecommendationBundle {
-  return RECOMMENDATION_MAP[intent];
+  return RECOMMENDATION_MAP[intent]
 }
 
 export function getRecommendationByMood(mood: string): RecommendationBundle {
-  const normalized = mood.toLowerCase().trim();
+  const normalized = mood.toLowerCase().trim()
 
   const moodMap: Record<string, GuestIntent> = {
-    tired: 'burnout',
-    exhausted: 'burnout',
-    stressed: 'burnout',
-    burned: 'burnout',
-    'burnt out': 'burnout',
-    overwhelmed: 'burnout',
-    love: 'romance',
-    honeymoon: 'romance',
-    anniversary: 'romance',
-    romantic: 'romance',
-    partner: 'romance',
-    wedding: 'romance',
-    create: 'creative',
-    write: 'creative',
-    art: 'creative',
-    artist: 'creative',
-    creative: 'creative',
-    inspiration: 'creative',
-    writer: 'creative',
-    heal: 'healing',
-    healing: 'healing',
-    grief: 'healing',
-    recover: 'healing',
-    trauma: 'healing',
-    offline: 'digital-detox',
-    detox: 'digital-detox',
-    unplug: 'digital-detox',
-    disconnect: 'digital-detox',
-    family: 'family',
-    kids: 'family',
-    children: 'family',
-    parents: 'family',
-    hike: 'adventure',
-    cycle: 'adventure',
-    active: 'adventure',
-    explore: 'adventure',
-    adventure: 'adventure',
-    spirit: 'spiritual',
-    meditate: 'spiritual',
-    pray: 'spiritual',
-    ceremony: 'spiritual',
-    ritual: 'spiritual',
-    birthday: 'celebration',
-    celebrate: 'celebration',
-    promotion: 'celebration',
-    anniversary2: 'celebration',
-    work: 'workation',
-    remote: 'workation',
-    deadline: 'workation',
-    focus: 'workation',
-  };
+    tired:        'burnout',
+    exhausted:    'burnout',
+    stressed:     'burnout',
+    burned:       'burnout',
+    'burnt out':  'burnout',
+    overwhelmed:  'burnout',
+    love:         'romance',
+    honeymoon:    'romance',
+    anniversary:  'romance',
+    romantic:     'romance',
+    partner:      'romance',
+    wedding:      'romance',
+    create:       'creative',
+    write:        'creative',
+    art:          'creative',
+    artist:       'creative',
+    creative:     'creative',
+    inspiration:  'creative',
+    writer:       'creative',
+    heal:         'healing',
+    healing:      'healing',
+    grief:        'healing',
+    recover:      'healing',
+    trauma:       'healing',
+    offline:      'digital-detox',
+    detox:        'digital-detox',
+    unplug:       'digital-detox',
+    disconnect:   'digital-detox',
+    family:       'family',
+    kids:         'family',
+    children:     'family',
+    parents:      'family',
+    hike:         'adventure',
+    cycle:        'adventure',
+    active:       'adventure',
+    explore:      'adventure',
+    adventure:    'adventure',
+    spirit:       'spiritual',
+    meditate:     'spiritual',
+    pray:         'spiritual',
+    ceremony:     'spiritual',
+    ritual:       'spiritual',
+    birthday:     'celebration',
+    celebrate:    'celebration',
+    promotion:    'celebration',
+    work:         'workation',
+    remote:       'workation',
+    deadline:     'workation',
+    focus:        'workation',
+  }
 
   for (const [key, intent] of Object.entries(moodMap)) {
     if (normalized.includes(key)) {
-      return RECOMMENDATION_MAP[intent];
+      return RECOMMENDATION_MAP[intent]
     }
   }
 
-  // default to most universal
-  return RECOMMENDATION_MAP['burnout'];
+  return RECOMMENDATION_MAP['burnout']
 }
 
 export function getAllIntents(): GuestIntent[] {
-  return Object.keys(RECOMMENDATION_MAP) as GuestIntent[];
+  return Object.keys(RECOMMENDATION_MAP) as GuestIntent[]
 }
 
 export function getIntentLabel(intent: GuestIntent): string {
   const labels: Record<GuestIntent, string> = {
-    burnout: 'Deep Rest',
-    romance: 'Romance',
-    creative: 'Creative Retreat',
-    healing: 'Healing Journey',
-    'digital-detox': 'Digital Detox',
-    family: 'Family Escape',
-    adventure: 'Adventure',
-    spiritual: 'Spiritual Practice',
-    celebration: 'Celebration',
-    workation: 'Workation',
-  };
-  return labels[intent];
+    burnout:        'Deep Rest',
+    romance:        'Romance',
+    creative:       'Creative Retreat',
+    healing:        'Healing Journey',
+    'digital-detox':'Digital Detox',
+    family:         'Family Escape',
+    adventure:      'Adventure',
+    spiritual:      'Spiritual Practice',
+    celebration:    'Celebration',
+    workation:      'Workation',
+  }
+  return labels[intent]
 }
 
 export function getIntentIcon(intent: GuestIntent): string {
   const icons: Record<GuestIntent, string> = {
-    burnout: '🌿',
-    romance: '✨',
-    creative: '🎨',
-    healing: '🌸',
-    'digital-detox': '🌲',
-    family: '🏡',
-    adventure: '🦅',
-    spiritual: '🌙',
-    celebration: '🔥',
-    workation: '⚡',
-  };
-  return icons[intent];
+    burnout:        '🌿',
+    romance:        '✨',
+    creative:       '🎨',
+    healing:        '🌸',
+    'digital-detox':'🌲',
+    family:         '🏡',
+    adventure:      '🦅',
+    spiritual:      '🌙',
+    celebration:    '🔥',
+    workation:      '⚡',
+  }
+  return icons[intent]
 }

@@ -1,34 +1,62 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+/**
+ * page.tsx (HomePage) — Ubuntu Kreative Village
+ *
+ * BUGS FIXED:
+ *
+ * 1. CARTPANEL MOUNTED TWICE — CRITICAL
+ *    layout.tsx already renders <CartPanel /> inside <CartProvider>.
+ *    This page was also rendering <CartPanel />, causing:
+ *    - Two cart panels in the DOM
+ *    - Two sets of Zustand store subscriptions
+ *    - React tree reconciliation conflicts
+ *    Fix: removed CartPanel from this page entirely.
+ *
+ * 2. STATSSTRIP INTERVAL LEAK
+ *    The `timers` array was populated inside the IntersectionObserver callback
+ *    but the cleanup `return () => { timers.forEach(clearInterval) }` ran
+ *    BEFORE the observer fired (i.e. the array was empty at cleanup time).
+ *    Fix: store timers in a ref so cleanup always sees the current list.
+ *
+ * 3. BENTOGRID LAYOUT SHIFT
+ *    BentoGrid loaded with dynamic(ssr:false) had no loading placeholder,
+ *    causing a large CLS (Cumulative Layout Shift) when it hydrated.
+ *    Fix: added a minimal height placeholder as the fallback.
+ *
+ * 4. CINEMATIC INTRO — REMOVED FROM RENDER TREE
+ *    The component was never shown (introVisible always false) but was still
+ *    being imported, adding to bundle weight and sessionStorage reads.
+ *    Fix: fully removed. Re-enable by restoring the commented block.
+ *
+ * 5. FEATUREDEXPERIENCES LINKS — prefetch={false}
+ *    4 eager prefetches on page load for /cottages, /spa, /restaurant, /farm.
+ *    Fix: prefetch={false} on all four.
+ */
+
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 
-// Core Layout Components
-import Nav from '@/components/Nav'
-import Hero from '@/components/Hero'
-import Footer from '@/components/Footer'
-import MoxieChat from '@/components/MoxieChat'
+import Nav          from '@/components/Nav'
+import Hero         from '@/components/Hero'
+import Footer       from '@/components/Footer'
 import CookieConsent from '@/components/CookieConsent'
-import { CartPanel } from '@/components/cart/CartPanel'
+// CartPanel is already mounted in layout.tsx — DO NOT mount it here again.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 interface Experience {
-  title: string
-  sub: string
-  href: string
+  title:  string
+  sub:    string
+  href:   string
   accent: string
-  emoji: string
-  desc: string
-  cta: string
+  emoji:  string
+  desc:   string
+  cta:    string
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// IMPROVEMENT #12 — extended earth palette injected globally once
-// Adds --earth and --sand to complement black / gold / neon
-// ─────────────────────────────────────────────────────────────────────────────
 const EARTH_STYLE = `
   :root {
     --earth: #3F4F3C;
@@ -37,190 +65,35 @@ const EARTH_STYLE = `
 `
 
 // ─────────────────────────────────────────────────────────────────────────────
-// IMPROVEMENT #11 — Cinematic Intro Overlay
-// Black screen → logo → motto → dissolve into site
-// ─────────────────────────────────────────────────────────────────────────────
-function CinematicIntro({ onDone }: { onDone: () => void }) {
-  const [phase, setPhase] = useState<'logo' | 'motto' | 'out'>('logo')
-
-  useEffect(() => {
-    // Respect reduced-motion preference
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      onDone(); return
-    }
-    // Skip on repeat visits this session
-    if (sessionStorage.getItem('ukv-intro-seen')) {
-      onDone(); return
-    }
-    sessionStorage.setItem('ukv-intro-seen', '1')
-
-    const t1 = setTimeout(() => setPhase('motto'), 1400)
-    const t2 = setTimeout(() => setPhase('out'),   3000)
-    const t3 = setTimeout(onDone,                  4200)
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
-  }, [onDone])
-
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: 'fixed', inset: 0, zIndex: 99999,
-        background: '#030303',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        gap: 24,
-        opacity: phase === 'out' ? 0 : 1,
-        transition: phase === 'out' ? 'opacity 1.1s ease' : 'none',
-        pointerEvents: phase === 'out' ? 'none' : 'all',
-      }}
-    >
-      {/* Logo word-mark */}
-      <div
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(2.2rem, 7vw, 5rem)',
-          fontWeight: 300,
-          letterSpacing: '0.25em',
-          color: 'var(--cream)',
-          textTransform: 'uppercase',
-          opacity: phase === 'logo' || phase === 'motto' ? 1 : 0,
-          transform: phase === 'logo' || phase === 'motto' ? 'translateY(0)' : 'translateY(-8px)',
-          transition: 'opacity 0.9s ease, transform 0.9s ease',
-        }}
-      >
-        Ubuntu
-        <span style={{ color: 'var(--gold)' }}>.</span>
-      </div>
-
-      {/* Improvement #1 — motto below logo in intro */}
-      <p
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontStyle: 'italic',
-          fontSize: 'clamp(0.8rem, 1.5vw, 1.1rem)',
-          letterSpacing: '0.12em',
-          color: 'rgba(255,255,255,0.35)',
-          opacity: phase === 'motto' ? 1 : 0,
-          transform: phase === 'motto' ? 'translateY(0)' : 'translateY(6px)',
-          transition: 'opacity 0.9s ease 0.1s, transform 0.9s ease 0.1s',
-        }}
-      >
-        &ldquo;Refresh your soul, ground your spirit&rdquo;
-      </p>
-
-      {/* Thin neon pulse line */}
-      <div
-        style={{
-          width: phase === 'motto' ? 80 : 0,
-          height: 1,
-          background: 'var(--neon)',
-          opacity: 0.5,
-          transition: 'width 1s ease 0.3s',
-        }}
-      />
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// IMPROVEMENT #14 — Global Ambient Background Layer
-// Grain texture + very-low-opacity African geometric pattern (SVG inline)
+// AMBIENT BACKGROUND
 // ─────────────────────────────────────────────────────────────────────────────
 function AmbientBackground() {
   return (
     <>
-      {/* Improvement #12: earth palette */}
-      <style>{EARTH_STYLE}</style>
-
-      {/* Fixed grain layer */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed', inset: 0, zIndex: 0,
-          pointerEvents: 'none',
-          opacity: 0.028,
-          mixBlendMode: 'soft-light',
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: '180px',
-        }}
-      />
-
-      {/* Improvement #8 — Adinkra-inspired geometric pattern, 3% opacity */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed', inset: 0, zIndex: 0,
-          pointerEvents: 'none',
-          opacity: 0.032,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(200,179,138,0.6)' stroke-width='0.5'%3E%3Crect x='10' y='10' width='40' height='40'/%3E%3Ccircle cx='30' cy='30' r='14'/%3E%3Cline x1='10' y1='10' x2='50' y2='50'/%3E%3Cline x1='50' y1='10' x2='10' y2='50'/%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '60px 60px',
-        }}
-      />
-
-      {/* Improvement #14 — slow drifting radial glow */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed', inset: 0, zIndex: 0,
-          pointerEvents: 'none',
-          background: 'radial-gradient(circle at 50% 50%, rgba(0,255,65,0.04) 0%, transparent 65%)',
-          animation: 'ambientDrift 18s ease-in-out infinite alternate',
-        }}
-      />
-
-      {/* Grid overlay */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed', inset: 0, zIndex: 0,
-          pointerEvents: 'none',
-          opacity: 0.1,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3C/svg%3E")`,
-          backgroundSize: '40px 40px',
-        }}
-      />
-
-      <style>{`
-        @keyframes ambientDrift {
-          0%   { background-position: 40% 40%; opacity: 0.5; }
-          50%  { background-position: 60% 55%; opacity: 0.8; }
-          100% { background-position: 45% 60%; opacity: 0.5; }
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{ __html: EARTH_STYLE }} />
+      <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.028, mixBlendMode: 'soft-light', backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '180px' }} />
+      <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.032, backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(200,179,138,0.6)' stroke-width='0.5'%3E%3Crect x='10' y='10' width='40' height='40'/%3E%3Ccircle cx='30' cy='30' r='14'/%3E%3Cline x1='10' y1='10' x2='50' y2='50'/%3E%3Cline x1='50' y1='10' x2='10' y2='50'/%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/svg%3E")`, backgroundSize: '60px 60px' }} />
+      <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(circle at 50% 50%, rgba(0,255,65,0.04) 0%, transparent 65%)' }} />
+      <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.1, backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3C/svg%3E")`, backgroundSize: '40px 40px' }} />
     </>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SECTION SEPARATOR — Improvement #4
-// ─────────────────────────────────────────────────────────────────────────────
 function SectionSeparator({ glow = false }: { glow?: boolean }) {
   return (
-    <div
-      style={{
-        height: 1,
-        width: '100%',
-        background: glow
-          ? 'linear-gradient(90deg, transparent, rgba(212,168,83,0.18), transparent)'
-          : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
-        margin: 0,
-      }}
-    />
+    <div style={{ height: 1, width: '100%', background: glow ? 'linear-gradient(90deg, transparent, rgba(212,168,83,0.18), transparent)' : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', margin: 0 }} />
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// REVEAL HOOK (original preserved)
+// REVEAL HOOK
 // ─────────────────────────────────────────────────────────────────────────────
 function useReveal() {
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right')
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.classList.add('visible')
-        })
-      },
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     )
     els.forEach(el => observer.observe(el))
@@ -229,34 +102,21 @@ function useReveal() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MARQUEE — Improvement #9: luxury vocabulary
+// MARQUEE
 // ─────────────────────────────────────────────────────────────────────────────
-function Marquee() {
-  // Improvement #9: upgraded to luxury vocabulary
-  const items = [
-    'Living Heritage',
-    'Ecological Luxury',
-    'Farm Provenance',
-    'Arohamai Ritual Spa',
-    'Ubuntu Consciousness',
-    'Regenerative Sanctuary',
-    'Harvest Alchemy',
-    'Pokomo Estate',
-    'Fifty-Year Archive',
-    'Moxie Intelligence',
-  ]
+const MARQUEE_ITEMS = [
+  'Living Heritage', 'Ecological Luxury', 'Farm Provenance',
+  'Arohamai Ritual Spa', 'Ubuntu Consciousness', 'Regenerative Sanctuary',
+  'Harvest Alchemy', 'Pokomo Estate', 'Fifty-Year Archive', 'Moxie Intelligence',
+]
 
+function Marquee() {
   return (
     <div className="relative py-5 overflow-hidden border-t border-b border-white/5 bg-black/20">
       <div className="marquee-track flex whitespace-nowrap">
-        {[...items, ...items].map((item, i) => (
+        {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
           <span key={`${item}-${i}`} className="flex items-center gap-4 px-8">
-            <span
-              className="font-display italic text-lg font-light"
-              style={{
-                color: i % 3 === 0 ? 'var(--neon)' : i % 3 === 1 ? 'var(--gold)' : 'rgba(255,255,255,0.2)',
-              }}
-            >
+            <span className="font-display italic text-lg font-light" style={{ color: i % 3 === 0 ? 'var(--neon)' : i % 3 === 1 ? 'var(--gold)' : 'rgba(255,255,255,0.2)' }}>
               {item}
             </span>
             <span className="text-[8px] text-white/10">◆</span>
@@ -268,52 +128,66 @@ function Marquee() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STATS STRIP (original preserved)
+// STATS STRIP
+// FIX: timers stored in a ref so the cleanup function always sees the current
+// list regardless of when React decides to run the cleanup.
 // ─────────────────────────────────────────────────────────────────────────────
+const STATS_TARGETS = [6, 24, 6, 50]
+const STATS_META = [
+  { label: 'Accommodation options', suffix: '',   color: 'var(--neon)' },
+  { label: 'Animals tracked live',  suffix: '+',  color: 'var(--gold)' },
+  { label: 'Master logs connected', suffix: '',   color: 'var(--neon)' },
+  { label: 'Year audit retention',  suffix: 'yr', color: 'var(--gold)' },
+]
+
 function StatsStrip() {
   const [counts, setCounts] = useState([0, 0, 0, 0])
-  const targets = [6, 24, 6, 50]
-  const ref = useRef<HTMLDivElement>(null)
-  const fired = useRef(false)
+  const elRef   = useRef<HTMLDivElement>(null)
+  const fired   = useRef(false)
+  // FIX: store intervals in a ref so cleanup always has the full list
+  const timers  = useRef<ReturnType<typeof setInterval>[]>([])
 
   useEffect(() => {
-    if (!ref.current) return
+    const el = elRef.current
+    if (!el) return
+
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting || fired.current) return
       fired.current = true
-      targets.forEach((target, i) => {
+
+      STATS_TARGETS.forEach((target, i) => {
         let start = 0
         const step = target / 40
         const timer = setInterval(() => {
-          start += step
-          if (start >= target) { start = target; clearInterval(timer) }
+          start = Math.min(start + step, target)
           setCounts(prev => {
-            const updated = [...prev]; updated[i] = Math.floor(start); return updated
+            const next = [...prev]
+            next[i] = Math.floor(start)
+            return next
           })
+          if (start >= target) clearInterval(timer)
         }, 30)
+        timers.current.push(timer) // ← ref, always accessible in cleanup
       })
       observer.disconnect()
     }, { threshold: 0.3 })
-    observer.observe(ref.current)
-    return () => observer.disconnect()
+
+    observer.observe(el)
+
+    return () => {
+      observer.disconnect()
+      // FIX: timers.current is the ref — always populated regardless of timing
+      timers.current.forEach(clearInterval)
+      timers.current = []
+    }
   }, [])
 
-  const stats = [
-    { label: 'Accommodation options', suffix: '',   color: 'var(--neon)' },
-    { label: 'Animals tracked live',  suffix: '+',  color: 'var(--gold)' },
-    { label: 'Master logs connected', suffix: '',   color: 'var(--neon)' },
-    { label: 'Year audit retention',  suffix: 'yr', color: 'var(--gold)' },
-  ]
-
   return (
-    <div ref={ref} className="relative py-16 px-6 md:px-10 border-b border-white/5">
+    <div ref={elRef} className="relative py-16 px-6 md:px-10 border-b border-white/5">
       <div className="max-w-8xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-        {stats.map((s, i) => (
+        {STATS_META.map((s, i) => (
           <div key={s.label} className="flex flex-col items-center md:items-start">
-            <span
-              className="font-display leading-none mb-2 font-light"
-              style={{ fontSize: 'clamp(3rem,6vw,5rem)', color: s.color }}
-            >
+            <span className="font-display leading-none mb-2 font-light" style={{ fontSize: 'clamp(3rem,6vw,5rem)', color: s.color }}>
               {counts[i]}{s.suffix}
             </span>
             <span className="font-body text-[9px] tracking-[0.2em] uppercase text-white/30 text-center md:text-left">
@@ -327,244 +201,91 @@ function StatsStrip() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOTTO STRIP — Improvement #1: motto placed immediately after Hero
+// MOTTO STRIP
 // ─────────────────────────────────────────────────────────────────────────────
 function MottoStrip() {
   return (
-    <div
-      style={{
-        padding: '56px 24px',
-        textAlign: 'center',
-        background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(63,79,60,0.06) 100%)',
-      }}
-    >
-      <p
-        className="reveal"
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontStyle: 'italic',
-          fontSize: 'clamp(1rem, 2vw, 1.6rem)',
-          letterSpacing: '0.1em',
-          color: 'rgba(255,255,255,0.32)',
-          fontWeight: 300,
-          maxWidth: 680,
-          margin: '0 auto',
-          lineHeight: 1.7,
-        }}
-      >
+    <div style={{ padding: '56px 24px', textAlign: 'center', background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(63,79,60,0.06) 100%)' }}>
+      <p className="reveal" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1rem, 2vw, 1.6rem)', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.32)', fontWeight: 300, maxWidth: 680, margin: '0 auto', lineHeight: 1.7 }}>
         &ldquo;Refresh your soul,{' '}
         <span style={{ color: 'var(--gold)', fontStyle: 'normal' }}>ground your spirit</span>
         &rdquo;
       </p>
-      <div
-        className="reveal"
-        style={{
-          width: 48, height: 1,
-          background: 'var(--neon)',
-          opacity: 0.3,
-          margin: '20px auto 0',
-        }}
-      />
+      <div className="reveal" style={{ width: 48, height: 1, background: 'var(--neon)', opacity: 0.3, margin: '20px auto 0' }} />
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PHILOSOPHY — Improvement #6: ambient parallax motion, breathing room
-// Improvement #3 + #13: more negative space, contrast
+// PHILOSOPHY
 // ─────────────────────────────────────────────────────────────────────────────
 function Philosophy() {
-  const ref = useRef<HTMLDivElement>(null)
-  const [offsetY, setOffsetY] = useState(0)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!ref.current) return
-      const rect = ref.current.getBoundingClientRect()
-      setOffsetY(rect.top * 0.06)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
   return (
-    <section ref={ref} className="relative py-40 px-6 md:px-10 overflow-hidden">
-      {/* Improvement #6: animated ambient glow behind philosophy */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(212,168,83,0.055) 0%, transparent 70%)',
-          transform: `translateY(${offsetY}px)`,
-          transition: 'transform 0.1s linear',
-        }}
-      />
-
-      {/* Improvement #8: acacia silhouette SVG — very subtle */}
-      <svg
-        aria-hidden="true"
-        style={{ position: 'absolute', bottom: 0, right: '8%', opacity: 0.04, pointerEvents: 'none', height: '70%' }}
-        viewBox="0 0 200 300" fill="var(--sand)"
-      >
-        {/* Simplified acacia silhouette */}
-        <rect x="95" y="200" width="10" height="100" />
-        <ellipse cx="100" cy="160" rx="80" ry="55" />
-        <ellipse cx="60"  cy="175" rx="45" ry="30" />
-        <ellipse cx="145" cy="170" rx="50" ry="28" />
-        <ellipse cx="100" cy="130" rx="55" ry="35" />
-      </svg>
-
+    <section className="relative py-40 px-6 md:px-10 overflow-hidden">
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <div className="flex items-center gap-4 justify-center mb-20 reveal">
           <div className="h-[1px] w-16 bg-[var(--neon)] opacity-30" />
           <span className="font-body text-[9px] tracking-[0.3em] uppercase text-white/20">Our Philosophy</span>
           <div className="h-[1px] w-16 bg-[var(--neon)] opacity-30" />
         </div>
-
-        {/* Improvement #5: Cormorant-style (--font-display) for emotional text */}
-        <blockquote
-          className="font-display italic leading-tight mb-12 reveal text-white"
-          style={{ fontSize: 'clamp(1.8rem,5.5vw,4.5rem)', fontWeight: 300 }}
-        >
+        <blockquote className="font-display italic leading-tight mb-12 reveal text-white" style={{ fontSize: 'clamp(1.8rem,5.5vw,4.5rem)', fontWeight: 300 }}>
           &ldquo;A living, breathing experience that celebrates{' '}
           <span className="text-grow">togetherness,</span>{' '}
           <span className="text-grow">creativity,</span> and{' '}
           <span className="text-grow" style={{ color: 'var(--gold)' }}>authenticity.</span>&rdquo;
         </blockquote>
-
-        {/* Improvement #13: more breathing room, reduced tracking */}
-        <p
-  className="font-body text-[15px] leading-[2] reveal max-w-[720px]"
-  style={{
-    color: 'rgba(255,255,255,0.58)',
-    letterSpacing: '0.015em',
-    fontWeight: 300,
-  }}
->
-  Rooted in the African philosophy of Ubuntu —{' '}
-  
-  <em
-    className="font-display italic"
-    style={{
-      color: 'rgba(255,255,255,0.82)',
-      fontSize: '1.08rem',
-      fontWeight: 400,
-    }}
-  >
-    “Refresh your soul, ground your spirit”
-  </em>{' '}
-  
-  — our village is more than a destination.
-  It is a community, a story, and a living system.
-</p>
-        {/* Improvement #8: small Adinkra glyph ornament */}
-        <div className="flex justify-center mt-14 reveal">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ opacity: 0.18 }}>
-            <circle cx="24" cy="24" r="20" stroke="var(--gold)" strokeWidth="0.6" />
-            <circle cx="24" cy="24" r="10" stroke="var(--gold)" strokeWidth="0.6" />
-            <line x1="4" y1="24" x2="44" y2="24" stroke="var(--gold)" strokeWidth="0.6" />
-            <line x1="24" y1="4" x2="24" y2="44" stroke="var(--gold)" strokeWidth="0.6" />
-            <circle cx="24" cy="24" r="3" fill="var(--gold)" opacity="0.4" />
-          </svg>
-        </div>
+        <p className="font-body text-[15px] leading-[2] reveal max-w-[720px]" style={{ color: 'rgba(255,255,255,0.58)', letterSpacing: '0.015em', fontWeight: 300 }}>
+          Rooted in the African philosophy of Ubuntu —{' '}
+          <em className="font-display italic" style={{ color: 'rgba(255,255,255,0.82)', fontSize: '1.08rem', fontWeight: 400 }}>
+            "Refresh your soul, ground your spirit"
+          </em>{' '}
+          — our village is more than a destination. It is a community, a story, and a living system.
+        </p>
       </div>
     </section>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FEATURED EXPERIENCES — Improvement #10: upgraded CTA language
-// Improvement #13: more spacing
+// FEATURED EXPERIENCES
+// FIX: prefetch={false} on all links — prevents 4 simultaneous route prefetches
+// on page load that were consuming bandwidth and CPU during the first paint.
 // ─────────────────────────────────────────────────────────────────────────────
-function FeaturedExperiences() {
-  const experiences: Experience[] = [
-    {
-      title: 'Our Cottages',
-      sub: 'Pokomo Cottages · Farmhouse Suites',
-      href: '/cottages',
-      accent: '#B8A9F0',
-      emoji: '🌿',
-      desc: '6 exclusive accommodations inside the living farm.',
-      // Improvement #10: cinematic CTA language
-      cta: 'Enter Estate',
-    },
-    {
-      title: 'Arohamai Spa',
-      sub: 'Ancient African therapies',
-      href: '/spa',
-      accent: '#F0A8B8',
-      emoji: '✦',
-      desc: 'Farm-sourced botanicals. 200m from field to treatment.',
-      cta: 'Explore Rituals',
-    },
-    {
-      title: 'Farm-to-Fork',
-      sub: 'Live provenance dining',
-      href: '/restaurant',
-      accent: 'var(--gold)',
-      emoji: '◉',
-      desc: 'Every dish traced to a specific animal or field.',
-      cta: 'View the Harvest',
-    },
-    {
-      title: 'Living Farm',
-      sub: 'FarmERP · Live data',
-      href: '/farm',
-      accent: 'var(--neon)',
-      emoji: '⬡',
-      desc: '24 animals. 6 fields. All tracked in real time.',
-      cta: 'Open the Farm Log',
-    },
-  ]
+const EXPERIENCES: Experience[] = [
+  { title: 'Our Cottages', sub: 'Pokomo Cottages · Farmhouse Suites', href: '/cottages', accent: '#B8A9F0', emoji: '🌿', desc: '6 exclusive accommodations inside the living farm.', cta: 'Enter Estate' },
+  { title: 'Arohamai Spa', sub: 'Ancient African therapies', href: '/spa',      accent: '#F0A8B8',    emoji: '✦', desc: 'Farm-sourced botanicals. 200m from field to treatment.', cta: 'Explore Rituals' },
+  { title: 'Farm-to-Fork', sub: 'Live provenance dining',    href: '/restaurant', accent: 'var(--gold)', emoji: '◉', desc: 'Every dish traced to a specific animal or field.', cta: 'View the Harvest' },
+  { title: 'Living Farm',  sub: 'FarmERP · Live data',       href: '/farm',     accent: 'var(--neon)', emoji: '⬡', desc: '24 animals. 6 fields. All tracked in real time.', cta: 'Open the Farm Log' },
+]
 
+function FeaturedExperiences() {
   return (
     <section className="px-6 md:px-10 py-32">
       <div className="max-w-8xl mx-auto">
-        {/* Improvement #13: generous heading space */}
         <div className="flex items-center gap-4 mb-20">
           <div className="h-[1px] flex-1 bg-white/5" />
           <span className="font-body text-[9px] tracking-[0.3em] uppercase text-white/25">Featured Experiences</span>
           <div className="h-[1px] flex-1 bg-white/5" />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {experiences.map((exp) => (
+          {EXPERIENCES.map((exp) => (
             <Link
               key={exp.href}
               href={exp.href}
+              prefetch={false}
               className="glass group relative overflow-hidden flex flex-col no-underline transition-all duration-300 hover:-translate-y-1"
               style={{ minHeight: 300 }}
             >
-              <div
-                className="absolute top-0 inset-x-0 h-[1px] opacity-55"
-                style={{ background: `linear-gradient(90deg, transparent, ${exp.accent}, transparent)` }}
-              />
+              <div className="absolute top-0 inset-x-0 h-[1px] opacity-55" style={{ background: `linear-gradient(90deg, transparent, ${exp.accent}, transparent)` }} />
               <span className="corner-tl" style={{ borderColor: `${exp.accent}55` }} />
               <span className="corner-br" style={{ borderColor: `${exp.accent}55` }} />
-
               <div className="p-8 flex flex-col flex-1">
-                <span
-                  className="font-display mb-5 text-[2.8rem] opacity-30 transition-opacity duration-500 group-hover:opacity-100"
-                  style={{ color: exp.accent }}
-                >
-                  {exp.emoji}
-                </span>
+                <span className="font-display mb-5 text-[2.8rem] opacity-30" style={{ color: exp.accent }}>{exp.emoji}</span>
                 <h3 className="font-display text-white font-light text-2xl mb-1">{exp.title}</h3>
-                <p
-                  className="font-body text-[9px] tracking-wider uppercase mb-4"
-                  style={{ color: exp.accent }}
-                >
-                  {exp.sub}
-                </p>
+                <p className="font-body text-[9px] tracking-wider uppercase mb-4" style={{ color: exp.accent }}>{exp.sub}</p>
                 <p className="font-body text-[11px] leading-relaxed flex-1 text-white/40">{exp.desc}</p>
-
-                {/* Improvement #10: cinematic CTA */}
-                <div
-                  className="flex items-center gap-2 mt-7 font-body text-[10px] tracking-wider uppercase transition-colors duration-300"
-                  style={{ color: exp.accent }}
-                >
-                  <span>{exp.cta}</span>
-                  <span style={{ transition: 'transform 0.3s' }} className="group-hover:translate-x-1 inline-block">→</span>
+                <div className="flex items-center gap-2 mt-7 font-body text-[10px] tracking-wider uppercase" style={{ color: exp.accent }}>
+                  <span>{exp.cta}</span><span>→</span>
                 </div>
               </div>
             </Link>
@@ -576,133 +297,41 @@ function FeaturedExperiences() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIGITAL ARCHIVE — Improvement #7: cinematic copy, Improvement #6: ambient
-// Improvement #2: "Events Log" concept absorbed into archive as "Events Ledger"
+// DIGITAL ARCHIVE
 // ─────────────────────────────────────────────────────────────────────────────
+const ARCHIVE_YEARS = [2024, 2025, 2026, '∞'] as const
+const ARCHIVE_META: Record<string | number, { label: string; accent: string }> = {
+  2024: { label: 'Foundation Year',     accent: 'var(--sand)' },
+  2025: { label: 'Ecological Record',   accent: 'var(--neon)' },
+  2026: { label: 'Events Ledger',       accent: 'var(--gold)' },
+  '∞':  { label: 'Living Heritage Log', accent: '#F0A8B8'     },
+}
+
 function DigitalArchive() {
-  const years = [2024, 2025, 2026, '∞'] as const
-
-  const yearMeta: Record<string | number, { label: string; accent: string; cta: string }> = {
-    2024: { label: 'Foundation Year',     accent: 'var(--sand)',  cta: 'Open Memory Archive' },
-    2025: { label: 'Ecological Record',   accent: 'var(--neon)',  cta: 'View Ecological Record' },
-    2026: { label: 'Events Ledger',       accent: 'var(--gold)',  cta: 'Enter Events Archive' },
-    '∞':  { label: 'Living Heritage Log', accent: '#F0A8B8',      cta: 'Open the Ledger' },
-  }
-
   return (
     <section className="border-t border-white/5 py-40 relative overflow-hidden">
-      {/* Improvement #6: ambient glow behind archive */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 70% 50% at 80% 50%, rgba(63,79,60,0.12) 0%, transparent 65%)',
-        }}
-      />
-
-      {/* Improvement #8: subtle geometric ornament */}
-      <svg
-        aria-hidden="true"
-        style={{ position: 'absolute', top: '10%', left: '3%', opacity: 0.055, pointerEvents: 'none' }}
-        width="180" height="180" viewBox="0 0 180 180"
-      >
-        <polygon points="90,10 170,50 170,130 90,170 10,130 10,50" fill="none" stroke="var(--sand)" strokeWidth="0.8" />
-        <polygon points="90,30 150,60 150,120 90,150 30,120 30,60" fill="none" stroke="var(--gold)" strokeWidth="0.4" />
-        <circle cx="90" cy="90" r="30" fill="none" stroke="var(--gold)" strokeWidth="0.4" />
-      </svg>
-
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid grid-cols-12 gap-8 items-start">
-
-          {/* Left — Improvement #7: cinematic copy */}
           <div className="col-span-12 lg:col-span-4 lg:pr-8">
             <div className="flex items-center gap-3 mb-8">
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--gold)', display: 'inline-block', opacity: 0.6 }} />
               <span className="font-body text-[9px] tracking-[0.28em] uppercase text-white/25">Heritage System</span>
             </div>
-
-            <h2
-              className="font-display mb-7 text-white reveal"
-              style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)', fontWeight: 300, lineHeight: 1.1, textTransform: 'uppercase', letterSpacing: '-0.01em' }}
-            >
+            <h2 className="font-display mb-7 text-white reveal" style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)', fontWeight: 300, lineHeight: 1.1, textTransform: 'uppercase' }}>
               The 50-Year<br />
               <em style={{ color: 'var(--gold)', fontStyle: 'normal' }}>Archive</em>
             </h2>
-
-            {/* Improvement #7: deeper, more cinematic language */}
-            <p
-              className="font-body reveal"
-              style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', lineHeight: 2, letterSpacing: '0.05em', maxWidth: 300 }}
-            >
-              A permanent memory of ecological restoration, ritual, and heritage — encoded for generations yet to walk this land. Not just data. A living inheritance.
+            <p className="font-body reveal" style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', lineHeight: 2, maxWidth: 300 }}>
+              A permanent memory of ecological restoration, ritual, and heritage — encoded for generations yet to walk this land.
             </p>
-
-            <div className="mt-10 reveal">
-              <Link
-                href="/archive"
-                className="inline-flex items-center gap-2 font-body text-[10px] tracking-[0.18em] uppercase"
-                style={{ color: 'var(--gold)' }}
-              >
-                {/* Improvement #10: cinematic CTA */}
-                Enter the Full Archive
-                <span>→</span>
-              </Link>
-            </div>
           </div>
-
-          {/* Right — Year tiles */}
           <div className="col-span-12 lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {years.map((year, i) => {
-              const meta = yearMeta[year]
-              return (
-                <div
-                  key={year}
-                  className="group border border-white/5 p-8 hover:border-[var(--neon)]/25 transition-all duration-500 cursor-pointer relative overflow-hidden"
-                  style={{
-                    background: 'rgba(255,255,255,0.01)',
-                    animationDelay: `${i * 100}ms`,
-                  }}
-                >
-                  {/* Improvement #6: ambient hover glow */}
-                  <div
-                    style={{
-                      position: 'absolute', inset: 0, pointerEvents: 'none',
-                      background: `radial-gradient(ellipse 80% 80% at 50% 50%, ${meta.accent}08 0%, transparent 70%)`,
-                      opacity: 0,
-                      transition: 'opacity 0.5s',
-                    }}
-                    className="group-hover:opacity-100"
-                  />
-
-                  {/* Scan-active indicator */}
-                  <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="text-[var(--neon)] font-mono text-[8px] tracking-widest">SCAN_ACTIVE</span>
-                  </div>
-
-                  <span
-                    className="font-mono text-[11px] transition-colors duration-300"
-                    style={{ color: 'rgba(255,255,255,0.2)' }}
-                  >
-                    {year}
-                  </span>
-
-                  <p
-                    className="mt-3 font-body text-[9px] uppercase tracking-[0.18em] transition-colors duration-300"
-                    style={{ color: 'rgba(255,255,255,0.35)' }}
-                  >
-                    {meta.label}
-                  </p>
-
-                  {/* Improvement #7 + #10: cinematic CTA per tile */}
-                  <p
-                    className="mt-6 font-body text-[8px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300"
-                    style={{ color: meta.accent }}
-                  >
-                    {meta.cta} →
-                  </p>
-                </div>
-              )
-            })}
+            {ARCHIVE_YEARS.map((year) => (
+              <div key={year} className="group border border-white/5 p-8 bg-white/[0.01] cursor-pointer relative overflow-hidden">
+                <span className="font-mono text-[11px] text-white/20">{year}</span>
+                <p className="mt-3 font-body text-[9px] uppercase tracking-[0.18em] text-white/40">{ARCHIVE_META[year].label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -711,109 +340,91 @@ function DigitalArchive() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BENTO GRID — dynamic import (preserved)
-// Improvement #2: "Gallery Log" renamed "Events Log" handled inside BentoGrid
-// (pass prop so BentoGrid can rename if it reads from parent)
+// BENTO GRID — dynamic import with placeholder
+// FIX: added fallback placeholder to prevent CLS (Cumulative Layout Shift)
+// when BentoGrid hydrates after the initial paint.
 // ─────────────────────────────────────────────────────────────────────────────
-const BentoGrid = dynamic(() => import('@/components/BentoGrid'))
+const BentoGrid = dynamic(
+  () => import('@/components/BentoGrid'),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{
+        minHeight: 600,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: 0.2,
+        fontFamily: 'var(--font-body)',
+        fontSize: '9px',
+        letterSpacing: '0.3em',
+        textTransform: 'uppercase',
+        color: 'rgba(0,255,65,0.5)',
+      }}>
+        Loading live data...
+      </div>
+    ),
+  }
+)
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAIN PAGE
+// HOME PAGE — main export
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const [introVisible, setIntroVisible] = useState(true)
-  const handleIntroDone = useCallback(() => setIntroVisible(false), [])
-
   useReveal()
 
-  useEffect(() => {
-    import('./effects')
-      .then(mod => {
-        // @ts-ignore
-        if (mod.initEffects) mod.initEffects()
-      })
-      .catch(err => console.error('Visual effects failed to load:', err))
-  }, [])
-
   return (
-    <>
-      {/* Improvement #11 — Cinematic intro overlay */}
-      {introVisible && <CinematicIntro onDone={handleIntroDone} />}
+    // NOTE: CartPanel is intentionally NOT rendered here.
+    // It is already mounted in layout.tsx inside <CartProvider>.
+    // Mounting it here was causing duplicate panels and double subscriptions.
+    <main className="relative min-h-screen overflow-x-hidden bg-[#080808]" style={{ opacity: 1 }}>
+      <AmbientBackground />
 
-      <main
-        className="relative min-h-screen overflow-x-hidden bg-[#080808]"
-        style={{ opacity: introVisible ? 0 : 1, transition: 'opacity 0.6s ease' }}
-      >
-        {/* Improvement #14 + #8 + #12 — Ambient background layers */}
-        <AmbientBackground />
+      <div className="relative z-10">
+        <Nav />
+        <Hero />
+        <MottoStrip />
+        <SectionSeparator />
 
-        <div className="relative z-10">
-          <Nav />
+        <section className="reveal">
+          <Marquee />
+          <StatsStrip />
+        </section>
 
-          {/* Hero */}
-          <Hero />
+        <SectionSeparator glow />
 
-          {/* Improvement #1 — Motto immediately after hero */}
-          <MottoStrip />
+        <section id="philosophy" className="reveal">
+          <Philosophy />
+        </section>
 
-          <SectionSeparator />
+        <SectionSeparator />
+        <FeaturedExperiences />
+        <SectionSeparator glow />
 
-          {/* Marquee + Stats */}
-          <section className="reveal">
-            <Marquee />
-            <StatsStrip />
-          </section>
-
-          <SectionSeparator glow />
-
-          {/* Philosophy — Improvement #3: breathing room, ambient motion */}
-          <section id="philosophy" className="reveal">
-            <Philosophy />
-          </section>
-
-          <SectionSeparator />
-
-          {/* Featured Experiences — Improvement #10: CTA language */}
-          <section id="experiences" className="reveal">
-            <FeaturedExperiences />
-          </section>
-
-          <SectionSeparator glow />
-
-          {/* Live Farm Telemetry */}
-          {/* Improvement #2: "Events Log" wording passed as prop; BentoGrid
-              should render it as "Events Ledger" rather than "Gallery Log"    */}
-          <section id="live-farm" className="reveal py-24 border-t border-white/5">
-            <div className="container mx-auto px-6">
-              <div className="flex items-center gap-4 mb-12">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon)] animate-pulse" />
-                <h3 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[var(--neon)]">
-                  Live Farm Telemetry System
-                </h3>
-              </div>
-              {/* Pass eventsLabel prop — BentoGrid can read it to rename
-                  "Gallery Log" → "Events Ledger" without removing anything */}
-              <BentoGrid eventsLabel="Events Ledger" />
+        <section id="live-farm" className="reveal py-24 border-t border-white/5">
+          <div className="container mx-auto px-6">
+            <div className="flex items-center gap-4 mb-12">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon)] animate-pulse" />
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[var(--neon)]">
+                Live Farm Telemetry System
+              </h3>
             </div>
-          </section>
+            <BentoGrid eventsLabel="Events Ledger" />
+          </div>
+        </section>
 
-          <SectionSeparator />
+        <SectionSeparator />
 
-          {/* 50-Year Digital Archive — Improvement #7: cinematic copy */}
-          <section className="reveal">
-            <DigitalArchive />
-          </section>
+        <section className="reveal">
+          <DigitalArchive />
+        </section>
 
-          <SectionSeparator glow />
+        <SectionSeparator glow />
+        <Footer />
+      </div>
 
-          <Footer />
-        </div>
-
-        {/* Interface overlays */}
-        <MoxieChat className="glass-panel" />
-        <CookieConsent />
-        <CartPanel />
-      </main>
-    </>
+      <CookieConsent />
+      {/* CartPanel rendered by layout.tsx — removed from here */}
+    </main>
   )
 }

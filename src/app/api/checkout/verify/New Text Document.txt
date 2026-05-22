@@ -1,0 +1,53 @@
+// src/app/api/checkout/verify/route.ts
+import { NextResponse } from 'next/server'
+import { Monitoring } from '@/lib/monitoring'
+import { Logger } from '@/lib/logger'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+
+export async function POST(req: Request) {
+  const timestamp = Date.now()
+  let bodyPayload: any
+
+  try {
+    bodyPayload = await req.json()
+    const { paymentIntentId, bookingId, amount, userId } = bodyPayload
+
+    // Use latency tracker wrapper to capture performance data
+    return await Monitoring.trackExecutionLatency('Webhook Settlement Pipeline', async () => {
+      
+      // 1. Simulate a database exception lookup
+      const { data: booking, error: dbError } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single()
+
+      if (dbError) {
+        // Escalate the database failure
+        Monitoring.trackDatabaseError('bookings', 'SELECT', new Error(dbError.message), { bookingId })
+        return NextResponse.json({ error: 'Data hydration drop' }, { status: 500 })
+      }
+
+      // 2. Simulate transaction total verification mismatches
+      if (booking.total_amount !== amount) {
+        Monitoring.trackPaymentFailure('stripe', 'CAPTURE', amount, paymentIntentId, 'Transactional ledger mismatch detected', userId)
+        return NextResponse.json({ error: 'Financial balance mismatch' }, { status: 400 })
+      }
+
+      Logger.info(`Fulfillment loop completed cleanly for booking ${bookingId}`, {
+        category: 'BOOKING',
+        entityId: bookingId,
+        userId
+      })
+
+      return NextResponse.json({ verified: true })
+    })
+
+  } catch (globalError: any) {
+    // Fallback error catcher for handling unexpected network drops
+    Monitoring.trackApiFailure('/api/checkout/verify', 'POST', 500, globalError.message || 'Fatal thread crash')
+    return NextResponse.json({ error: 'Critical system routing crash' }, { status: 500 })
+  }
+}

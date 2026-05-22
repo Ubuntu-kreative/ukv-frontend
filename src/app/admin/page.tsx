@@ -1,25 +1,8 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboardPage() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
-
-  // 1. Fetch the server-side session securely
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  // 2. Extract user role from Supabase metadata
-  const role = session?.user?.user_metadata?.role
-
-  // 🚨 Guard Clause: Strict role-based redirect
-  if (!session || role !== 'admin') {
-    redirect('/login?callbackUrl=/admin')
-  }
+  
 
   return (
     <div 

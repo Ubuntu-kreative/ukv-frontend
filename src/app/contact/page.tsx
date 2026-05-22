@@ -1480,14 +1480,12 @@ export default function ContactPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className="flex flex-col items-start py-4 pr-8 transition-all shrink-0 font-body"
-              style={{
-                borderBottom: `2px solid ${activeTab === tab.id ? 'var(--gold)' : 'transparent'}`,
-                marginBottom: '-0.5px',
-                background: 'none',
-                cursor: 'pointer',
-                border: 'none',
-                borderBottom: `2px solid ${activeTab === tab.id ? 'var(--gold)' : 'transparent'}`,
-              } as React.CSSProperties}
+             style={{
+  borderBottom: `2px solid ${activeTab === tab.id ? 'var(--gold)' : 'transparent'}`,
+  marginBottom: '-0.5px',
+  background: 'none',
+  cursor: 'pointer',
+} as React.CSSProperties}
             >
               <span className="text-[10px] uppercase tracking-[0.2em]" style={{ color: activeTab === tab.id ? 'var(--gold)' : 'rgba(255,255,255,0.5)' }}>
                 {tab.label}

@@ -43,7 +43,6 @@ export function FarmSection() {
               style={{
                 fontFamily: 'var(--font-body)',
                 color: tab === t.key ? 'var(--gold)' : 'var(--muted)',
-                borderBottom: tab === t.key ? '1.5px solid var(--gold)' : '1.5px solid transparent',
                 marginBottom: '-0.5px',
                 background: 'none',
                 border: 'none',

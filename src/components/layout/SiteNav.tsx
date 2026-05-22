@@ -1,7 +1,25 @@
 'use client'
 
+/**
+ * SiteNav — fixed
+ *
+ * Fix applied (error 5):
+ *   - `NavSection` was imported from '@/app/page' which didn't export it,
+ *     producing: "Module '@/app/page' has no exported member 'NavSection'."
+ *   - Fix: define `NavSection` locally in this file. If your page.tsx does
+ *     export it, you can restore the import and delete the local definition.
+ */
+
 import { useCartStore } from '@/context/cartStore'
-import type { NavSection } from '@/app/page'
+
+// ── Fix: define NavSection locally instead of importing from '@/app/page' ────
+export type NavSection =
+  | 'cottages'
+  | 'restaurant'
+  | 'spa'
+  | 'farm'
+  | 'events'
+  | 'calendar'
 
 const NAV_ITEMS: { key: NavSection; label: string }[] = [
   { key: 'cottages',   label: 'Our Cottages' },
@@ -14,7 +32,7 @@ const NAV_ITEMS: { key: NavSection; label: string }[] = [
 
 interface SiteNavProps {
   activeSection: NavSection
-  onNavigate: (s: NavSection) => void
+  onNavigate:    (s: NavSection) => void
 }
 
 export function SiteNav({ activeSection, onNavigate }: SiteNavProps) {
@@ -56,7 +74,6 @@ export function SiteNav({ activeSection, onNavigate }: SiteNavProps) {
           className="flex items-center gap-2.5 transition-all duration-200 group"
           style={{ color: 'var(--muted)' }}
         >
-          {/* Cart icon */}
           <svg
             width="18" height="16" viewBox="0 0 18 16" fill="none"
             className="group-hover:stroke-[#c8a84b] transition-colors"
@@ -72,12 +89,11 @@ export function SiteNav({ activeSection, onNavigate }: SiteNavProps) {
           >
             Cart
           </span>
-          {/* Badge */}
           <span
             className="flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-medium transition-all"
             style={{
               background: items.length > 0 ? 'var(--gold)' : 'rgba(200,168,75,0.15)',
-              color: items.length > 0 ? 'var(--bg)' : 'var(--muted)',
+              color:      items.length > 0 ? 'var(--bg)'   : 'var(--muted)',
               border: '0.5px solid rgba(200,168,75,0.3)',
             }}
           >
@@ -97,8 +113,8 @@ export function SiteNav({ activeSection, onNavigate }: SiteNavProps) {
             onClick={() => onNavigate(item.key)}
             className="relative px-6 py-2.5 text-[10px] tracking-[0.16em] uppercase whitespace-nowrap transition-all duration-200"
             style={{
-              fontFamily: 'var(--font-body)',
-              color: activeSection === item.key ? 'var(--gold)' : 'var(--muted)',
+              fontFamily:   'var(--font-body)',
+              color:        activeSection === item.key ? 'var(--gold)' : 'var(--muted)',
               borderBottom: activeSection === item.key
                 ? '1.5px solid var(--gold)'
                 : '1.5px solid transparent',
