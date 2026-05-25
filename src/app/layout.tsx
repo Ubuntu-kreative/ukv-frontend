@@ -8,6 +8,7 @@ import './globals.css'
 
 import ClientLayout from '@/components/ClientLayout'
 import Cursor from '@/components/Cursor'
+import PageTransition from '@/components/PageTransition'
 
 
 import { CartProvider } from '@/context/CartContext'
@@ -177,7 +178,9 @@ export default function RootLayout({
             {/* Main App */}
             <main className="relative z-[2] min-h-screen">
 
+              <PageTransition>
                 {children}
+              </PageTransition>
 
             </main>
 
