@@ -1,7 +1,6 @@
 // /app/login/page.tsx
 'use client'
 
-import { supabase } from '@/lib/supabaseAuth'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -11,15 +10,24 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { supabase } = await import('@/lib/supabaseAuth')
+      if (!supabase) {
+        alert('Authentication is not configured')
+        return
+      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (!error) {
-      router.push('/admin')
-    } else {
-      alert(error.message)
+      if (!error) {
+        router.push('/admin')
+      } else {
+        alert(error.message)
+      }
+    } catch (error) {
+      alert('Authentication is not configured')
     }
   }
 
