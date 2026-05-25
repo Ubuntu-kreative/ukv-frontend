@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import './farm.css'
+
 // ── NAVIGATION ─────────────────────────────────
 import NavWrapper from '@/components/NavWrapper'
 
