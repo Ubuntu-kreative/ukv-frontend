@@ -14,10 +14,9 @@ export default function WeatherWidget() {
         const data = await getWeather()
         if (!isMounted) return
 
-        // Formats response based on Open-Meteo style structure
-        if (data?.current?.temperature_2m !== undefined) {
-          const temp = Math.round(data.current.temperature_2m)
-          setWeather(`🌤️ ${temp}°C Nairobi`)
+        // Formats response using internal weather payload
+        if (data?.temperatureC !== undefined) {
+          setWeather(`🌤️ ${Math.round(data.temperatureC)}°C Nairobi`)
         } else {
           setWeather('🌤️ 24°C Nairobi')
         }

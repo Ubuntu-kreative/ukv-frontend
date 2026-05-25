@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildSystemPrompt }         from '@/lib/moxie/systemPrompt'
 import { getMenuSummaryForAI }       from '@/lib/moxie/menu'
+import tools from '@/lib/moxie/tools'
 
 // ── Runtime ──────────────────────────────────────────────────────────
 export const runtime = 'edge'
@@ -273,6 +274,36 @@ export async function POST(req: NextRequest) {
       MOXIE_TOOLS,
     )
 
+    // If the model requested a tool call, attempt to execute it server-side
+    let toolResult: any = null
+    if (toolCall && toolCall.name) {
+      try {
+        if (toolCall.name === 'get_menu') {
+          const section = (toolCall.args as any)?.section
+          toolResult = { items: getMenuSummaryForAI({ section }) }
+        } else if (toolCall.name === 'add_to_cart') {
+          const args = toolCall.args as any
+          const res = await tools.tool_add_menu_to_cart({ query: args.itemName || args.itemId, qty: args.qty || 1 })
+          toolResult = res
+        } else if (toolCall.name === 'create_reservation') {
+          const args = toolCall.args as any
+          const res = await tools.tool_create_reservation({
+            name: args.guestName || args.name,
+            phone: args.phone,
+            time: args.time,
+            date: args.date,
+            guests: args.guests,
+            notes: args.notes,
+            type: args.type,
+          })
+          toolResult = res
+        }
+      } catch (err) {
+        console.error('[Moxie API] tool execution error', err)
+        toolResult = { ok: false, error: 'Tool execution failed' }
+      }
+    }
+
     // ── Update session memory from conversation ──
     updateMemory(sessionId, messages as Message[])
 
@@ -282,6 +313,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       content:  responseText,
       toolCall: toolCall || null,
+      toolResult: toolResult || null,
       sessionId,
     })
 

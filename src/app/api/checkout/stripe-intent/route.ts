@@ -2,15 +2,24 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-// Initialize Stripe with strict API versioning mapping
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-02-24' as any, 
-})
+// Initialize Stripe lazily if the secret key is available.
+// This prevents build-time collection from failing when env vars are not present.
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-02-24' as any,
+    })
+  : null
 
 const SERVICE_CHARGE_RATE = 0.10
 const VAT_RATE = 0.16
 
 export async function POST(req: Request) {
+  if (!stripe) {
+    return NextResponse.json(
+      { error: 'Stripe is not configured. STRIPE_SECRET_KEY is missing.' },
+      { status: 500 }
+    )
+  }
   try {
     const { items, checkIn, checkOut, guests, customerInfo } = await req.json()
 

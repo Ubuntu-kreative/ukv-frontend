@@ -2,11 +2,25 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-02-24' as any,
-})
+function getStripeClient() {
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey) return null
+
+  return new Stripe(secretKey, {
+    apiVersion: '2025-02-24' as any,
+  })
+}
 
 export async function POST(req: Request) {
+  const stripe = getStripeClient()
+  if (!stripe) {
+    console.error('[STRIPE_WEBHOOK_ERROR] Missing STRIPE_SECRET_KEY')
+    return NextResponse.json(
+      { error: 'Stripe is not configured. STRIPE_SECRET_KEY is required.' },
+      { status: 500 }
+    )
+  }
+
   const body = await req.text() // Extract raw payload string for signature hashing validation
   const signature = req.headers.get('stripe-signature') || ''
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ''

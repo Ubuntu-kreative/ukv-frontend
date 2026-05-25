@@ -4,7 +4,24 @@
 // Production v1.0.0
 // ─────────────────────────────────────────────────────────────────────
 
-import * as Sentry from '@sentry/nextjs'
+const Sentry: any = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // @ts-ignore
+    return require('@sentry/nextjs')
+  } catch {
+    return {
+      withScope: (callback: (scope: any) => void) => callback({
+        setLevel: () => undefined,
+        setTag: () => undefined,
+        setUser: () => undefined,
+        setContext: () => undefined,
+      }),
+      captureException: () => undefined,
+      captureMessage: () => undefined,
+    }
+  }
+})()
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical'
 
@@ -52,7 +69,7 @@ export class Logger {
 
     // 2. Escalate dangerous anomalies automatically to Sentry with strict tag mapping
     if (level === 'error' || level === 'critical') {
-      Sentry.withScope((scope) => {
+      Sentry.withScope((scope: any) => {
         scope.setLevel(level === 'critical' ? 'fatal' : 'error')
         scope.setTag('category', context.category)
         

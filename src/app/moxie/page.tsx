@@ -94,7 +94,7 @@ export default function MoxiePage() {
         <div className="absolute inset-0">
           <video
             autoPlay
-            muted
+            muted={false}
             loop
             playsInline
             className="h-full w-full object-cover opacity-30"
@@ -111,6 +111,9 @@ export default function MoxiePage() {
         </div>
 
         <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-6 py-32 lg:px-10">
+          <Link href="/" className="absolute top-8 left-6 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm backdrop-blur hover:bg-white/10 transition lg:left-10">
+            ← Back to Home
+          </Link>
           <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm backdrop-blur">
             <Bot size={16} />
             Ubuntu AI Concierge · Live
@@ -372,7 +375,7 @@ export default function MoxiePage() {
                     </h3>
 
                     <p className="text-sm text-emerald-400">
-                      Live · GPT-4o Powered
+                      Live · SmartMind Ent! Powered
                     </p>
                   </div>
                 </div>

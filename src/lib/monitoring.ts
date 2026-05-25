@@ -8,7 +8,23 @@
  *   - `Sentry.startSpan` signature corrected for SDK v8 API.
  */
 
-import * as Sentry from '@sentry/nextjs'
+const Sentry: any = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // @ts-ignore
+    return require('@sentry/nextjs')
+  } catch {
+    return {
+      captureMessage: () => undefined,
+      captureException: () => undefined,
+      startSpan: async (_opts: any, callback: (span: any) => Promise<any>) => {
+        return callback({
+          finish: () => undefined,
+        })
+      },
+    }
+  }
+})()
 
 // ── Minimal logger shim ───────────────────────────────────────────────────────
 // Replace with your real Logger import if it exists:

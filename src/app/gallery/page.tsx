@@ -704,24 +704,35 @@ function OrbitalCore({ onOpenExhibit }: { onOpenExhibit: (e: typeof EXHIBITS[0])
   const [angle, setAngle]   = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const lastX  = useRef(0)
-  const raf    = useRef<number | null>(null)
+  const raf = useRef<number | null>(null)
   const angleRef = useRef(0)
   const velRef   = useRef(0)
 
-  useEffect(() => {
-    let running = true
-    const tick = () => {
-      if (!running) return
-      if (!isDragging) {
-        velRef.current   = velRef.current * 0.96 + 0.008
-        angleRef.current = angleRef.current + velRef.current
-        setAngle(angleRef.current)
-      }
-      raf.current = requestAnimationFrame(tick)
+ useEffect(() => {
+  let running = true
+
+  const tick = () => {
+    if (!running) return
+
+    if (!isDragging) {
+      velRef.current = velRef.current * 0.96 + 0.008
+      angleRef.current = angleRef.current + velRef.current
+      setAngle(angleRef.current)
     }
+
     raf.current = requestAnimationFrame(tick)
-    return () => { running = false; if (raf.current) cancelAnimationFrame(raf.current) }
-  }, [isDragging])
+  }
+
+  raf.current = requestAnimationFrame(tick)
+
+  return () => {
+    running = false
+
+    if (raf.current !== null) {
+      cancelAnimationFrame(raf.current)
+    }
+  }
+}, [isDragging])
 
   function onPointerDown(e: React.PointerEvent) {
     setIsDragging(true)

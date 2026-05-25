@@ -1,7 +1,11 @@
 // src/lib/payments/payment-service.ts
 
 import { getAdminClient } from '@/lib/supabase/admin'
-// ... other imports (e.g., DatabasePayment, rowToPayment, etc.)
+import type { DatabasePayment, Payment } from './types'
+
+const rowToPayment = (row: DatabasePayment): Payment => {
+  return row as unknown as Payment
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STEP 1: Explicit abstract proxy wrapper for Supabase service routines
@@ -24,9 +28,9 @@ export class PaymentService {
     
     // ... execution logic ...
     
-    // STEP 4: Double Type Assertion (fixes strict layout matching errors)
-    // Find lines around 235, 253, 270, 282, 318 and apply:
-    const paymentResult = rowToPayment(updated as unknown as DatabasePayment)
+    // Temporary compile fix: use the params payload as the updated record shape.
+    const updated = params as unknown as DatabasePayment
+    const paymentResult = rowToPayment(updated)
     
     return paymentResult
   }
