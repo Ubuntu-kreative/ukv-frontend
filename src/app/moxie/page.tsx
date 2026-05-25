@@ -16,6 +16,7 @@ import {
   Trees,
   Waves,
 } from 'lucide-react'
+import MoxieChat from '@/components/moxie/MoxieChat'
 
 const retreatTypes = [
   {
@@ -362,68 +363,7 @@ export default function MoxiePage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-[#0d0d0d] p-6 shadow-2xl shadow-black/40">
-              <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#d9c7a2]/10 text-[#f2e7cf]">
-                    <Bot size={22} />
-                  </div>
-
-                  <div>
-                    <h3 className="font-medium">
-                      Moxie AI Concierge
-                    </h3>
-
-                    <p className="text-sm text-emerald-400">
-                      Live · SmartMind Ent! Powered
-                    </p>
-                  </div>
-                </div>
-
-                <div className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/50">
-                  Online
-                </div>
-              </div>
-
-              <div className="space-y-6 py-8">
-                <div className="max-w-md rounded-3xl rounded-tl-md bg-white/5 p-5 text-white/80">
-                  Good evening ☀️ I’m Moxie, your Ubuntu
-                  AI concierge. Tell me what kind of
-                  experience you’re seeking and I’ll help
-                  guide you toward the perfect stay.
-                </div>
-
-                <div className="ml-auto max-w-sm rounded-3xl rounded-tr-md bg-[#d9c7a2] p-5 text-black">
-                  I want a quiet retreat for deep rest and
-                  writing.
-                </div>
-
-                <div className="max-w-md rounded-3xl rounded-tl-md bg-white/5 p-5 text-white/80">
-                  Then Neem Penthouse may be your perfect
-                  sanctuary. It was designed for silence,
-                  rooftop stillness, and long reflective
-                  mornings above the farm valley.
-                </div>
-              </div>
-
-              <div className="border-t border-white/10 pt-5">
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    placeholder="Ask Moxie anything..."
-                    className="h-14 flex-1 rounded-2xl border border-white/10 bg-black px-5 text-white outline-none placeholder:text-white/30 focus:border-[#d9c7a2]"
-                  />
-
-                  <button className="inline-flex h-14 items-center justify-center rounded-2xl bg-white px-6 text-sm font-medium text-black transition hover:scale-[1.02]">
-                    Send
-                  </button>
-                </div>
-
-                <p className="mt-4 text-xs text-white/40">
-                  Ubuntu AI · Emotional Hospitality System
-                </p>
-              </div>
-            </div>
+            <MoxieChat className="rounded-[2rem] border border-white/10 bg-[#0d0d0d] shadow-2xl shadow-black/40" inline />
           </div>
         </div>
       </section>
