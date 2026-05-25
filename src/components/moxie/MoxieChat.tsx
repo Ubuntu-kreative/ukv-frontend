@@ -2,10 +2,7 @@
 
 import React, { useState } from 'react'
 import styles from './MoxieChat.module.css'
-import { tableReservationToCartItem, addMenuItemToCart } from '../../lib/moxie/cartActions'
-import { validateBooking } from '../../lib/moxie/validation'
 import { useCartStore } from '../../context/cartStore'
-import { findMenuItem, getMenu } from '../../lib/moxie/menu'
 import toast from 'react-hot-toast'
 
 interface Props {
@@ -15,59 +12,69 @@ interface Props {
 export default function MoxieChat({ className }: Props) {
 	const [open, setOpen] = useState(false)
 	const [message, setMessage] = useState('')
-	const [status, setStatus] = useState<string | null>(null)
-
+	const [messages, setMessages] = useState<Array<{role: string, content: string}>>([])
+	const [isLoading, setIsLoading] = useState(false)
+	
 	const addToCart = useCartStore((s: any) => s.addItem)
+	const openCartPanel = useCartStore((s: any) => s.openCart)
 
-	async function handleAddReservation() {
-		const booking = {
-			name: 'Guest',
-			phone: '0712345678',
-			time: '19:00',
-			guests: 2,
-			date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+	async function handleSendMessage() {
+		if (!message.trim() || isLoading) return
+
+		const userMessage = { role: 'user', content: message.trim() }
+		setMessages(prev => [...prev, userMessage])
+		setMessage('')
+		setIsLoading(true)
+
+		try {
+			const response = await fetch('/api/moxie', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					messages: [...messages, userMessage],
+					sessionId: 'session_' + Date.now(),
+					pathname: window.location.pathname,
+				}),
+			})
+
+			if (!response.ok) throw new Error('Failed to connect to Moxie')
+
+			const data = await response.json()
+			setMessages(prev => [...prev, { role: 'assistant', content: data.text || 'I apologize, but I encountered an error.' }])
+
+			// Handle tool calls if present
+			if (data.toolCall) {
+				handleToolCall(data.toolCall)
+			}
+		} catch (error) {
+			console.error('Moxie error:', error)
+			setMessages(prev => [...prev, { role: 'assistant', content: 'I apologize, but I am having trouble connecting right now. Please try again or contact us directly at hello@ubuntuecolodge.com' }])
+		} finally {
+			setIsLoading(false)
 		}
-
-		const valid = validateBooking(booking as any)
-		if (!valid.valid) {
-			setStatus(valid.error ?? 'Invalid booking data')
-			return
-		}
-
-		const cartItem = tableReservationToCartItem({
-			time: booking.time,
-			guests: booking.guests,
-			name: booking.name,
-			phone: booking.phone,
-			date: booking.date,
-		})
-
-		addToCart(cartItem)
-		setStatus('Added reservation to cart')
 	}
 
-	async function handleAddMenuItem() {
-		// Try to resolve menu item from the user's message
-		let item = null
-		if (message && message.trim().length > 2) {
-			item = findMenuItem(message)
+	function handleToolCall(toolCall: { name: string; args: any }) {
+		switch (toolCall.name) {
+			case 'add_to_cart':
+				const { itemName, price, qty = 1, category = 'general' } = toolCall.args
+				addToCart({
+					id: Date.now().toString(),
+					name: itemName,
+					price: Number(price),
+					category,
+					tag: '',
+					unit: '/ each',
+					qty: Number(qty),
+				})
+				toast.success(`${itemName} added to your journey`)
+				openCartPanel()
+				break
+			case 'create_reservation':
+				toast.success('Your reservation request has been received. Please complete the booking details.')
+				window.location.href = '/contact#booking'
+				break
 		}
-
-		if (!item) {
-			const popular = getMenu({ popular: true })
-			item = popular && popular.length ? popular[0] : null
-		}
-
-		if (!item) {
-			toast.error('Could not find a menu item to add')
-			setStatus('No menu item found')
-			return
-		}
-
-		const cartItem = addMenuItemToCart(item as any, 1)
-		addToCart(cartItem)
-		toast.success(`${item.name} added to cart`)
-		setStatus(`Added ${item.name} to cart`)
 	}
 
 	return (
@@ -75,7 +82,7 @@ export default function MoxieChat({ className }: Props) {
 			{open && (
 				<div className={styles.chatPanel} role="dialog" aria-label="Moxie chat panel">
 					<button className={styles.moxieExit} onClick={() => setOpen(false)}>
-						Exit
+						✕
 					</button>
 
 					<div className={styles.chatHeader}>
@@ -83,36 +90,58 @@ export default function MoxieChat({ className }: Props) {
 							<div className={styles.moxieAvatar}>🤖</div>
 							<div>
 								<div className={styles.moxieTitle}>Moxie — Concierge</div>
-								<div className={styles.moxieSubtitle}>Ask about bookings</div>
+								<div className={styles.moxieSubtitle}>Ubuntu Kreative Village</div>
 							</div>
 						</div>
-						<div style={{ display: 'flex', gap: 8 }}>
-							<button onClick={handleAddReservation} className="rounded-2xl bg-[#d9c7a2]/10 px-3 py-2 text-sm">Add Table</button>
-							<button onClick={handleAddMenuItem} className="rounded-2xl bg-[#d9c7a2]/10 px-3 py-2 text-sm">Add Dish</button>
-						</div>
+						<button 
+							onClick={openCartPanel}
+							className="rounded-full bg-[#d9c7a2]/20 px-3 py-1.5 text-xs hover:bg-[#d9c7a2]/30 transition"
+						>
+							View Journey
+						</button>
 					</div>
 
-					<div style={{ padding: 16 }}>
-						<div style={{ marginBottom: 8 }}>
+					<div className={styles.messages}>
+						{messages.length === 0 && (
+							<div className={styles.welcomeMessage}>
+								<p>🌿 Welcome to Ubuntu Kreative Village!</p>
+								<p>I'm Moxie, your digital concierge. How can I help you today?</p>
+							</div>
+						)}
+						{messages.map((msg, i) => (
+							<div key={i} className={`${styles.messageRow} ${msg.role === 'user' ? styles.messageUser : styles.messageBot}`}>
+								<div className={`${styles.messageBubble} ${msg.role === 'user' ? styles.messageBubbleUser : styles.messageBubbleBot}`}>
+									{msg.content}
+								</div>
+							</div>
+						))}
+						{isLoading && (
+							<div className={styles.messageRow} styles.messageBot}>
+								<div className={styles.messageBubble} styles.messageBubbleBot}>
+									Thinking...
+								</div>
+							</div>
+						)}
+					</div>
+
+					<div className={styles.inputWrap}>
+						<div className={styles.inputShell}>
 							<input
 								value={message}
 								onChange={(e) => setMessage(e.target.value)}
+								onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage() } }}
 								placeholder="Ask Moxie anything..."
-								className="w-full rounded-md border px-3 py-2 bg-black text-white"
+								className={styles.chatInput}
+								disabled={isLoading}
 							/>
-						</div>
-
-						<div style={{ display: 'flex', gap: 8 }}>
-							<button onClick={() => setMessage('')} className="rounded-2xl bg-white/10 px-4 py-2">Clear</button>
 							<button
-								onClick={() => setStatus('Moxie is thinking...')}
-								className="rounded-2xl bg-[#d9c7a2] px-4 py-2 text-black"
+								onClick={handleSendMessage}
+								disabled={!message.trim() || isLoading}
+								className={styles.sendBtn}
 							>
-								Send
+								{isLoading ? '...' : 'Send'}
 							</button>
 						</div>
-
-						{status && <div style={{ marginTop: 12 }}>{status}</div>}
 					</div>
 				</div>
 			)}
@@ -122,7 +151,7 @@ export default function MoxieChat({ className }: Props) {
 				className={`${styles.moxieBubble} ${open ? styles.moxiePulse : ''}`}
 				aria-label={open ? 'Close chat' : 'Open chat'}
 			>
-				💬
+				{open ? '✕' : '💬'}
 			</button>
 		</div>
 	)
