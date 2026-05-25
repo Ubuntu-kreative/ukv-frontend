@@ -24,7 +24,7 @@ import {
   useState,
 } from 'react'
 
-import Nav from '@/components/Nav'
+import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 import MoxieChat from '@/components/MoxieChat'
 import Link from 'next/link'
@@ -831,7 +831,7 @@ export default function GalleryPage() {
 
   return (
     <main className="bg-obsidian min-h-screen text-cream relative selection:bg-gold selection:text-obsidian overflow-x-hidden">
-      <Nav />
+      <NavWrapper />
       <LivingBackground accent={activeExhibit?.accent} />
       <MagneticCursor accentColor={activeExhibit?.accent || 'var(--gold)'} />
 

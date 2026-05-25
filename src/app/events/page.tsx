@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import Nav from '@/components/Nav'
+import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 import MoxieChat from '@/components/MoxieChat'
 import Link from 'next/link'
@@ -580,7 +580,7 @@ export default function EventsPage() {
 
   return (
     <main className="bg-obsidian min-h-screen text-cream relative overflow-x-hidden">
-      <Nav />
+      <NavWrapper />
 
       {/* Dynamic Ambient Background Canvas */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden>

@@ -16,7 +16,7 @@
 
 import type { Metadata } from 'next'
 
-import Nav            from '@/components/Nav'
+import NavWrapper     from '@/components/NavWrapper'
 import Footer         from '@/components/Footer'
 import RestaurantHero from './_components/Hero'
 import MenuTicker     from './_components/MenuTicker'
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export default function RestaurantPage() {
   return (
     <main className="bg-black min-h-screen text-white selection:bg-[var(--gold)]/20">
-      <Nav />
+      <NavWrapper />
 
       {/* 1. Cinematic Hero — server rendered, zero JS */}
       <RestaurantHero />

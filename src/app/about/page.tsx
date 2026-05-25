@@ -1,4 +1,4 @@
-import Nav from '@/components/Nav'
+import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 import MoxieChat from '@/components/MoxieChat'
 import Link from 'next/link'
@@ -88,7 +88,7 @@ const TIMELINE = [
 export default function AboutPage() {
   return (
     <main style={{ background: 'var(--obsidian)', minHeight: '100vh' }}>
-      <Nav />
+      <NavWrapper />
 
       {/* ── Hero ── */}
       <section

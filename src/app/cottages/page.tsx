@@ -17,7 +17,7 @@
 
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import Nav from '@/components/Nav'
+import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 import { RatesSection } from './_components/RatesSection'
 import { StaysGrid } from './_components/StaysGrid'
@@ -48,7 +48,7 @@ export default function CottagesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
 
-      <Nav />
+      <NavWrapper />
 
       {/* ── HERO — Server-rendered HTML ─────────────────────────────
           No client JS needed here. Animations use CSS only (via

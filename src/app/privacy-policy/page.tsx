@@ -1,4 +1,4 @@
-import Nav from '@/components/Nav'
+import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 import MoxieChat from '@/components/MoxieChat'
 
@@ -124,7 +124,7 @@ Website: www.odpc.go.ke`,
 export default function PrivacyPolicyPage() {
   return (
     <main style={{ background: 'var(--obsidian)', minHeight: '100vh' }}>
-      <Nav />
+      <NavWrapper />
 
       {/* ── Hero ── */}
       <section

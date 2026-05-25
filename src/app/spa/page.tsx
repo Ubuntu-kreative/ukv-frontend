@@ -47,7 +47,7 @@
 import { Suspense }      from 'react'
 import type { Metadata } from 'next'
 
-import Nav    from '@/components/Nav'
+import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 
 import SpaHero             from './_components/SpaHero'
@@ -102,7 +102,7 @@ export default function SpaPage() {
       />
 
       <main className="bg-[#050505] text-white min-h-screen overflow-x-hidden">
-        <Nav />
+        <NavWrapper />
 
         {/* ── ABOVE THE FOLD: server HTML on first byte ───────────────────── */}
         <SpaHero />

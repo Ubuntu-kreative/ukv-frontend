@@ -36,7 +36,7 @@ import type { CSSProperties } from 'react'
 import { Suspense }           from 'react'
 import Link                   from 'next/link'
 
-import Nav           from '@/components/Nav'
+import NavWrapper    from '@/components/NavWrapper'
 import Hero          from '@/components/Hero'
 import Footer        from '@/components/Footer'
 import CookieConsent from '@/components/CookieConsent'
@@ -233,7 +233,7 @@ export default function HomePage() {
       <div className="relative z-10">
 
         {/* ── ABOVE THE FOLD ── */}
-        <Nav />
+        <NavWrapper />
         <Hero />
 
         {/* ── BELOW THE FOLD ── */}
