@@ -169,6 +169,41 @@ export default function UbuntuNav({
     setModalOpen(true);
   }, []);
 
+  const handleMegaItemClick = useCallback((item: string, sectionKey: string) => {
+    setMegaOpen(false);
+    
+    // Items with arrows open reserve modal
+    if (item.endsWith("→")) {
+      openReserve();
+      return;
+    }
+
+    // Navigation based on section and item
+    switch (sectionKey) {
+      case 'cottages':
+        // Navigate to cottages page and scroll to relevant section
+        router.push('/cottages');
+        break;
+      case 'restaurant':
+        router.push('/restaurant');
+        break;
+      case 'spa':
+        router.push('/spa');
+        break;
+      case 'farm':
+        router.push('/farm');
+        break;
+      case 'events':
+        router.push('/events');
+        break;
+      case 'gallery':
+        router.push('/gallery');
+        break;
+      default:
+        router.push('/');
+    }
+  }, [router, openReserve]);
+
   function handleJourneyClick() {
     setIconBounce(true);
     setTimeout(() => setIconBounce(false), 550);
@@ -273,7 +308,7 @@ export default function UbuntuNav({
                       <button
                         key={item}
                         className={`ukv-mega-item${item.endsWith("→") ? " ukv-mega-item--featured" : ""}`}
-                        onClick={item.endsWith("→") ? openReserve : undefined}
+                        onClick={() => handleMegaItemClick(item, megaKey)}
                       >
                         {item}
                       </button>

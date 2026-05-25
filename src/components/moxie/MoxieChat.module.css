@@ -211,10 +211,25 @@
 
 .moxieTitle {
   color: #f5f0e8;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.typingIndicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 0 0 rgba(255,255,255,0.85);
+  animation: moxieTyping 1.2s infinite ease-in-out;
+}
+
+@keyframes moxieTyping {
+  0%, 100% { transform: scale(0.75); opacity: 0.35; }
+  50% { transform: scale(1); opacity: 1; }
 }
 
 .moxieSubtitle {
