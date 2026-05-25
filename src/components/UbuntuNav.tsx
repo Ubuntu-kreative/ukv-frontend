@@ -570,10 +570,14 @@ const CSS = `
   .ukv-vsep { width:.5px;height:26px;background:rgba(196,164,90,.14);flex-shrink:0 }
 
   /* Metric */
-  .ukv-metric { display:flex;flex-direction:column;flex-shrink:0;gap:1px }
-  .ukv-metric-label { font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:rgba(196,164,90,.48) }
-  .ukv-metric-val { font-size:15px;font-weight:300;color:var(--ukv-ivory);letter-spacing:.04em;line-height:1;display:flex;align-items:center;gap:6px }
-  .ukv-metric-detail { font-size:10px;color:rgba(245,240,232,.35);font-style:italic;font-family:'Cormorant Garamond',serif }
+  .ukv-metric { display:flex;flex-direction:column;flex-shrink:0;gap:1px;transition:transform .3s ease,opacity .3s ease;cursor:default }
+  .ukv-metric:hover { transform:translateY(-2px);opacity:1 }
+  .ukv-metric-label { font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:rgba(196,164,90,.48);transition:color .3s ease }
+  .ukv-metric:hover .ukv-metric-label { color:rgba(196,164,90,.7) }
+  .ukv-metric-val { font-size:15px;font-weight:300;color:var(--ukv-ivory);letter-spacing:.04em;line-height:1;display:flex;align-items:center;gap:6px;transition:text-shadow .3s ease }
+  .ukv-metric:hover .ukv-metric-val { text-shadow:0 0 12px rgba(196,164,90,.2) }
+  .ukv-metric-detail { font-size:10px;color:rgba(245,240,232,.35);font-style:italic;font-family:'Cormorant Garamond',serif;transition:color .3s ease }
+  .ukv-metric:hover .ukv-metric-detail { color:rgba(245,240,232,.5) }
 
   /* Status */
   .ukv-status { display:flex;align-items:center;gap:5px;flex-shrink:0 }
@@ -610,12 +614,14 @@ const CSS = `
 
   /* My Journey */
   .ukv-jw { position:relative }
-  .ukv-jbtn { display:flex;align-items:center;gap:6px;padding:0 14px;height:34px;border:.5px solid rgba(196,164,90,.32);border-radius:3px;background:transparent;color:rgba(245,240,232,.65);cursor:pointer;font-size:9px;letter-spacing:.15em;text-transform:uppercase;font-family:'DM Sans',sans-serif;transition:all .25s;position:relative;overflow:hidden }
-  .ukv-jbtn::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg, transparent, rgba(196,164,90,.08), transparent);opacity:0;transition:opacity .3s }
-  .ukv-jbtn:hover { border-color:rgba(196,164,90,.65);color:var(--ukv-ivory);background:rgba(196,164,90,.08);box-shadow:0 0 12px rgba(196,164,90,.15), inset 0 0 0 1px rgba(196,164,90,.1) }
+  .ukv-jbtn { display:flex;align-items:center;gap:6px;padding:0 14px;height:34px;border:.5px solid rgba(196,164,90,.32);border-radius:3px;background:transparent;color:rgba(245,240,232,.65);cursor:pointer;font-size:9px;letter-spacing:.15em;text-transform:uppercase;font-family:'DM Sans',sans-serif;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden }
+  .ukv-jbtn::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg, transparent, rgba(196,164,90,.1), transparent);opacity:0;transition:opacity .3s }
+  .ukv-jbtn::after { content:'';position:absolute;inset:0;background:radial-gradient(circle at center, rgba(196,164,90,.15), transparent 70%);opacity:0;transition:opacity .3s }
+  .ukv-jbtn:hover { border-color:rgba(196,164,90,.7);color:var(--ukv-ivory);background:rgba(196,164,90,.1);box-shadow:0 0 20px rgba(196,164,90,.2), inset 0 0 0 1px rgba(196,164,90,.15);transform:translateY(-1px) }
   .ukv-jbtn:hover::before { opacity:1 }
-  .ukv-jbtn:hover .ukv-jbadge { animation:ukv-pulse 1s ease-in-out infinite;box-shadow:0 0 8px rgba(196,164,90,.4) }
-  .ukv-jbadge { width:16px;height:16px;border-radius:50%;background:rgba(196,164,90,.12);border:.5px solid rgba(196,164,90,.48);color:var(--ukv-gold);font-size:8px;font-weight:500;display:flex;align-items:center;justify-content:center;min-width:16px;position:relative;z-index:1 }
+  .ukv-jbtn:hover::after { opacity:1 }
+  .ukv-jbtn:hover .ukv-jbadge { animation:ukv-pulse 1s ease-in-out infinite;box-shadow:0 0 12px rgba(196,164,90,.5);transform:scale(1.1) }
+  .ukv-jbadge { width:16px;height:16px;border-radius:50%;background:rgba(196,164,90,.12);border:.5px solid rgba(196,164,90,.48);color:var(--ukv-gold);font-size:8px;font-weight:500;display:flex;align-items:center;justify-content:center;min-width:16px;position:relative;z-index:1;transition:all .3s ease }
 
   /* Journey panel */
   .ukv-jp { position:absolute;top:calc(100% + 10px);right:0;width:300px;background:rgba(16,21,17,.98);border:.5px solid rgba(196,164,90,.28);border-radius:5px;z-index:300;transform-origin:top right;transform:scale(.93) translateY(-8px);opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;box-shadow:0 12px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(196,164,90,.06), inset 0 1px 0 rgba(255,255,255,.02) }
@@ -630,14 +636,19 @@ const CSS = `
   .ukv-jp-suggestion { padding:12px 16px;background:rgba(196,164,90,.06);border:.5px solid rgba(196,164,90,.18);border-radius:8px;margin-bottom:12px }
   .ukv-jp-suggestion-title { font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--ukv-gold);margin-bottom:4px }
   .ukv-jp-suggestion-desc { font-size:10px;color:rgba(245,240,232,.5);line-height:1.5;font-style:italic;font-family:'Cormorant Garamond',serif }
-  .ukv-jp-item { display:flex;align-items:flex-start;gap:10px }
-  .ukv-jp-icon { width:28px;height:28px;border-radius:3px;background:rgba(196,164,90,.08);border:.5px solid rgba(196,164,90,.18);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px }
+  .ukv-jp-item { display:flex;align-items:flex-start;gap:10px;padding:8px;border-radius:6px;transition:background .3s ease,transform .3s ease }
+  .ukv-jp-item:hover { background:rgba(196,164,90,.06);transform:translateX(2px) }
+  .ukv-jp-icon { width:28px;height:28px;border-radius:3px;background:rgba(196,164,90,.08);border:.5px solid rgba(196,164,90,.18);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px;transition:all .3s ease }
+  .ukv-jp-item:hover .ukv-jp-icon { background:rgba(196,164,90,.12);border-color:rgba(196,164,90,.3);transform:scale(1.05) }
   .ukv-jp-info { flex:1 }
-  .ukv-jp-iname { font-size:11.5px;color:rgba(245,240,232,.82);line-height:1.3 }
-  .ukv-jp-isub { font-size:8.5px;color:rgba(245,240,232,.3);margin-top:2px;letter-spacing:.04em }
-  .ukv-jp-iprice { font-size:11.5px;color:var(--ukv-gold);white-space:nowrap;flex-shrink:0;margin-top:1px }
-  .ukv-jp-irm { background:none;border:none;cursor:pointer;color:rgba(245,240,232,.15);font-size:11px;padding:0;transition:color .2s;flex-shrink:0;margin-top:3px }
-  .ukv-jp-irm:hover { color:rgba(196,164,90,.65) }
+  .ukv-jp-iname { font-size:11.5px;color:rgba(245,240,232,.82);line-height:1.3;transition:color .3s ease }
+  .ukv-jp-item:hover .ukv-jp-iname { color:var(--ukv-ivory) }
+  .ukv-jp-isub { font-size:8.5px;color:rgba(245,240,232,.3);margin-top:2px;letter-spacing:.04em;transition:color .3s ease }
+  .ukv-jp-item:hover .ukv-jp-isub { color:rgba(245,240,232,.5) }
+  .ukv-jp-iprice { font-size:11.5px;color:var(--ukv-gold);white-space:nowrap;flex-shrink:0;margin-top:1px;transition:text-shadow .3s ease }
+  .ukv-jp-item:hover .ukv-jp-iprice { text-shadow:0 0 8px rgba(196,164,90,.3) }
+  .ukv-jp-irm { background:none;border:none;cursor:pointer;color:rgba(245,240,232,.15);font-size:11px;padding:0;transition:color .2s,transform .2s;flex-shrink:0;margin-top:3px }
+  .ukv-jp-irm:hover { color:rgba(196,164,90,.8);transform:scale(1.2) }
   .ukv-jp-div { height:.5px;background:rgba(196,164,90,.08);margin:0 16px }
   .ukv-jp-foot { padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px }
   .ukv-jp-tot { display:flex;justify-content:space-between;align-items:baseline }

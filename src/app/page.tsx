@@ -45,6 +45,8 @@ import CookieConsent from '@/components/CookieConsent'
 // Each is a dedicated 'use client' file — the server component tree is clean.
 import ClientShell         from '@/components/home/ClientShell'
 import StatsStrip          from '@/components/home/StatsStrip'
+import SustainabilityMetrics from '@/components/SustainabilityMetrics'
+import CulturalStorytelling from '@/components/CulturalStorytelling'
 import FeaturedExperiences from '@/components/home/FeaturedExperiences'
 import BentoGridClient     from '@/components/home/BentoGridClient'
 
@@ -250,12 +252,24 @@ export default function HomePage() {
             then animates when scrolled into view.
           */}
           <StatsStrip />
+          
+          {/* Sustainability metrics */}
+          <div className="mt-12">
+            <SustainabilityMetrics />
+          </div>
         </section>
 
         <SectionSeparator glow />
 
         <section id="philosophy" className="reveal">
           <Philosophy />
+        </section>
+
+        <SectionSeparator />
+
+        {/* Cultural storytelling */}
+        <section className="reveal">
+          <CulturalStorytelling />
         </section>
 
         <SectionSeparator />
