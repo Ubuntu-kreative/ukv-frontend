@@ -236,7 +236,16 @@ export default function UbuntuNav({
 
           {/* Logo */}
           <Link href="/" className="ukv-logo">
-            <UbuntuMark scrolled={scrolled} />
+            <img 
+              src={scrolled ? "/branding/ubuntu-logo-dark.png" : "/branding/ubuntu-logo-white.png"} 
+              alt="Ubuntu Kreative Village Logo"
+              className="ukv-logo-img"
+              style={{ 
+                height: scrolled ? "32px" : "40px",
+                width: "auto",
+                transition: "height 0.4s ease"
+              }}
+            />
             <div className="ukv-lt">
               <span className={`ukv-ln${scrolled ? " ukv-ln--scrolled" : ""}`}>Ubuntu</span>
               <span className="ukv-ls">Kreative Village · Kenya</span>

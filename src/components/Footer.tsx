@@ -647,10 +647,16 @@ export default function Footer() {
           >
             {/* Logo */}
             <Link href="/" style={{ display: 'inline-block', marginBottom: 20, textDecoration: 'none' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 300, color: 'var(--cream)', lineHeight: 1 }}>
-                Ubuntu
-              </div>
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--neon)', marginTop: 4 }}>
+              <img 
+                src="/branding/ubuntu-logo-white.png" 
+                alt="Ubuntu Kreative Village Logo"
+                style={{ 
+                  height: "48px",
+                  width: "auto",
+                  marginBottom: 8
+                }}
+              />
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--neon)', marginTop: 8 }}>
                 Kreative Village
               </div>
             </Link>
