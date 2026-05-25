@@ -54,13 +54,13 @@ export default function MoxieChat({ className, inline = false }: Props) {
       }
 
       const data = await response.json()
+      const assistantContent = data.content || data.text || 'I apologize, but I encountered an error while generating a response.'
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content:
-            data.text ||
-            'I apologize, but I encountered an error while generating a response.',
+          content: assistantContent,
         },
       ])
 
@@ -136,7 +136,7 @@ export default function MoxieChat({ className, inline = false }: Props) {
         </button>
       </div>
 
-      <div className={styles.messages}>
+      <div className={styles.messages} aria-live="polite">
         {messages.length === 0 ? (
           <div className={styles.welcomeMessage}>
             <p>🌿 Welcome to Ubuntu Kreative Village!</p>
@@ -149,7 +149,7 @@ export default function MoxieChat({ className, inline = false }: Props) {
             key={index}
             className={`${styles.messageRow} ${
               msg.role === 'user' ? styles.messageUser : styles.messageBot
-            }`}
+            } ${styles.messageAnimated}`}
           >
             <div
               className={`${styles.messageBubble} ${

@@ -648,7 +648,7 @@ export default function Footer() {
             {/* Logo */}
             <Link href="/" style={{ display: 'inline-block', marginBottom: 20, textDecoration: 'none' }}>
               <img 
-                src="/branding/ubuntu-logo-white.png" 
+                src="/branding/ubuntu-mark2.png" 
                 alt="Ubuntu Kreative Village Logo"
                 style={{ 
                   height: "48px",

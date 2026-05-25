@@ -232,6 +232,17 @@
   50% { transform: scale(1); opacity: 1; }
 }
 
+@keyframes moxieMessageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .moxieSubtitle {
   margin-top: 3px;
 
@@ -333,6 +344,11 @@
 
 .messageRow {
   display: flex;
+}
+
+.messageAnimated {
+  opacity: 0;
+  animation: moxieMessageIn .28s cubic-bezier(.18,.86,.4,1) forwards;
 }
 
 .messageBot {

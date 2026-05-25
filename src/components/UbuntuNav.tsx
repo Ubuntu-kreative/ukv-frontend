@@ -237,7 +237,7 @@ export default function UbuntuNav({
           {/* Logo */}
           <Link href="/" className="ukv-logo">
             <img 
-              src={scrolled ? "/branding/ubuntu-logo-dark.png" : "/branding/ubuntu-logo-white.png"} 
+              src="/branding/ubuntu-mark2.png" 
               alt="Ubuntu Kreative Village Logo"
               className="ukv-logo-img"
               style={{ 
@@ -471,24 +471,6 @@ export default function UbuntuNav({
 }
 
 // ── SVG icons ─────────────────────────────────────────────────────────────────
-function UbuntuMark({ scrolled }: { scrolled: boolean }) {
-  const size = scrolled ? 34 : 42;
-  return (
-    <svg width={size} height={size} viewBox="0 0 60 60" fill="none" aria-hidden="true"
-      style={{ transition: "width .4s ease, height .4s ease" }}>
-      <circle cx="30" cy="30" r="29" stroke="rgba(196,164,90,.3)" strokeWidth=".6"/>
-      <circle cx="30" cy="30" r="22" stroke="rgba(196,164,90,.12)" strokeWidth=".4" strokeDasharray="3 4"/>
-      <circle cx="30" cy="18" r="5" fill="rgba(122,150,114,.2)" stroke="rgba(122,150,114,.55)" strokeWidth=".7"/>
-      <circle cx="20" cy="36" r="5" fill="rgba(122,150,114,.2)" stroke="rgba(122,150,114,.55)" strokeWidth=".7"/>
-      <circle cx="40" cy="36" r="5" fill="rgba(122,150,114,.2)" stroke="rgba(122,150,114,.55)" strokeWidth=".7"/>
-      <line x1="30" y1="23" x2="24" y2="31" stroke="rgba(196,164,90,.3)" strokeWidth=".5"/>
-      <line x1="30" y1="23" x2="36" y2="31" stroke="rgba(196,164,90,.3)" strokeWidth=".5"/>
-      <line x1="25" y1="36" x2="35" y2="36" stroke="rgba(196,164,90,.3)" strokeWidth=".5"/>
-      <circle cx="30" cy="30" r="2.5" fill="#C4A45A" opacity=".9"/>
-    </svg>
-  );
-}
-
 function JourneyIcon({ bounce }: { bounce: boolean }) {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
