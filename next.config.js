@@ -31,9 +31,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'stream.mux.com',
       },
-
-      // ❗ DO NOT re-enable Unsplash unless absolutely necessary
-      // It will destroy dev performance
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
   },
 

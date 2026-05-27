@@ -643,26 +643,44 @@ export default function Footer() {
               opacity: revealed ? 1 : 0,
               transform: revealed ? 'translateY(0)' : 'translateY(18px)',
               transition: 'opacity 0.9s ease 0.1s, transform 0.9s ease 0.1s',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 24,
             }}
           >
             {/* Logo */}
             <Link href="/" style={{ display: 'inline-block', marginBottom: 20, textDecoration: 'none' }}>
-              <img 
-                src="/branding/ubuntu-mark2.png" 
-                alt="Ubuntu Kreative Village Logo"
-                style={{ 
-                  height: "48px",
-                  width: "auto",
-                  marginBottom: 8
-                }}
-              />
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--neon)', marginTop: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 12 }}>
+                <img 
+                  src="/branding/ubuntu-mark2.png" 
+                  alt="Ubuntu Kreative Village Mark"
+                  style={{ 
+                    height: "80px",
+                    width: "auto"
+                  }}
+                />
+                <div style={{ 
+                  width: '1px', 
+                  height: '60px', 
+                  background: 'rgba(255,255,255,0.15)' 
+                }} />
+                <img 
+                  src="/branding/ubuntu-logo-primary1.png" 
+                  alt="Ubuntu Kreative Village Logo"
+                  style={{ 
+                    height: "80px",
+                    width: "auto",
+                    transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)',
+                    transform: 'scale(1)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.6)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                />
+              </div>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--neon)', marginTop: 12, textAlign: 'center' }}>
                 Kreative Village
               </div>
             </Link>
-
-            {/* Divider */}
-            <div style={{ width: 32, height: 1, background: 'rgba(255,255,255,0.08)', marginBottom: 20 }} />
 
             {/* Ecosystem status rotator */}
             <EcosystemStatus />

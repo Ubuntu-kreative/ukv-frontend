@@ -71,23 +71,31 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import Image from 'next/image'
 import { useFeastStore } from '../_store/feast-store'
 import { useCartStore }  from '@/context/cartStore'
 import type { MenuItem } from '../_data/menu-data'
+import { ModalPortal } from '@/components/ui/ModalPortal'
+import { useModalFocusTrap } from '@/hooks/useModalFocusTrap'
 
 // ─── DISH IMAGE (error boundary built-in) ────────────────────────────────────
 
 function DishImage({
-  src, alt, className, onClick,
-}: { src: string; alt: string; className?: string; onClick?: () => void }) {
+  src, alt, className, onClick, priority = false,
+}: { src: string; alt: string; className?: string; onClick?: () => void; priority?: boolean }) {
   const [err, setErr] = useState(false)
+  const fallback = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800'
   return (
     <Image
-      src={err ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800' : src}
-      alt={alt} fill loading="lazy" className={className}
-      onError={() => setErr(true)} onClick={onClick}
+      src={err ? fallback : src}
+      alt={alt}
+      fill
+      priority={priority}
+      loading={priority ? 'eager' : 'lazy'}
+      className={className}
+      onError={() => setErr(true)}
+      onClick={onClick}
       sizes="(max-width: 768px) 100vw, 46vw"
     />
   )
@@ -143,13 +151,16 @@ interface LogModalProps {
   onClose: () => void
 }
 
-export default function LogModal({ item, onClose }: LogModalProps) {
+function LogModal({ item, onClose }: LogModalProps) {
   const stageItem     = useFeastStore(s => s.stageItem)
   const updateQty     = useFeastStore(s => s.updateQty)
   const getStagedItem = useFeastStore(s => s.getStagedItem)
   const stagedCount   = useFeastStore(s => s.stagedCount)
   const addingId      = useFeastStore(s => s.addingId)
-  const { openCart, addItem } = useCartStore()
+  const openCart      = useCartStore(s => s.openCart)
+  const addItem       = useCartStore(s => s.addItem)
+
+  const panelRef = useModalFocusTrap(true, onClose)
 
   const [localQty,  setLocalQty]  = useState(1)
   const [zoomed,    setZoomed]    = useState(false)
@@ -163,23 +174,22 @@ export default function LogModal({ item, onClose }: LogModalProps) {
   const isStaged   = !!stagedItem
   const fCount     = stagedCount()
 
-  // Body scroll lock — captures original and restores on cleanup
   useEffect(() => {
     const original = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = original }
+  }, [])
 
+  useEffect(() => {
     const fn = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (zoomed) setZoomed(false)
-        else onClose()
+      if (e.key === 'Escape' && zoomed) {
+        e.stopPropagation()
+        setZoomed(false)
       }
     }
     window.addEventListener('keydown', fn)
-    return () => {
-      window.removeEventListener('keydown', fn)
-      document.body.style.overflow = original
-    }
-  }, [zoomed, onClose])
+    return () => window.removeEventListener('keydown', fn)
+  }, [zoomed])
 
   // Zoom mousemove throttled via rAF
   const handleZoomMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -230,15 +240,21 @@ export default function LogModal({ item, onClose }: LogModalProps) {
   const safeTags        = item.tags        ?? []
 
   return (
-    <>
-      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/95 backdrop-blur-2xl p-0 sm:p-4 md:p-6">
-        <div className="absolute inset-0" onClick={onClose} />
+    <ModalPortal>
+      <div
+        ref={panelRef}
+        className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/95 backdrop-blur-2xl p-0 sm:p-4 md:p-6 isolate"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="log-modal-title"
+      >
+        <div className="absolute inset-0" onClick={onClose} aria-hidden />
         <div className="relative w-full max-w-6xl h-[95dvh] sm:h-[90vh] flex flex-col md:flex-row bg-[#060606] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,0.9)] rounded-t-3xl sm:rounded-2xl border border-white/[0.06]">
 
           {/* ── Left: image ── */}
           <div className="relative md:w-[46%] h-56 sm:h-72 md:h-full flex-shrink-0 bg-black overflow-hidden group rounded-t-3xl sm:rounded-tl-2xl sm:rounded-bl-2xl md:rounded-tr-none">
             <div className="relative w-full h-full cursor-zoom-in overflow-hidden" onClick={() => setZoomed(true)} onMouseMove={handleZoomMove}>
-              <DishImage src={item.image} alt={item.name} className="object-cover transition-transform duration-[2s] group-hover:scale-105 grayscale-[20%] group-hover:grayscale-0" />
+              <DishImage priority src={item.image} alt={item.name} className="object-cover transition-transform duration-[2s] group-hover:scale-105 grayscale-[20%] group-hover:grayscale-0" />
               <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.1) 2px,rgba(255,255,255,0.1) 4px)' }} />
               {(['top-4 left-4 border-t-2 border-l-2','top-4 right-4 border-t-2 border-r-2','bottom-4 left-4 border-b-2 border-l-2','bottom-4 right-4 border-b-2 border-r-2'] as const).map((c, i) => (
                 <div key={i} className={`absolute w-7 h-7 ${c} border-[var(--neon)]/30 pointer-events-none`} />
@@ -275,7 +291,7 @@ export default function LogModal({ item, onClose }: LogModalProps) {
 
             {/* Title */}
             <div className="px-5 sm:px-8 pt-5 pb-3 flex-shrink-0">
-              <h2 className="font-display text-2xl sm:text-3xl text-white uppercase tracking-tight leading-[0.9] mb-2">{item.name}</h2>
+              <h2 id="log-modal-title" className="font-display text-2xl sm:text-3xl text-white uppercase tracking-tight leading-[0.9] mb-2">{item.name}</h2>
               <div className="flex flex-wrap items-center gap-3 mt-1.5">
                 {item.pairing && <p className="font-mono text-[8px] text-[var(--gold)]/50 uppercase tracking-widest">◈ {item.pairing}</p>}
                 <TrendBar score={item.trendScore} />
@@ -472,7 +488,6 @@ export default function LogModal({ item, onClose }: LogModalProps) {
         </div>
       </div>
 
-      {/* ── Zoom overlay ── */}
       {zoomed && (
         <div
           className="fixed inset-0 z-[400] bg-black/98 flex items-center justify-center cursor-zoom-out overflow-hidden"
@@ -497,6 +512,8 @@ export default function LogModal({ item, onClose }: LogModalProps) {
           </div>
         </div>
       )}
-    </>
+    </ModalPortal>
   )
 }
+
+export default memo(LogModal)

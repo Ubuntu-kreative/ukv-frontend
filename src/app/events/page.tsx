@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import NavWrapper from '@/components/NavWrapper'
+import { ModalPortal } from '@/components/ui/ModalPortal'
+import { useModalFocusTrap } from '@/hooks/useModalFocusTrap'
 import Footer from '@/components/Footer'
-import MoxieChat from '@/components/MoxieChat'
 import Link from 'next/link'
-import { motion, AnimatePresence, useScroll, useTransform, LayoutGroup } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { SectionDivider } from '@/components/ui/SectionDivider'
 import { ProductCard } from '@/components/ui/ProductCard'
 import { EVENT_PACKAGES, PUBLIC_EVENTS } from '@/lib/data'
@@ -362,23 +364,6 @@ const CATEGORY_ATMOSPHERE: Record<string, {
 // UI COMPONENT PRIMITIVES
 // ─────────────────────────────────────────────────────────────────────────────
 
-function useCursorGlow() {
-  const [pos, setPos] = useState({ x: 0, y: 0 })
-  useEffect(() => {
-    const move = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY })
-    window.addEventListener('mousemove', move, { passive: true })
-    return () => window.removeEventListener('mousemove', move)
-  }, [])
-  return pos
-}
-
-function useScrollWeight() {
-  const { scrollY } = useScroll()
-  const fontWeight = useTransform(scrollY, [0, 600], [300, 380])
-  const letterSpacing = useTransform(scrollY, [0, 600], [-0.01, 0.02])
-  return { fontWeight, letterSpacing }
-}
-
 function Eyebrow({ children, color = 'rgba(255,255,255,0.28)', style }: { children: React.ReactNode; color?: string; style?: React.CSSProperties }) {
   return (
     <span style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase' as const, color, ...style }}>
@@ -568,11 +553,143 @@ function CinematicVideoPanel({ visible }: { visible: boolean }) {
 // MAIN INTERACTIVE SYSTEM ENGINE EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 
+function EventDetailDrawer({
+  event,
+  onClose,
+}: {
+  event: UKVEvent
+  onClose: () => void
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const panelRef = useModalFocusTrap(true, onClose)
+  const [imgErr, setImgErr] = useState(false)
+
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    scrollRef.current?.scrollTo(0, 0)
+    return () => { document.body.style.overflow = prev }
+  }, [event.id])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const heroSrc = imgErr
+    ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=80'
+    : event.image
+
+  return (
+    <ModalPortal>
+    <motion.div
+      ref={panelRef}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[1100] overflow-hidden isolate"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="event-drawer-title"
+    >
+      <button
+        type="button"
+        aria-label="Close event details"
+        className="absolute inset-0 bg-black/95"
+        onClick={onClose}
+      />
+
+      <motion.aside
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+        className="absolute top-0 right-0 bottom-0 flex w-full max-w-3xl flex-col bg-obsidian border-l border-white/10 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="flex flex-shrink-0 items-center justify-end border-b border-white/5 bg-obsidian px-6 md:px-10"
+          style={{ minHeight: 'var(--ukv-nav-height)', paddingTop: 'env(safe-area-inset-top, 0px)' }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white/60 transition-colors hover:border-white/30 hover:text-cream"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="relative w-full h-48 md:h-56 flex-shrink-0 bg-black">
+            <Image
+              src={heroSrc}
+              alt={event.title}
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 48rem"
+              onError={() => setImgErr(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent pointer-events-none" />
+          </div>
+          <div className="px-6 pb-10 md:px-12 md:pb-12 pt-6">
+          <span className="text-xs font-mono tracking-widest text-gold uppercase">{event.category}</span>
+          <h2
+            id="event-drawer-title"
+            className="font-display text-4xl md:text-5xl font-light text-cream mt-2 mb-4"
+          >
+            {event.title}
+          </h2>
+          <p className="font-body text-base text-white/70 leading-relaxed mb-8">{event.description}</p>
+
+          <div className="grid grid-cols-2 gap-4 mb-8 bg-white/5 p-6 rounded-xl border border-white/5">
+            <div>
+              <span className="block text-[10px] uppercase text-white/30 tracking-wider">Date Mapping</span>
+              <span className="font-body text-sm text-cream font-medium">{event.date}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] uppercase text-white/30 tracking-wider">Timeline Window</span>
+              <span className="font-body text-sm text-cream font-medium">{event.time} ({event.duration})</span>
+            </div>
+          </div>
+
+          <h3 className="font-display text-xl font-light text-cream mb-4">What&apos;s Encompassed:</h3>
+          <ul className="space-y-2 mb-12">
+            {event.includes.map((inc, i) => (
+              <li key={i} className="flex items-center gap-3 text-sm text-white/60 font-body">
+                <span className="text-gold">✦</span> {inc}
+              </li>
+            ))}
+          </ul>
+
+          <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <span className="block text-[10px] uppercase text-white/30 tracking-wider">Financial Vector</span>
+              <span className="font-mono text-2xl text-cream">
+                {event.price > 0 ? `KES ${event.price.toLocaleString()}` : 'Enquire'}
+              </span>
+            </div>
+            <Link
+              href="/contact"
+              onClick={onClose}
+              className="inline-flex justify-center px-8 py-4 bg-cream text-obsidian rounded-xl font-body text-xs uppercase font-bold tracking-widest hover:bg-gold transition-colors"
+            >
+              Lock Secure Booking Matrix
+            </Link>
+          </div>
+          </div>
+        </div>
+      </motion.aside>
+    </motion.div>
+    </ModalPortal>
+  )
+}
+
 export default function EventsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [activeEvent, setActiveEvent] = useState<UKVEvent | null>(null)
-  const cursor = useCursorGlow()
-  const scrollWeight = useScrollWeight()
 
   const filteredEvents = selectedCategory === 'All' 
     ? EVENTS 
@@ -597,18 +714,15 @@ export default function EventsPage() {
       </div>
 
       {/* Luxury Immersive Hero Segment */}
-      <section className="relative pt-32 pb-24 px-6 max-w-7xl mx-auto z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <section className="relative page-hero-offset pb-24 px-6 max-w-7xl mx-auto z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7">
           <Eyebrow color="var(--gold)">Ubuntu Command Center // Gatherings Matrix</Eyebrow>
-          <motion.h1 
-            style={{ fontWeight: scrollWeight.fontWeight, letterSpacing: scrollWeight.letterSpacing }}
-            className="font-display text-5xl md:text-8xl font-light leading-none tracking-tight text-cream mt-4 mb-6"
-          >
+          <h1 className="font-display text-5xl md:text-8xl font-light leading-none tracking-tight text-cream mt-4 mb-6">
             Memories Carved <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cream via-gold to-white/30">
               Into Raw Earth.
             </span>
-          </motion.h1>
+          </h1>
           <p className="font-body text-white/50 text-base md:text-lg max-w-xl leading-relaxed">
             From candlelit harvest communions under the Rift Valley twilight to high-stakes executive alignment retreats, we structure spaces where individual boundaries fade into tribal clarity.
           </p>
@@ -638,12 +752,10 @@ export default function EventsPage() {
 
       {/* Main Events Display Grid Layout */}
       <section className="max-w-7xl mx-auto px-6 py-12 relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <LayoutGroup>
-          {filteredEvents.map(ev => {
+        {filteredEvents.map(ev => {
             const currentAccent = CATEGORY_COLORS[ev.category] || 'var(--gold)'
             return (
               <motion.div
-                layout
                 key={ev.id}
                 onClick={() => setActiveEvent(ev)}
                 className="bg-black/30 border border-white/5 rounded-2xl overflow-hidden cursor-pointer group hover:border-white/20 transition-all duration-500 relative flex flex-col justify-between h-[520px]"
@@ -688,7 +800,6 @@ export default function EventsPage() {
               </motion.div>
             )
           })}
-        </LayoutGroup>
       </section>
 
       {/* Bespoke Structural Package Solutions */}
@@ -716,73 +827,12 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* Immersive Event Overlay Vault Screen Modal Drawer */}
       <AnimatePresence>
         {activeEvent && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl overflow-y-auto flex justify-end"
-          >
-            <motion.div 
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 150 }}
-              className="w-full max-w-3xl bg-obsidian border-l border-white/10 min-h-screen relative p-8 md:p-12"
-            >
-              <button 
-                onClick={() => setActiveEvent(null)}
-                className="absolute top-6 right-6 w-10 h-10 rounded-full border border-white/10 bg-black/40 flex items-center justify-center text-white/60 hover:text-cream hover:border-white/30 transition-colors"
-              >
-                ✕
-              </button>
-
-              <div className="mt-8">
-                <span className="text-xs font-mono tracking-widest text-gold uppercase">{activeEvent.category}</span>
-                <h2 className="font-display text-4xl md:text-5xl font-light text-cream mt-2 mb-4">{activeEvent.title}</h2>
-                <p className="font-body text-base text-white/70 leading-relaxed mb-8">{activeEvent.description}</p>
-
-                <div className="grid grid-cols-2 gap-4 mb-8 bg-white/5 p-6 rounded-xl border border-white/5">
-                  <div>
-                    <span className="block text-[10px] uppercase text-white/30 tracking-wider">Date Mapping</span>
-                    <span className="font-body text-sm text-cream font-medium">{activeEvent.date}</span>
-                  </div>
-                  <div>
-                    <span className="block text-[10px] uppercase text-white/30 tracking-wider">Timeline Window</span>
-                    <span className="font-body text-sm text-cream font-medium">{activeEvent.time} ({activeEvent.duration})</span>
-                  </div>
-                </div>
-
-                <h3 className="font-display text-xl font-light text-cream mb-4">What's Encompassed:</h3>
-                <ul className="space-y-2 mb-12">
-                  {activeEvent.includes.map((inc, i) => (
-                    <li key={i} className="flex items-center gap-3 text-sm text-white/60 font-body">
-                      <span className="text-gold">✦</span> {inc}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="border-t border-white/10 pt-8 flex items-center justify-between">
-                  <div>
-                    <span className="block text-[10px] uppercase text-white/30 tracking-wider">Financial Vector</span>
-                    <span className="font-mono text-2xl text-cream">{activeEvent.price > 0 ? `KES ${activeEvent.price.toLocaleString()}` : 'Enquire'}</span>
-                  </div>
-                  <Link 
-                    href="/contact"
-                    className="px-8 py-4 bg-cream text-obsidian rounded-xl font-body text-xs uppercase font-bold tracking-widest hover:bg-gold transition-colors"
-                  >
-                    Lock Secure Booking Matrix
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <EventDetailDrawer event={activeEvent} onClose={() => setActiveEvent(null)} />
         )}
       </AnimatePresence>
 
-      <MoxieChat className="glass-panel" />
       <Footer />
     </main>
   )

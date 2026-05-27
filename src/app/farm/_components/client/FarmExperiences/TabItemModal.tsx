@@ -6,11 +6,13 @@
  * Saves ~8 KB from the initial hydration payload.
  */
 
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState, memo } from 'react'
 import Image from 'next/image'
 import type { TabItem } from '../../../_data/farm-data'
 import { addTabItemAction } from './actions'
 import { useJustAdded, useModalScrollLock } from './hooks'
+import { ModalPortal } from '@/components/ui/ModalPortal'
+import { useModalFocusTrap } from '@/hooks/useModalFocusTrap'
 
 interface TabItemModalProps {
   item:     TabItem
@@ -18,10 +20,16 @@ interface TabItemModalProps {
   onClose:  () => void
 }
 
-export function TabItemModal({ item, openCart, onClose }: TabItemModalProps) {
+function TabItemModalInner({ item, openCart, onClose }: TabItemModalProps) {
   const [justAdded, triggerJustAdded] = useJustAdded()
+  const [imgErr, setImgErr] = useState(false)
+  const panelRef = useModalFocusTrap(true, onClose)
 
   useModalScrollLock(onClose)
+
+  const imageSrc = imgErr
+    ? 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=900&q=80'
+    : item.image
 
   // All inline style objects memoized per item reference
   const overlayStyle = useMemo(() => ({
@@ -52,23 +60,26 @@ export function TabItemModal({ item, openCart, onClose }: TabItemModalProps) {
   const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), [])
 
   return (
+    <ModalPortal>
     <div
+      ref={panelRef}
       className="farm-modal-backdrop"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={item.name}
+      aria-labelledby="farm-tab-modal-title"
     >
       <div className="farm-tab-modal" onClick={stopProp} style={borderStyle}>
 
-        <div className="farm-tab-modal__image-wrap">
+        <div className="farm-tab-modal__image-wrap relative min-h-[280px] h-[38vh] sm:h-[44vh]">
           <Image
-            src={item.image}
+            src={imageSrc}
             alt={item.name}
             fill
             sizes="100vw"
-            style={{ objectFit: 'cover' }}
+            className="object-cover"
             priority
+            onError={() => setImgErr(true)}
           />
           <div className="farm-tab-modal__image-overlay" style={overlayStyle} />
           <button onClick={onClose} className="farm-modal__close" aria-label="Close">✕</button>
@@ -76,7 +87,7 @@ export function TabItemModal({ item, openCart, onClose }: TabItemModalProps) {
             {item.tag}
           </span>
           <div className="farm-tab-modal__image-footer">
-            <h2 className="farm-tab-modal__title font-display">{item.name}</h2>
+            <h2 id="farm-tab-modal-title" className="farm-tab-modal__title font-display">{item.name}</h2>
             {item.price && (
               <span className="farm-tab-modal__price font-display">
                 KES {item.price.toLocaleString()}
@@ -142,5 +153,8 @@ export function TabItemModal({ item, openCart, onClose }: TabItemModalProps) {
 
       </div>
     </div>
+    </ModalPortal>
   )
 }
+
+export const TabItemModal = memo(TabItemModalInner)

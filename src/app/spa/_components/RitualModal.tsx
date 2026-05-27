@@ -20,9 +20,10 @@
 import { useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import toast from 'react-hot-toast'
 
+import { ModalPortal } from '@/components/ui/ModalPortal'
 import { useCartStore } from '@/context/cartStore'
 import { RITUAL_ACCENTS, DEFAULT_ACCENT, type Ritual } from '../_data/spa-data'
 
@@ -127,6 +128,10 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
     }
   }, []) // ← intentionally empty — runs exactly once on mount/unmount
 
+  const reduceMotion = useReducedMotion()
+  const fadeTransition = reduceMotion ? { duration: 0.01 } : { duration: 0.35 }
+  const panelTransition = reduceMotion ? { duration: 0.01 } : { duration: 0.5, ease: SLOW_EASE }
+
   const addToCart = useCallback(() => {
     addItem({
       id:       ritual.id,
@@ -141,37 +146,39 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
   }, [addItem, ritual, onClose])
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.35 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={ritual.name}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl" />
-
-      {/* Panel */}
+    <ModalPortal>
       <motion.div
-        variants={MODAL_VARIANTS}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        transition={{ duration: 0.5, ease: SLOW_EASE }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative z-10 w-full max-w-6xl flex flex-col lg:flex-row rounded-[2.5rem] overflow-hidden border border-white/8 bg-[#080808] shadow-2xl"
-        style={{ maxHeight: 'calc(100svh - 48px)' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={fadeTransition}
+        className="fixed inset-0 z-[10000] flex items-center justify-center p-4 md:p-6"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ritual.name}
       >
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl" />
+
+        {/* Panel */}
+        <motion.div
+          variants={MODAL_VARIANTS}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          transition={panelTransition}
+          onClick={(e) => e.stopPropagation()}
+          className="relative z-20 w-full max-w-6xl flex flex-col lg:flex-row rounded-[2.5rem] overflow-hidden border border-white/8 bg-[#080808] shadow-2xl"
+          style={{ maxHeight: 'calc(100svh - 48px)' }}
+        >
         {/* ── Left: image panel ── */}
         <div className="relative lg:w-[42%] min-h-[260px] lg:min-h-0 flex-shrink-0 overflow-hidden">
           <Image
             src={ritual.image}
             alt={ritual.name}
             fill
+            priority
             sizes="(max-width:1024px) 100vw, 42vw"
             className="object-cover"
           />
@@ -327,5 +334,6 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
         </div>
       </motion.div>
     </motion.div>
+  </ModalPortal>
   )
 }

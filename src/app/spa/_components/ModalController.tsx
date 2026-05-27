@@ -25,14 +25,27 @@
  * registers exactly ONE.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 
+import { ModalPortal } from '@/components/ui/ModalPortal'
 import { RITUALS, type Ritual } from '../_data/spa-data'
 
 // RitualModal JS only loads when a card is first clicked
-const RitualModal = dynamic(() => import('./RitualModal'), { ssr: false })
+function RitualModalFallback() {
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9998] bg-black/90 flex items-center justify-center px-4">
+        <div className="max-w-sm rounded-3xl border border-white/10 bg-[#101010]/95 px-8 py-6 text-center text-sm text-white/80">
+          Loading ritual details…
+        </div>
+      </div>
+    </ModalPortal>
+  )
+}
+
+const RitualModal = dynamic(() => import('./RitualModal'), { ssr: false, loading: () => <RitualModalFallback /> })
 
 // O(1) lookup — built once at module load, never recreated
 const RITUAL_BY_ID = new Map(RITUALS.map((r) => [r.id, r]))
@@ -41,6 +54,22 @@ export default function ModalController() {
   const [selectedRitual, setSelectedRitual] = useState<Ritual | null>(null)
 
   const handleClose = useCallback(() => setSelectedRitual(null), [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const prefetchRitualModal = () => {
+      void import('./RitualModal')
+    }
+
+    if ('requestIdleCallback' in window) {
+      const handle = (window as any).requestIdleCallback(prefetchRitualModal)
+      return () => (window as any).cancelIdleCallback(handle)
+    }
+
+    const timer = globalThis.setTimeout(prefetchRitualModal, 1800)
+    return () => globalThis.clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     // Single delegated listener — catches clicks on ANY data-ritual-id element
@@ -60,7 +89,9 @@ export default function ModalController() {
   return (
     <AnimatePresence>
       {selectedRitual && (
-        <RitualModal ritual={selectedRitual} onClose={handleClose} />
+        <Suspense fallback={<RitualModalFallback />}>
+          <RitualModal ritual={selectedRitual} onClose={handleClose} />
+        </Suspense>
       )}
     </AnimatePresence>
   )

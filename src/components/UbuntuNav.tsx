@@ -235,54 +235,42 @@ export default function UbuntuNav({
         <div className={`ukv-main${scrolled ? " ukv-main--scrolled" : ""}`}>
 
           {/* Logo */}
-          <Link href="/" className="ukv-logo">
-            <img 
-              src="/branding/ubuntu-mark2.png" 
-              alt="Ubuntu Kreative Village Logo"
-              className="ukv-logo-img"
-              style={{ 
-                height: scrolled ? "32px" : "40px",
-                width: "auto",
-                transition: "height 0.4s ease"
-              }}
-            />
-            <div className="ukv-lt">
-              <span className={`ukv-ln${scrolled ? " ukv-ln--scrolled" : ""}`}>Ubuntu</span>
-              <span className="ukv-ls">Kreative Village · Kenya</span>
+          <Link href="/" className="ukv-logo" aria-label="Ubuntu Kreative Village home">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              <img 
+                src="/branding/ubuntu-mark2.png" 
+                alt="Ubuntu Kreative Village Mark"
+                style={{ 
+                  height: scrolled ? "40px" : "48px",
+                  width: "auto"
+                }}
+              />
+              <div style={{ 
+                width: '1px', 
+                height: scrolled ? "32px" : "40px", 
+                background: 'rgba(255,255,255,0.15)' 
+              }} />
+              <img 
+                src="/branding/ubuntu-logo-primary1.png" 
+                alt="Ubuntu Kreative Village Logo"
+                style={{ 
+                  height: scrolled ? "64px" : "80px",
+                  width: "auto",
+                  transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)',
+                  transform: 'scale(1)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.6)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              />
             </div>
           </Link>
 
-          <div className="ukv-vsep" />
-
-          {/* Village metric */}
-          <div className="ukv-metric">
-            <span className="ukv-metric-label">Today's Harvest</span>
-            <span className="ukv-metric-val">
-              {harvestCount} Ready
-              {readyCrops.length > 0 && (
-                <span className="ukv-metric-detail">
-                  ({readyCrops.slice(0, 2).join(', ')})
-                </span>
-              )}
-            </span>
-          </div>
-
-          <div className="ukv-vsep" />
-
-          {/* Status */}
-          <div className="ukv-status">
-            <span className="ukv-sdot" />
-            <span className="ukv-slabel">Guests Welcome</span>
-          </div>
-
-          <div className="ukv-vsep" />
-
-          {/* Nav + mega */}
           <nav
             ref={navRef}
             className="ukv-nav-links"
             onMouseLeave={() => setMegaOpen(false)}
           >
+
             {NAV_LINKS.map(({ label, href, key }) => (
               <Link
                 key={href}
@@ -327,6 +315,29 @@ export default function UbuntuNav({
               </div>
             </div>
           </nav>
+
+          <div className="ukv-vsep" />
+
+          {/* Village metric */}
+          <div className="ukv-metric">
+            <span className="ukv-metric-label">Today's Harvest</span>
+            <span className="ukv-metric-val">
+              {harvestCount} Ready
+              {readyCrops.length > 0 && (
+                <span className="ukv-metric-detail">
+                  ({readyCrops.slice(0, 2).join(', ')})
+                </span>
+              )}
+            </span>
+          </div>
+
+          <div className="ukv-vsep" />
+
+          {/* Status */}
+          <div className="ukv-status">
+            <span className="ukv-sdot" />
+            <span className="ukv-slabel">Guests Welcome</span>
+          </div>
 
           <div className="ukv-vsep" />
 
@@ -520,8 +531,8 @@ const CSS = `
     .ukv-ribbon { display:none }
     .ukv-main { padding:10px 16px }
     .ukv-main--scrolled { padding:6px 16px }
-    .ukv-logo { display:none }
-    .ukv-logo svg { display:none }
+    .ukv-logo { display:flex }
+    .ukv-logo-img { height:30px !important; width:auto; }
     .ukv-lt { border-left:none;padding-left:0 }
     .ukv-ln { font-size:22px }
     .ukv-ln--scrolled { font-size:18px }
@@ -579,8 +590,8 @@ const CSS = `
   .ukv-shim { position:absolute;bottom:0;left:0;height:1px;width:30%;background:linear-gradient(90deg,transparent,rgba(196,164,90,.6),transparent);animation:ukv-shim 4s ease-in-out infinite }
 
   /* Main */
-  .ukv-main { display:flex;align-items:center;padding:12px 24px;gap:14px;transition:padding .4s ease }
-  .ukv-main--scrolled { padding:8px 24px }
+  .ukv-main { display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:14px 24px;gap:16px;transition:padding .4s ease }
+  .ukv-main--scrolled { padding:10px 24px }
 
   /* Logo */
   .ukv-logo { display:flex;align-items:center;gap:12px;flex-shrink:0;text-decoration:none;position:relative }
@@ -611,8 +622,9 @@ const CSS = `
   .ukv-slabel { font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ukv-sage) }
 
   /* Nav links */
-  .ukv-nav-links { display:flex;align-items:center;flex:1;justify-content:center;position:relative }
-  .ukv-nl { font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,240,232,.48);padding:6px 12px;cursor:pointer;position:relative;white-space:nowrap;transition:color .25s,transform .25s,letter-spacing .25s;text-decoration:none;display:inline-block;font-weight:400 }
+  .ukv-nav-links { display:flex;align-items:center;flex:1 1 52%;min-width:0;justify-content:center;position:relative;gap:16px;overflow:visible;scrollbar-width:none;max-width:calc(100vw - 360px) }
+  .ukv-nav-links::-webkit-scrollbar { display:none }
+  .ukv-nl { font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,240,232,.62);padding:8px 14px;cursor:pointer;position:relative;white-space:nowrap;transition:color .25s,transform .25s,letter-spacing .25s;text-decoration:none;display:inline-block;font-weight:500 }
   .ukv-nl::before { content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:1px;background:linear-gradient(90deg, transparent, var(--ukv-gold), transparent);transition:width .3s ease }
   .ukv-nl:hover { color:rgba(245,240,232,.92);transform:translateY(-1px);letter-spacing:.19em }
   .ukv-nl:hover::before { width:calc(100% - 24px) }
@@ -636,7 +648,8 @@ const CSS = `
   .ukv-mega-item--featured { color:var(--ukv-gold);font-style:italic;font-weight:400 }
 
   /* Actions */
-  .ukv-actions { display:flex;align-items:center;gap:8px;flex-shrink:0 }
+  .ukv-actions { display:flex;align-items:center;gap:10px;flex:0 0 auto;min-width:0 }
+  .ukv-actions > * { flex-shrink:0 }
 
   /* My Journey */
   .ukv-jw { position:relative }
@@ -684,12 +697,10 @@ const CSS = `
   .ukv-jp-go:hover { opacity:.86 }
 
   /* Reserve */
-  .ukv-rbtn { display:inline-flex;align-items:center;gap:6px;padding:0 20px;height:34px;border:1px solid rgba(196,164,90,.75);border-radius:3px;background:transparent;color:var(--ukv-gold);font-size:9.5px;letter-spacing:.21em;text-transform:uppercase;font-family:'DM Sans',sans-serif;cursor:pointer;position:relative;overflow:hidden;transition:color .3s,height .4s,padding .4s,font-size .4s,border-color .3s,box-shadow .3s;white-space:nowrap;text-decoration:none;font-weight:500 }
-  .ukv-rbtn::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg, var(--ukv-gold), var(--ukv-bronze));transform:scaleX(0);transform-origin:left;transition:transform .32s cubic-bezier(.4,0,.2,1) }
-  .ukv-rbtn::after { content:'';position:absolute;inset:0;background:linear-gradient(135deg, transparent, rgba(255,255,255,.1), transparent);opacity:0;transition:opacity .3s }
-  .ukv-rbtn:hover::before { transform:scaleX(1) }
-  .ukv-rbtn:hover::after { opacity:1 }
-  .ukv-rbtn:hover { color:#101511;border-color:var(--ukv-gold);box-shadow:0 0 16px rgba(196,164,90,.4), 0 0 0 1px rgba(196,164,90,.2) }
+  .ukv-rbtn { display:inline-flex;align-items:center;gap:8px;padding:0 22px;height:38px;border:none;border-radius:999px;background:linear-gradient(135deg, rgba(196,164,90,.96), rgba(255,235,150,.96));color:#101511;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-family:'DM Sans',sans-serif;cursor:pointer;position:relative;overflow:hidden;transition:transform .28s,box-shadow .28s,background .28s;white-space:nowrap;text-decoration:none;font-weight:700;box-shadow:0 12px 24px rgba(196,164,90,.18) }
+  .ukv-rbtn::before { content:'';position:absolute;inset:0;background:rgba(255,255,255,.12);opacity:0;transition:opacity .3s }
+  .ukv-rbtn:hover::before { opacity:1 }
+  .ukv-rbtn:hover { transform:translateY(-1px);box-shadow:0 18px 30px rgba(196,164,90,.24) }
   .ukv-rbtn > * { position:relative;z-index:1;display:flex;align-items:center;gap:5px }
   .ukv-rbtn--sm { height:30px;font-size:8.5px;padding:0 16px;letter-spacing:.19em }
 

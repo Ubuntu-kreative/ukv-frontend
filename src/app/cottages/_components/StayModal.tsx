@@ -21,6 +21,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useCartStore } from '@/context/cartStore'
+import { ModalPortal } from '@/components/ModalPortal'
 import type { Stay, BoardOption } from '../_data/stays-data'
 import { BOARD_LABELS, BOARD_INCLUDES, BOARD_OPTIONS } from '../_data/stays-data'
 
@@ -145,13 +146,17 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
   ]
 
   return (
-    <>
+    <ModalPortal>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[9999] flex items-center justify-center p-0 md:p-4 lg:p-6"
         style={{ isolation: 'isolate' }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stay-modal-title"
+        aria-describedby="stay-modal-description"
       >
         {/* Backdrop */}
         <div
@@ -207,8 +212,8 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                 </span>
               </div>
 
-              <h2 className="font-display text-[clamp(2rem,5vw,4rem)] font-light leading-[0.88] uppercase tracking-tight text-white mb-2">{c.name}</h2>
-              <p className={`text-xs mb-8 ${c.status === 'available' ? 'text-[var(--neon)]' : 'text-white/25'}`}>
+              <h2 id="stay-modal-title" className="font-display text-[clamp(2rem,5vw,4rem)] font-light leading-[0.88] uppercase tracking-tight text-white mb-2">{c.name}</h2>
+              <p id="stay-modal-description" className={`text-xs mb-8 ${c.status === 'available' ? 'text-[var(--neon)]' : 'text-white/25'}`}>
                 {c.status === 'available' ? '● Available' : '○ Currently Reserved'}
               </p>
 
@@ -399,7 +404,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </ModalPortal>
   )
 }
 

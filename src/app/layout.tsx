@@ -9,6 +9,7 @@ import './globals.css'
 import ClientLayout from '@/components/ClientLayout'
 import Cursor from '@/components/Cursor'
 import PageTransition from '@/components/PageTransition'
+import MoxieConcierge from '@/components/MoxieChat'
 
 
 import { CartProvider } from '@/context/CartContext'
@@ -186,6 +187,9 @@ export default function RootLayout({
 
             {/* SINGLE authoritative cart panel */}
             <CartPanel />
+
+            {/* Moxie — site-wide concierge (lazy, isolated) */}
+            <MoxieConcierge />
           </ClientLayout>
         </CartProvider>
 

@@ -59,7 +59,7 @@
   min-height:  100svh;
   display:     flex;
   align-items: center;
-   padding-top: calc(var(--nav-height, 72px) + 12px);
+  padding-top: calc(var(--ukv-nav-height, 7.5rem) + 1rem);
   overflow:    hidden;
 }
 

@@ -1,6 +1,5 @@
 import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
-import MoxieChat from '@/components/MoxieChat'
 
 const SECTIONS = [
   {
@@ -128,8 +127,7 @@ export default function PrivacyPolicyPage() {
 
       {/* ── Hero ── */}
       <section
-        className="relative px-6 md:px-10 pb-16"
-        style={{ paddingTop: '120px' }}
+        className="relative px-6 md:px-10 page-hero-offset pb-16"
       >
         <div
           className="absolute inset-0"
@@ -262,7 +260,6 @@ export default function PrivacyPolicyPage() {
       </section>
 
       <Footer />
-      <MoxieChat />
     </main>
   )
 }

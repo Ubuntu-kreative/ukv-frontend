@@ -100,7 +100,7 @@ export default function SpaHero() {
         </div>
 
         {/* Hero content */}
-        <div className="relative flex-1 flex items-center justify-center px-6 pt-[120px] pb-16" style={{ zIndex: 10 }}>
+        <div className="relative flex-1 flex items-center justify-center px-6 page-hero-offset pb-16" style={{ zIndex: 10 }}>
           <div className="max-w-6xl w-full mx-auto text-center">
 
             <span className="hero-fade-up inline-block px-6 py-2.5 mb-10 border border-gold/20 bg-black/35 backdrop-blur-xl text-gold uppercase tracking-[0.35em] text-[10px] rounded-full">

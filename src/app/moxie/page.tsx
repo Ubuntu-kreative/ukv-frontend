@@ -16,7 +16,7 @@ import {
   Trees,
   Waves,
 } from 'lucide-react'
-import MoxieChat from '@/components/moxie/MoxieChat'
+import MoxieConcierge from '@/components/moxie/MoxieConcierge'
 
 const retreatTypes = [
   {
@@ -363,7 +363,7 @@ export default function MoxiePage() {
               </div>
             </div>
 
-            <MoxieChat className="rounded-[2rem] border border-white/10 bg-[#0d0d0d] shadow-2xl shadow-black/40" inline />
+            <MoxieConcierge className="rounded-[2rem] border border-white/10 bg-[#0d0d0d] shadow-2xl shadow-black/40" inline />
           </div>
         </div>
       </section>

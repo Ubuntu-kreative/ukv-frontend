@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildSystemPrompt }         from '@/lib/moxie/systemPrompt'
 import { getMenuSummaryForAI }       from '@/lib/moxie/menu'
+import { getEcosystemSnapshot }      from '@/lib/moxie/ecosystemSnapshot'
 import tools from '@/lib/moxie/tools'
 
 // ── Runtime ──────────────────────────────────────────────────────────
@@ -73,9 +74,11 @@ interface Message {
 }
 
 interface RequestBody {
-  messages:  Message[]
-  sessionId: string
-  pathname:  string
+  messages:     Message[]
+  sessionId:    string
+  pathname:     string
+  guest?:       { name?: string; email?: string; phone?: string }
+  cartSummary?: { name: string; qty: number; price: number }[]
 }
 
 // ── Tool Definitions ──────────────────────────────────────────────────
@@ -118,7 +121,7 @@ const MOXIE_TOOLS = [
           tag:      { type: 'string', description: 'Display tag' },
           unit:     { type: 'string', description: 'Price unit e.g. / person' },
         },
-        required: ['itemName', 'price', 'qty', 'category'],
+        required: ['itemName'],
       },
     },
   },
@@ -231,7 +234,7 @@ async function callLLM(
 // ── Route Handler ─────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const { messages, sessionId, pathname }: RequestBody = await req.json()
+    const { messages, sessionId, pathname, guest, cartSummary }: RequestBody = await req.json()
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Invalid messages' }, { status: 400 })
@@ -260,12 +263,44 @@ export async function POST(req: NextRequest) {
     const memory    = getMemory(sessionId)
     const currentHr = new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
 
+    let cartContext = ''
+    if (cartSummary?.length) {
+      cartContext =
+        '\n\n[GUEST_CART]\n' +
+        cartSummary
+          .map((i) => `- ${i.name} × ${i.qty} — KES ${(i.price * i.qty).toLocaleString()}`)
+          .join('\n') +
+        '\n[/GUEST_CART]\n'
+    }
+
+    if (guest?.name || guest?.phone) {
+      const guestFacts = [
+        guest.name ? `Guest name: ${guest.name}` : '',
+        guest.phone ? `Guest phone: ${guest.phone}` : '',
+        guest.email ? `Guest email: ${guest.email}` : '',
+      ].filter(Boolean)
+      if (guestFacts.length) {
+        sessionMemory.set(
+          sessionId,
+          [memory, ...guestFacts].filter(Boolean).join('\n').slice(-800),
+        )
+      }
+    }
+
+    const ecosystemContext = getEcosystemSnapshot(pathname || '/')
+
     // ── Build enriched system prompt ──
-    const systemPrompt = buildSystemPrompt({
-      pathname,
-      guestMemory: memory || undefined,
-      currentTime: currentHr,
-    }) + menuContext
+    const systemPrompt =
+      buildSystemPrompt({
+        pathname,
+        guestMemory: getMemory(sessionId) || undefined,
+        currentTime: currentHr,
+      }) +
+      menuContext +
+      cartContext +
+      '\n\n[LIVE_CATALOGUE]\n' +
+      ecosystemContext +
+      '\n[/LIVE_CATALOGUE]\n'
 
     // ── Call LLM ──
     const { text, toolCall } = await callLLM(
@@ -282,8 +317,11 @@ export async function POST(req: NextRequest) {
           const section = (toolCall.args as any)?.section
           toolResult = { items: getMenuSummaryForAI({ section }) }
         } else if (toolCall.name === 'add_to_cart') {
-          const args = toolCall.args as any
-          const res = await tools.tool_add_menu_to_cart({ query: args.itemName || args.itemId, qty: args.qty || 1 })
+          const args = toolCall.args as Record<string, unknown>
+          const res = await tools.tool_add_menu_to_cart({
+            query: String(args.itemName || args.itemId || ''),
+            qty: Number(args.qty) || 1,
+          })
           toolResult = res
         } else if (toolCall.name === 'create_reservation') {
           const args = toolCall.args as any

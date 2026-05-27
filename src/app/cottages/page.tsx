@@ -56,7 +56,7 @@ export default function CottagesPage() {
           have been replaced with CSS @keyframes in globals.css.
           This saves ~40kB of Framer Motion from the initial bundle.
       ─────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center justify-center pt-24 md:pt-28 pb-16 px-4 sm:px-6">
+      <section className="relative min-h-screen flex items-center justify-center page-hero-offset pb-16 px-4 sm:px-6">
         {/* Background image */}
         <div className="absolute inset-0 overflow-hidden">
           <Image

@@ -20,7 +20,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import {
-  useState, useMemo, useCallback, lazy, Suspense,
+  useState, useMemo, useCallback, Suspense,
 } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
@@ -33,9 +33,19 @@ import {
 import { StayCard } from './StayCard'
 
 // ── Lazy imports — 0 bytes until needed ───────────────────────────────
+function StayModalFallback() {
+  return (
+    <div className="fixed inset-0 z-[9998] bg-black/90 flex items-center justify-center px-4">
+      <div className="max-w-md rounded-3xl border border-white/10 bg-[#101010]/95 px-8 py-6 text-center text-sm text-white/80">
+        Loading residence details…
+      </div>
+    </div>
+  )
+}
+
 const StayModal = dynamic(
   () => import('./StayModal').then((m) => ({ default: m.StayModal })),
-  { ssr: false }
+  { ssr: false, loading: () => <StayModalFallback /> }
 )
 
 // Penthouse showcase is heavy (image + motion) — defer it
@@ -320,14 +330,16 @@ export function StaysGrid() {
       {/* ── MODAL — dynamically imported, only mounts when needed ── */}
       <AnimatePresence>
         {selectedStay && (
-          <StayModal
-            c={selectedStay}
-            onClose={handleCloseModal}
-            selectedBoard={globalBoard}
-            onBoardChange={handleBoardChange}
-            guests={modalGuests}
-            onGuestsChange={handleGuestsChange}
-          />
+          <Suspense fallback={<StayModalFallback />}>
+            <StayModal
+              c={selectedStay}
+              onClose={handleCloseModal}
+              selectedBoard={globalBoard}
+              onBoardChange={handleBoardChange}
+              guests={modalGuests}
+              onGuestsChange={handleGuestsChange}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
     </>

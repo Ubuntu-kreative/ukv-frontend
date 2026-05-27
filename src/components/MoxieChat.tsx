@@ -1,7 +1,11 @@
-"use client"
+'use client'
 
 import dynamic from 'next/dynamic'
 
-const Moxie = dynamic(() => import('./moxie/MoxieChat'), { ssr: false })
+/** Global luxury concierge — presence + chat on demand (lazy-loaded) */
+const MoxieConcierge = dynamic(() => import('./moxie/MoxieConcierge'), {
+  ssr: false,
+  loading: () => null,
+})
 
-export default Moxie
+export default MoxieConcierge

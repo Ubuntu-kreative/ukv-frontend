@@ -26,7 +26,6 @@ import {
 
 import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
-import MoxieChat from '@/components/MoxieChat'
 import Link from 'next/link'
 
 import {
@@ -836,7 +835,7 @@ export default function GalleryPage() {
       <MagneticCursor accentColor={activeExhibit?.accent || 'var(--gold)'} />
 
       {/* Cinematic Hero */}
-      <section className="relative pt-32 pb-20 px-6 max-w-7xl mx-auto z-10">
+      <section className="relative page-hero-offset pb-20 px-6 max-w-7xl mx-auto z-10">
         <span className="text-gold tracking-[0.4em] uppercase text-xs block mb-3 font-medium">
           Ubuntu Village OS // Art & Culture
         </span>
@@ -897,7 +896,6 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      <MoxieChat className="glass-panel" />
       <Footer />
 
       {/* Fullscreen Architectural Interactive Overlays */}

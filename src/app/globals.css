@@ -77,6 +77,25 @@
   --border:  rgba(200, 168, 75, 0.14);
   --border2: rgba(237, 230, 211, 0.08);
 
+  /* Fixed LuxuryNav stack (status bar + main nav) — modals use for top padding */
+  --ukv-nav-height: 7.5rem;
+
+  .page-hero-offset {
+    padding-top: calc(var(--ukv-nav-height, 7.5rem) + 1rem);
+  }
+
+  @media (min-width: 768px) {
+    .page-hero-offset {
+      padding-top: calc(var(--ukv-nav-height, 7.5rem) + 1.5rem);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-hero-offset {
+      padding-top: calc(var(--ukv-nav-height, 7.5rem) + 2.5rem);
+    }
+  }
+
   /* ── Typography — runtime CSS vars from Next.js font loader ── */
   /*    Fallbacks below are compile-time only; injected vars take precedence */
   --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;

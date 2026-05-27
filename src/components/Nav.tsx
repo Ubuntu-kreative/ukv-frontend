@@ -1,5 +1,4 @@
 'use client'
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Ubuntu Kreative Village — Navigation  (production merge)
 //
@@ -22,7 +21,6 @@
 //   • Gold underline beneath nav bar on scroll
 //   • Global shimmer CSS keyframe
 // ─────────────────────────────────────────────────────────────────────────────
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -30,7 +28,6 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore } from '@/context/cartStore'
 import WeatherWidget from '@/components/WeatherWidget'
-
 // ─────────────────────────────────────────────────────────────────────────────
 // NAV LINKS — original 8, preserved exactly
 // ─────────────────────────────────────────────────────────────────────────────
@@ -44,7 +41,6 @@ const NAV_LINKS = [
   { label: 'Gallery',      href: '/gallery'    },
   { label: 'About',        href: '/about'      },
 ]
-
 // ─────────────────────────────────────────────────────────────────────────────
 // STATUS BAR — rotating ecosystem metrics (upgrade from v2)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -56,7 +52,6 @@ const STATUS_METRICS = [
   '24 Animals tracked',
   'FarmERP synced',
 ]
-
 // ─────────────────────────────────────────────────────────────────────────────
 // LIVE DOT
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,7 +69,6 @@ function LiveDot({ size = 6 }: { size?: number }) {
     </span>
   )
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // CART ICON SVG
 // ─────────────────────────────────────────────────────────────────────────────
@@ -87,7 +81,6 @@ function CartIcon({ color = 'currentColor' }: { color?: string }) {
     </svg>
   )
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // CART BADGE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -114,7 +107,6 @@ function CartBadge({ count }: { count: number }) {
     </span>
   )
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // RESERVE BUTTON — pill, shimmer, glass (upgrade from v2)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -143,7 +135,7 @@ function ReserveButton({ onClick }: { onClick?: () => void }) {
     >
       {hov && (
         <span
-          aria-hidden
+  
           style={{
             position:      'absolute',
             inset:         0,
@@ -169,7 +161,6 @@ function ReserveButton({ onClick }: { onClick?: () => void }) {
     </Link>
   )
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // DESKTOP NAV LINK — refined luxury typography + active glow (upgrade v2)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -209,7 +200,6 @@ function DesktopNavLink({
       >
         {label}
       </span>
-
       {/* Active — solid gold underline */}
       <span
         style={{
@@ -223,7 +213,6 @@ function DesktopNavLink({
           display:    'block',
         }}
       />
-
       {/* Hover — neon underline, 25% reduced saturation vs original */}
       {!active && (
         <span
@@ -242,79 +231,49 @@ function DesktopNavLink({
     </Link>
   )
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
-// LOGO — transparent PNG, shimmer sweep, scroll parallax (upgrade v2)
+// LOGO — transparent PNG, image + logo side by side with logo zoom only
 // ─────────────────────────────────────────────────────────────────────────────
 function LogoImage({ scrolled }: { scrolled: boolean }) {
-  const [hovered, setHovered] = useState(false)
-
-  const baseFilter = [
-    'brightness(1.08)',
-    'contrast(1.12)',
-    'saturate(1.08)',
-    'drop-shadow(0 2px 10px rgba(0,0,0,0.45))',
-    'drop-shadow(0 0 10px rgba(212,168,83,0.10))',
-  ].join(' ')
-
-  const hoverFilter = [
-    'brightness(1.14)',
-    'contrast(1.18)',
-    'saturate(1.14)',
-    'drop-shadow(0 4px 18px rgba(0,0,0,0.52))',
-    'drop-shadow(0 0 18px rgba(212,168,83,0.20))',
-  ].join(' ')
-
   return (
     <div
-      className="ukv-logo-wrapper"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
-        position:       'relative',
         display:        'inline-flex',
         alignItems:     'center',
-        overflow:       'hidden',
+        gap:            24,
         transform:      scrolled ? 'translateY(-1px) scale(0.97)' : 'translateY(0px) scale(1)',
         transformOrigin: 'left center',
         transition:     'transform 0.45s cubic-bezier(0.16,1,0.3,1)',
       }}
     >
-      <span
-        aria-hidden
-        className={hovered ? 'ukv-shimmer ukv-shimmer--active' : 'ukv-shimmer'}
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2 }}
-      />
-
-      <Image
-        src="/branding/ubuntu-logo-primary.png"
-        alt="Ubuntu Kreative Village"
-        width={480}
-        height={160}
-        priority
+      <img
+        src="/branding/ubuntu-mark2.png"
+        alt="Ubuntu Kreative Village Mark"
         style={{
-          width:          scrolled ? '190px' : '240px',
-          height:         'auto',
-          maxHeight:      scrolled ? '56px' : '72px',
-          objectFit:      'contain',
-          objectPosition: 'left center',
-          filter:         hovered ? hoverFilter : baseFilter,
-          transform:      hovered ? 'scale(1.05)' : 'scale(1)',
-          transformOrigin: 'left center',
-          transition: [
-            'width 0.45s cubic-bezier(0.16,1,0.3,1)',
-            'max-height 0.45s cubic-bezier(0.16,1,0.3,1)',
-            'transform 0.45s cubic-bezier(0.16,1,0.3,1)',
-            'filter 0.35s ease',
-          ].join(', '),
-          willChange:      'width, max-height, transform, filter',
-          imageRendering:  '-webkit-optimize-contrast' as React.CSSProperties['imageRendering'],
+          height: scrolled ? "48px" : "56px",
+          width: "auto"
+        }}
+      />
+      <div style={{
+        width: '1px',
+        height: scrolled ? "40px" : "48px",
+        background: 'rgba(255,255,255,0.15)'
+      }} />
+      <img
+        src="/branding/ubuntu-logo-primary1.png"
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.6)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        alt="Ubuntu Kreative Village Logo"
+        style={{
+          height: scrolled ? "72px" : "90px",
+          width: "auto",
+          transform: 'scale(1)',
+          transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)',
         }}
       />
     </div>
   )
 }
-
 // Mobile logo fallback — text-based if no mark image available
 function MobileLogoMark() {
   return (
@@ -347,22 +306,18 @@ function MobileLogoMark() {
     </div>
   )
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN NAV COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Nav() {
   const pathname = usePathname()
-
   const [scrolled,  setScrolled]  = useState(false)
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [mounted,   setMounted]   = useState(false)
   const [statusIdx, setStatusIdx] = useState(0)
   const [statusVis, setStatusVis] = useState(true)
-
   // Original cart logic — preserved exactly
   const { items, openCart } = useCartStore()
-
   // ── Scroll detection ──────────────────────────────────────────────────────
   useEffect(() => {
     setMounted(true)
@@ -370,13 +325,11 @@ export default function Nav() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
   // ── Body lock when mobile menu open — original preserved ─────────────────
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
-
   // ── Status bar rotator (upgrade v2) ──────────────────────────────────────
   useEffect(() => {
     const interval = setInterval(() => {
@@ -388,18 +341,14 @@ export default function Nav() {
     }, 3500)
     return () => clearInterval(interval)
   }, [])
-
   // ── Close mobile menu on route change ────────────────────────────────────
   useEffect(() => { setMenuOpen(false) }, [pathname])
-
   const navBg = scrolled
     ? 'rgba(5,7,5,0.94)'
     : 'linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.0) 100%)'
-
   const navBorder = scrolled
     ? '1px solid rgba(212,168,83,0.10)'
     : '1px solid transparent'
-
   return (
     <>
       {/* ═══════════════════════════════════════════════════════════════════ */}
@@ -410,7 +359,6 @@ export default function Nav() {
           0%   { transform: translateX(-120%); }
           100% { transform: translateX(140%); }
         }
-
         .ukv-shimmer {
           background: linear-gradient(
             118deg,
@@ -431,7 +379,6 @@ export default function Nav() {
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
-
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* TOP STATUS BAR                                                      */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
@@ -451,7 +398,7 @@ export default function Nav() {
       >
         {/* Ambient gold glow */}
         <div
-          aria-hidden
+  
           style={{
             position:      'absolute',
             inset:         0,
@@ -459,7 +406,6 @@ export default function Nav() {
             pointerEvents: 'none',
           }}
         />
-
         <div className="relative flex items-center gap-4 md:gap-6 px-4 overflow-hidden">
           {/* Rotating status metric */}
           <div className="flex items-center gap-2">
@@ -479,9 +425,7 @@ export default function Nav() {
               {STATUS_METRICS[statusIdx]}
             </span>
           </div>
-
           <span className="text-white/10 text-[8px] hidden md:block">◆</span>
-
           {/* Motto — original preserved */}
           <em
             className="font-display not-italic hidden md:block"
@@ -496,9 +440,7 @@ export default function Nav() {
           >
             &ldquo;Refresh your soul, ground your spirit&rdquo;
           </em>
-
           <span className="text-white/10 text-[8px] hidden lg:block">◆</span>
-
           <span
             className="font-body uppercase hidden lg:block"
             style={{
@@ -512,7 +454,6 @@ export default function Nav() {
           </span>
         </div>
       </div>
-
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* MAIN NAVIGATION                                                     */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
@@ -538,7 +479,7 @@ export default function Nav() {
       >
         {/* Gold underline beneath nav on scroll */}
         <div
-          aria-hidden
+  
           style={{
             position:      'absolute',
             bottom:        0,
@@ -552,12 +493,9 @@ export default function Nav() {
             pointerEvents: 'none',
           }}
         />
-
         <div className="max-w-8xl mx-auto flex items-center justify-between gap-4">
-
           {/* ── LEFT: LOGO + LIVE STATUS ── */}
           <div className="flex items-center gap-6 xl:gap-10 min-w-0">
-
             {/* Logo link — overflow:hidden clips shimmer cleanly */}
             <Link
               href="/"
@@ -575,7 +513,6 @@ export default function Nav() {
             >
               <LogoImage scrolled={scrolled} />
             </Link>
-
             {/* Desktop XL live status + weather — original placement preserved */}
             <div className="hidden xl:flex items-center gap-3 border-l border-white/10 pl-6 h-8">
               <div className="flex items-center gap-2">
@@ -598,10 +535,8 @@ export default function Nav() {
               <WeatherWidget />
             </div>
           </div>
-
           {/* ── CENTRE + RIGHT: DESKTOP NAV LINKS + ACTIONS ── */}
           <div className="hidden lg:flex items-center gap-5 xl:gap-7">
-
             {/* All 8 links — original preserved */}
             <nav className="flex items-center gap-4 xl:gap-5 overflow-x-auto no-scrollbar">
               {NAV_LINKS.map(link => (
@@ -613,7 +548,6 @@ export default function Nav() {
                 />
               ))}
             </nav>
-
             {/* Vertical divider */}
             <div
               style={{
@@ -623,7 +557,6 @@ export default function Nav() {
                 flexShrink: 0,
               }}
             />
-
             {/* CART — original logic preserved, refined styling */}
             <button
               onClick={openCart}
@@ -656,20 +589,16 @@ export default function Nav() {
               {/* Cart badge — original count logic, refined design */}
               {mounted && <CartBadge count={items.length} />}
             </button>
-
             {/* RESERVE — original link to /contact, upgraded pill design */}
             <ReserveButton />
           </div>
-
           {/* ── MOBILE ACTIONS ── */}
           <div className="flex lg:hidden items-center gap-4">
-
             {/* Mobile Farm Pulse + WeatherWidget — original preserved */}
             <div className="flex items-center gap-2">
               <LiveDot size={5} />
               <WeatherWidget />
             </div>
-
             {/* Mobile cart button — original logic preserved */}
             {mounted && items.length > 0 && (
               <button
@@ -710,7 +639,6 @@ export default function Nav() {
                 </span>
               </button>
             )}
-
             {/* Hamburger — original animation logic preserved */}
             <button
               className="flex flex-col justify-center gap-[5px] p-2 z-[130] relative"
@@ -736,10 +664,8 @@ export default function Nav() {
               ))}
             </button>
           </div>
-
         </div>
       </motion.nav>
-
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* MOBILE FULL-SCREEN MENU — framer-motion AnimatePresence (upgrade)  */}
       {/* All 8 original links preserved · staggered entry · gold active     */}
@@ -760,7 +686,7 @@ export default function Nav() {
           >
             {/* Ambient aurora top */}
             <div
-              aria-hidden
+      
               style={{
                 position:      'absolute',
                 inset:         0,
@@ -770,7 +696,7 @@ export default function Nav() {
             />
             {/* Neon bottom sweep */}
             <div
-              aria-hidden
+      
               style={{
                 position:      'absolute',
                 bottom:        0,
@@ -781,9 +707,7 @@ export default function Nav() {
                 pointerEvents: 'none',
               }}
             />
-
             <div className="relative h-full flex flex-col justify-center items-center px-8 py-20 overflow-hidden w-full">
-
               {/* Logo mark */}
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -793,7 +717,6 @@ export default function Nav() {
               >
                 <MobileLogoMark />
               </motion.div>
-
               {/* All 8 nav links — original list, staggered entry */}
               <nav className="flex flex-col items-center gap-5 mb-10">
                 {NAV_LINKS.map((link, i) => {
@@ -833,7 +756,6 @@ export default function Nav() {
                   )
                 })}
               </nav>
-
               {/* Thin gold divider */}
               <motion.div
                 initial={{ scaleX: 0 }}
@@ -846,7 +768,6 @@ export default function Nav() {
                   marginBottom: 24,
                 }}
               />
-
               {/* Bottom actions — original logic preserved */}
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
@@ -871,10 +792,8 @@ export default function Nav() {
                 >
                   View Cart ({mounted ? items.length : 0})
                 </button>
-
                 {/* Reserve — upgraded pill */}
                 <ReserveButton onClick={() => setMenuOpen(false)} />
-
                 {/* Motto — original preserved */}
                 <p
                   className="font-display italic text-center mt-2"
@@ -887,7 +806,6 @@ export default function Nav() {
                   &ldquo;Refresh your soul, ground your spirit&rdquo;
                 </p>
               </motion.div>
-
             </div>
           </motion.div>
         )}

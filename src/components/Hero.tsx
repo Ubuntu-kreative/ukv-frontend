@@ -23,7 +23,6 @@ import {
   motion,
   useScroll,
   useTransform,
-  useSpring,
   AnimatePresence,
 } from 'framer-motion'
 
@@ -58,13 +57,9 @@ export default function Hero() {
   // ── Scroll-driven parallax ────────────────────────────────
   const { scrollY } = useScroll()
 
-  // Video drifts DOWN as user scrolls (classic parallax)
-  const yVideoRaw = useTransform(scrollY, [0, 900], [0, 130])
-  const yVideo    = useSpring(yVideoRaw, { stiffness: 60, damping: 20 })
-
-  // Content floats UP as user scrolls
-  const yContentRaw = useTransform(scrollY, [0, 900], [0, -70])
-  const yContent    = useSpring(yContentRaw, { stiffness: 60, damping: 20 })
+  // Direct transforms (no useSpring — springs keep rAF loops alive while scrolling)
+  const yVideo    = useTransform(scrollY, [0, 900], [0, 130])
+  const yContent  = useTransform(scrollY, [0, 900], [0, -70])
 
   // Subtle opacity fade on scroll
   const heroOpacity = useTransform(scrollY, [0, 600], [1, 0])
@@ -98,14 +93,15 @@ export default function Hero() {
           muted
           loop
           playsInline
+          preload="auto"
           onCanPlay={() => setVideoReady(true)}
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             opacity:    videoReady ? 1 : 0,
             transition: 'opacity 1.8s ease',
           }}
-        >
-          <source src="/videos/Hero-main01.mp4" type="video/mp4" />
+         >
+          <source src="/videos/Hero-Main01.mp4" type="video/mp4" />
         </video>
       </motion.div>
 
@@ -193,7 +189,7 @@ export default function Hero() {
       {/* ── HERO CONTENT with scroll parallax ─────────────── */}
       {/* pt-28 md:pt-32 clears the fixed nav (typically 64–80px tall) */}
       <motion.div
-        className="relative w-full max-w-8xl mx-auto px-6 md:px-10 pt-28 md:pt-32 pb-28 md:pb-36"
+        className="relative w-full max-w-8xl mx-auto px-6 md:px-10 page-hero-offset pb-28 md:pb-36"
         style={{ zIndex: 5, y: yContent, opacity: heroOpacity }}
       >
 

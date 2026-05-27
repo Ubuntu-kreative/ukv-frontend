@@ -12,7 +12,7 @@
  *  • No Framer Motion in grid-level renders
  */
 
-import { useState, useCallback, useMemo, lazy, Suspense } from 'react'
+import { useState, useCallback, useMemo, useEffect, lazy, Suspense } from 'react'
 import { useCartStore } from '@/context/cartStore'
 import { EXPERIENCE_ITEMS, TAB_DATA, type ExperienceItem, type TabItem, type FarmTab } from '../../../_data/farm-data'
 import { addExperienceAction, addTabItemAction } from './actions'
@@ -23,6 +23,20 @@ import { FloatingCartButton } from './FloatingCartButton'
 // ─── LAZY MODALS — zero bundle cost until first open ──────────────────────────
 // Dynamic import means modal code is NOT included in the initial JS chunk.
 // Each modal is ~8–12 KB; deferring them saves ~20 KB from the initial parse.
+function FarmModalFallback() {
+  return (
+    <div className="farm-modal-backdrop">
+      <div className="farm-modal animate-pulse" style={{ minHeight: '320px' }}>
+        <div className="farm-modal__image-panel bg-white/5" />
+        <div className="farm-modal__content">
+          <div className="h-6 w-2/3 bg-white/10 rounded" />
+          <div className="h-4 w-full bg-white/5 rounded mt-4" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const ExperienceModal = lazy(() =>
   import('./ExperienceModal').then(m => ({ default: m.ExperienceModal }))
 )
@@ -62,6 +76,11 @@ export default function FarmExperiences() {
   const closeExpModal  = useCallback(() => setModalItem(null),    [])
   const closeTabModal  = useCallback(() => setTabModalItem(null), [])
 
+  useEffect(() => {
+    void import('./ExperienceModal')
+    void import('./TabItemModal')
+  }, [])
+
   return (
     <>
       {/* ── Experience cards grid ── */}
@@ -84,7 +103,7 @@ export default function FarmExperiences() {
 
       {/* ── Modals — rendered only when active, lazy-loaded chunks ── */}
       {modalItem && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<FarmModalFallback />}>
           <ExperienceModal
             item={modalItem}
             inCart={isInCart(modalItem.id)}
@@ -95,7 +114,7 @@ export default function FarmExperiences() {
         </Suspense>
       )}
       {tabModalItem && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<FarmModalFallback />}>
           <TabItemModal
             item={tabModalItem}
             openCart={openCart}

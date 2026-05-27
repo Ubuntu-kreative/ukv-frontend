@@ -64,6 +64,7 @@ import {
   useRef,
   useEffect,
   useState,
+  Suspense,
 } from 'react'
 import dynamic from 'next/dynamic'
 
@@ -82,7 +83,22 @@ import {
 // ─── DYNAMIC IMPORT — LogModal ────────────────────────────────────────────────
 // ssr:false: modal uses document.body, window.addEventListener — server-unsafe.
 // Only loaded when selectedDish becomes non-null, so it never blocks page load.
-const LogModal = dynamic(() => import('./LogModal'), { ssr: false })
+function LogModalFallback() {
+  return (
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/95 backdrop-blur-2xl p-0 sm:p-4 md:p-6 isolate">
+      <div className="relative w-full max-w-6xl h-[95dvh] sm:h-[90vh] flex flex-col md:flex-row bg-[#060606] overflow-hidden rounded-t-3xl sm:rounded-2xl border border-white/[0.06] animate-pulse">
+        <div className="md:w-[46%] h-56 sm:h-72 md:h-full flex-shrink-0 bg-white/5" />
+        <div className="flex-1 p-8 space-y-4">
+          <div className="h-8 w-2/3 bg-white/10 rounded" />
+          <div className="h-4 w-full bg-white/5 rounded" />
+          <div className="h-4 w-5/6 bg-white/5 rounded" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const LogModal = dynamic(() => import('./LogModal'), { ssr: false, loading: () => <LogModalFallback /> })
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 
@@ -222,6 +238,11 @@ export default function MenuGrid() {
     () => CATEGORIES.filter(c => c.id !== 'all' && groupedDishes.has(c.id)),
     [groupedDishes]
   )
+
+  // Preload modal chunk so first open is instant (no blank Suspense hang)
+  useEffect(() => {
+    void import('./LogModal')
+  }, [])
 
   // ── Sticky shadow — no scroll listener, uses IntersectionObserver ──────────
   useEffect(() => {
@@ -379,10 +400,12 @@ export default function MenuGrid() {
           onClose — stable callback that clears selectedDish
       */}
       {selectedDish && (
-        <LogModal
-          item={selectedDish}
-          onClose={handleCloseLog}
-        />
+        <Suspense fallback={<LogModalFallback />}>
+          <LogModal
+            item={selectedDish}
+            onClose={handleCloseLog}
+          />
+        </Suspense>
       )}
     </div>
   )

@@ -225,7 +225,7 @@ function SectionHeader({
       </h2>
       <div className="farm-log-section-divider" />
       {badge && (
-        <span className={`farm-log-badge ${badgeClass ?? ''}`}>{badge}</span>
+        <span className={`farm-log-section-pill ${badgeClass ?? ''}`}>{badge}</span>
       )}
     </div>
   )
@@ -251,13 +251,13 @@ export default function FarmLog() {
         </h2>
         <p className="farm-log-intro__body" data-reveal="up" data-reveal-delay="160">
           Every animal, crop, and field tracked in real time via FarmERP. This data powers your dinner,
-          your spa treatments, and Moxie's provenance answers.
+          your spa treatments, and Moxie&apos;s provenance answers.
         </p>
       </div>
 
       {/* ── Livestock ── */}
       <section className="farm-log-section" aria-labelledby="log-livestock">
-        <SectionHeader id="log-livestock" title="Livestock" color="var(--neon)" badge="● Live" badgeClass="farm-log-badge--live" />
+        <SectionHeader id="log-livestock" title="Livestock" color="var(--neon)" badge="● Live" badgeClass="farm-log-section-pill--live" />
         <div className="farm-log-grid">
           {LIVESTOCK.map((animal, i) => (
             <LivestockCard key={animal.id} animal={animal} index={i} />
@@ -267,7 +267,7 @@ export default function FarmLog() {
 
       {/* ── Crops ── */}
       <section className="farm-log-section" aria-labelledby="log-crops">
-        <SectionHeader id="log-crops" title="Crops" color="var(--gold)" badge="↻ Synced" badgeClass="farm-log-badge--sync" />
+        <SectionHeader id="log-crops" title="Crops" color="var(--gold)" badge="↻ Synced" badgeClass="farm-log-section-pill--sync" />
         <div className="farm-log-grid farm-log-grid--crops">
           {CROPS.map((crop, i) => (
             <CropCard key={crop.name} crop={crop} index={i} />

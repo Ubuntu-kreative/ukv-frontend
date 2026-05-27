@@ -1,11 +1,13 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, memo } from 'react'
 import type { MouseEvent } from 'react'
 import Image from 'next/image'
 import type { ExperienceItem } from '../../../_data/farm-data'
 import { addExperienceAction } from './actions'
 import { useJustAdded, useModalScrollLock } from './hooks'
+import { ModalPortal } from '@/components/ui/ModalPortal'
+import { useModalFocusTrap } from '@/hooks/useModalFocusTrap'
 
 interface ExperienceModalProps {
   item:     ExperienceItem
@@ -15,13 +17,19 @@ interface ExperienceModalProps {
   onClose:  () => void
 }
 
-export function ExperienceModal({
+function ExperienceModalInner({
   item, inCart, cartQty, openCart, onClose,
 }: ExperienceModalProps) {
   const [qty, setQty] = useState(1)
+  const [imgErr, setImgErr] = useState(false)
   const [justAdded, triggerJustAdded] = useJustAdded()
+  const panelRef = useModalFocusTrap(true, onClose)
 
   useModalScrollLock(onClose)
+
+  const imageSrc = imgErr
+    ? 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=900&q=80'
+    : item.image
 
   const handleAdd = useCallback(() => {
     addExperienceAction(item, qty)
@@ -33,21 +41,25 @@ export function ExperienceModal({
   const stopProp = useCallback((e: MouseEvent<HTMLDivElement>) => e.stopPropagation(), [])
 
   return (
+    <ModalPortal>
     <div
+      ref={panelRef}
       className="farm-modal-backdrop"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={item.name}
+      aria-labelledby="farm-exp-modal-title"
     >
       <div className="farm-modal" onClick={stopProp}>
-        <div className="farm-modal__image-panel">
+        <div className="farm-modal__image-panel relative min-h-[260px] h-[32vh] md:h-[38vh]">
           <Image
-            src={item.image}
+            src={imageSrc}
             alt={item.name}
             fill
+            priority
             sizes="(max-width:700px) 100vw, 440px"
-            style={{ objectFit: 'cover' }}
+            className="object-cover"
+            onError={() => setImgErr(true)}
           />
           <div className="farm-modal__image-overlay" />
           <button onClick={onClose} className="farm-modal__close" aria-label="Close">✕</button>
@@ -77,7 +89,7 @@ export function ExperienceModal({
         <div className="farm-modal__content">
           <div>
             <span className="farm-modal__category">{item.category}</span>
-            <h2 className="farm-modal__title font-display">{item.name}</h2>
+            <h2 id="farm-exp-modal-title" className="farm-modal__title font-display">{item.name}</h2>
             <div className="farm-modal__price-row">
               <span className="farm-modal__price font-display">KES {item.price.toLocaleString()}</span>
               <span className="farm-modal__price-unit">/ person</span>
@@ -147,5 +159,8 @@ export function ExperienceModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   )
 }
+
+export const ExperienceModal = memo(ExperienceModalInner)

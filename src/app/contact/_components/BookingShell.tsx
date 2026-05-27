@@ -74,7 +74,7 @@ export function BookingShell() {
   return (
     <>
       {/* ── PAGE HERO ── */}
-      <section className="relative pt-28 pb-16 px-6 md:px-10 overflow-hidden">
+      <section className="relative page-hero-offset pb-16 px-6 md:px-10 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(200,168,75,0.06),transparent_60%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(0,255,65,0.03),transparent_50%)]" />
@@ -460,7 +460,7 @@ function ContactTab({ onSelectService }: { onSelectService: (s: UKVService) => v
             className="btn-neon w-full flex items-center justify-center text-[9px]"
             style={{ padding: '8px 16px', cursor: 'pointer' }}
             onClick={() => {
-              const b = document.querySelector('.moxie-bubble') as HTMLElement
+              const b = document.querySelector('[data-moxie-trigger]') as HTMLElement
               b?.click()
             }}
           >

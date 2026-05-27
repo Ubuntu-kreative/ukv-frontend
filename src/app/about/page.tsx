@@ -1,6 +1,5 @@
 import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
-import MoxieChat from '@/components/MoxieChat'
 import Link from 'next/link'
 
 const TEAM = [
@@ -92,8 +91,8 @@ export default function AboutPage() {
 
       {/* ── Hero ── */}
       <section
-        className="relative flex items-end px-6 md:px-10 pb-20"
-        style={{ minHeight: '65vh', paddingTop: '120px' }}
+        className="relative flex items-end px-6 md:px-10 page-hero-offset pb-20"
+        style={{ minHeight: '65vh' }}
       >
         <div
           className="absolute inset-0"
@@ -304,7 +303,6 @@ export default function AboutPage() {
       </section>
 
       <Footer />
-      <MoxieChat />
     </main>
   )
 }

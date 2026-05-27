@@ -110,6 +110,38 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  /* Always animate in — never wait for IntersectionObserver */
+  animation: heroContentIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes heroContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger children for a cascading reveal */
+.farm-hero__content > * {
+  animation: heroContentIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.farm-hero__content > *:nth-child(1) { animation-delay: 0.05s; }
+.farm-hero__content > *:nth-child(2) { animation-delay: 0.15s; }
+.farm-hero__content > *:nth-child(3) { animation-delay: 0.25s; }
+.farm-hero__content > *:nth-child(4) { animation-delay: 0.35s; }
+.farm-hero__content > *:nth-child(5) { animation-delay: 0.42s; }
+
+/* Override .farm-reveal on hero children — they should not start hidden */
+.farm-hero__content .farm-reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  animation: heroContentIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .farm-hero__eyebrow {
@@ -248,6 +280,22 @@
 .farm-btn--ghost:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
+}
+
+.farm-btn--neon {
+  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(0, 255, 65, 0.28);
+  color: var(--neon, #00ff41);
+}
+
+.farm-btn--neon:hover {
+  background: rgba(0, 255, 65, 0.14);
+  border-color: rgba(0, 255, 65, 0.45);
+}
+
+/* Utility: explicitly apply display font (used via className in TSX) */
+.font-display {
+  font-family: var(--font-display);
 }
 
 /* =========================================================
@@ -545,27 +593,105 @@
 }
 
 /* =========================================================
-   FARM LOG CARDS
+   FARM LOG — INTRO BLOCK
+   (.farm-log-intro introduces the whole data dashboard)
+========================================================= */
+
+.farm-log-intro {
+  margin-bottom: 64px;
+}
+
+.farm-log-intro__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.farm-log-intro__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+
+.farm-log-intro__sync {
+  color: rgba(0, 255, 65, 0.7);
+  white-space: nowrap;
+}
+
+.farm-log-intro__heading {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--cream, #ede6d3);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.farm-log-intro__heading-accent {
+  font-style: italic;
+  color: var(--gold, #c8a84b);
+}
+
+.farm-log-intro__body {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.42);
+  max-width: 580px;
+}
+
+/* =========================================================
+   FARM LOG — SUB-SECTION WRAPPER
+========================================================= */
+
+.farm-log-section {
+  margin-bottom: 72px;
+}
+
+/* =========================================================
+   FARM LOG — SECTION HEADER (Livestock / Crops / Fields rows)
+   Horizontal: coloured title · optional badge | divider
 ========================================================= */
 
 .farm-log-section-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 14px;
+  margin-bottom: 28px;
 }
 
-.farm-log-section-header h2 {
+.farm-log-section-title {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
   font-weight: 300;
+  line-height: 1;
   flex-shrink: 0;
 }
 
+.farm-log-section-divider {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent);
+  min-width: 24px;
+}
+
+/* =========================================================
+   FARM LOG CARDS
+========================================================= */
+
+/* Divider also used inline in eyebrow rows */
 .farm-log-divider {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent);
+  min-width: 24px;
 }
 
 .farm-log-grid {
@@ -664,6 +790,41 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.farm-log-badge--sync {
+  color: var(--gold, #c8a84b);
+  border-color: rgba(212, 168, 83, 0.35);
+  background: rgba(212, 168, 83, 0.07);
+}
+
+/* Section header pill — completely separate from .farm-log-badge.
+   Never uses position:absolute. Sits as a normal flex child in
+   .farm-log-section-header rows. */
+.farm-log-section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.farm-log-section-pill--live {
+  color: var(--neon, #00ff41);
+  border: 1px solid rgba(0, 255, 65, 0.35);
+  background: rgba(0, 255, 65, 0.07);
+}
+
+.farm-log-section-pill--sync {
+  color: var(--gold, #c8a84b);
+  border: 1px solid rgba(212, 168, 83, 0.35);
+  background: rgba(212, 168, 83, 0.07);
+}
+
 .farm-log-card__id {
   position: absolute;
   bottom: 12px;
@@ -745,6 +906,45 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Crops grid: slightly tighter columns so 3 show on wide screens */
+.farm-log-grid--crops {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* =========================================================
+   FARM LOG — ERP FOOTER NOTE
+========================================================= */
+
+.farm-log-erp-note {
+  margin-top: 48px;
+  padding: 28px 32px;
+  border: 1px solid rgba(0, 255, 65, 0.12);
+  border-radius: 16px;
+  background: rgba(0, 255, 65, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 640px;
+}
+
+.farm-log-erp-note__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--neon, #00ff41);
+}
+
+.farm-log-erp-note__body {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.38);
+}
+
 /* =========================================================
    MOISTURE BAR
 ========================================================= */
@@ -776,13 +976,511 @@
 }
 
 /* =========================================================
-   MODALS
+   MODALS — ExperienceModal + TabItemModal (BEM)
+   
+   IMPORTANT: Modals must be rendered via a React portal into
+   document.body (or a dedicated #modal-root div appended to body).
+   Any ancestor with transform/filter/will-change breaks
+   position:fixed — portaling out of the component tree fixes this.
 ========================================================= */
 
-.farm-modal-overlay {
+/*
+ * Modal portal host — add this div once in your layout:
+ *   <div id="modal-root" />
+ * Then render modals into it with ReactDOM.createPortal().
+ * This guarantees the backdrop sits at the true viewport root.
+ */
+#modal-root {
   position: fixed;
   inset: 0;
   z-index: 9999;
+  pointer-events: none; /* transparent until a modal is open */
+  isolation: isolate;
+}
+
+#modal-root:not(:empty) {
+  pointer-events: auto;
+}
+
+.farm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  /* z-index intentionally lower than #modal-root's children
+     so stacking is handled by the portal, not competing layers */
+  z-index: 1;
+  background: rgba(5, 8, 4, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
+  overscroll-behavior: contain;
+}
+
+.farm-modal {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  background: rgba(16, 20, 12, 0.98);
+  border: 1px solid rgba(212, 168, 83, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.3s ease;
+}
+
+.farm-modal__image-panel {
+  position: relative;
+  min-height: 260px;
+  background: #0a0a0a;
+}
+
+.farm-modal__image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent 55%, rgba(16, 20, 12, 0.92) 100%);
+  pointer-events: none;
+}
+
+.farm-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.farm-modal__close:hover {
+  background: rgba(0, 0, 0, 0.75);
+  color: var(--cream);
+}
+
+.farm-modal__badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.farm-modal__in-cart-tag {
+  position: absolute;
+  top: 56px;
+  left: 16px;
+  z-index: 5;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(212, 168, 83, 0.12);
+  border: 1px solid rgba(212, 168, 83, 0.35);
+}
+
+.farm-modal__image-stats {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  gap: 12px;
+}
+
+.farm-modal__stat {
+  flex: 1;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+}
+
+.farm-modal__stat-label {
+  font-family: var(--font-body);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 4px;
+}
+
+.farm-modal__stat-value {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--cream);
+}
+
+.farm-modal__content {
+  padding: 32px 28px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+}
+
+.farm-modal__category {
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.farm-modal__title {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.farm-modal__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.farm-modal__price {
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--gold);
+}
+
+.farm-modal__price-unit {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.farm-modal__story {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.75;
+  border-left: 2px solid rgba(212, 168, 83, 0.35);
+  padding-left: 12px;
+  margin: 0;
+}
+
+.farm-modal__description {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.85;
+}
+
+.farm-modal__section-label {
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+  margin-bottom: 8px;
+}
+
+.farm-modal__includes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.farm-modal__includes li {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.farm-modal__check {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.farm-modal__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.farm-modal__tag {
+  font-family: var(--font-body);
+  font-size: 9px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.farm-modal__cta-section {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.farm-modal__qty-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.farm-modal__qty-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.farm-modal__qty-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.farm-modal__qty-control button {
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--cream);
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+.farm-modal__qty-value {
+  font-size: 1.1rem;
+  color: var(--gold);
+  min-width: 24px;
+  text-align: center;
+}
+
+.farm-modal__qty-total {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-left: auto;
+}
+
+.farm-modal__btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.farm-modal__btn {
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.farm-modal__btn--primary {
+  background: linear-gradient(135deg, var(--gold) 0%, #c09a3a 100%);
+  color: var(--obsidian);
+}
+
+.farm-modal__btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--cream);
+}
+
+.farm-modal__btn--neon {
+  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(0, 255, 65, 0.25);
+  color: var(--neon);
+}
+
+.farm-modal__btn--full {
+  width: 100%;
+}
+
+.farm-modal__btn--added {
+  opacity: 0.85;
+}
+
+/* Tab item modal (single column) */
+.farm-tab-modal {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  background: rgba(16, 20, 12, 0.98);
+  border: 1px solid rgba(212, 168, 83, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.3s ease;
+}
+
+.farm-tab-modal__image-wrap {
+  position: relative;
+  background: #0a0a0a;
+}
+
+.farm-tab-modal__image-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.farm-tab-modal__tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.farm-tab-modal__image-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  z-index: 5;
+}
+
+.farm-tab-modal__title {
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.2;
+}
+
+.farm-tab-modal__price {
+  font-size: 1.4rem;
+  color: var(--gold);
+  display: block;
+  margin-top: 4px;
+}
+
+.farm-tab-modal__price-unit {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.farm-tab-modal__content {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.farm-tab-modal__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.farm-tab-modal__meta-tag {
+  font-family: var(--font-body);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.farm-tab-modal__description {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.8;
+}
+
+.farm-tab-modal__cta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+@media (max-width: 1024px) {
+  .farm-modal {
+    grid-template-columns: 1fr;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .farm-modal__image-panel {
+    min-height: 220px;
+    height: 32vh;
+  }
+
+  .farm-modal__image-overlay {
+    background: linear-gradient(to top, rgba(16, 20, 12, 0.9) 0%, transparent 50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .farm-modal-backdrop,
+  .farm-modal,
+  .farm-tab-modal {
+    animation: none;
+  }
+}
+
+/* Legacy aliases (older markup) — keep in sync with portal approach above */
+.farm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1; /* portal's #modal-root provides the top-level z-index */
   background: rgba(5, 8, 4, 0.92);
   backdrop-filter: blur(12px);
   display: flex;
@@ -790,6 +1488,14 @@
   justify-content: center;
   padding: 20px;
   animation: fadeIn 0.25s ease;
+}
+
+/* Prevent body scroll while any modal is open.
+   Apply this class to <body> when a modal mounts, remove on unmount. */
+body.modal-open {
+  overflow: hidden;
+  /* Prevent layout shift from scrollbar disappearing */
+  padding-right: var(--scrollbar-width, 0px);
 }
 
 .farm-modal-content {
@@ -866,6 +1572,10 @@
 
 /* =========================================================
    SCROLL REVEAL ANIMATIONS
+   
+   NOTE: Never apply .farm-reveal to hero content — use the
+   heroContentIn animation above instead. .farm-reveal is for
+   off-screen sections that scroll into view.
 ========================================================= */
 
 .farm-reveal {
@@ -873,6 +1583,21 @@
   transform: translateY(24px);
   transition: opacity 0.6s ease, transform 0.6s ease;
   transition-delay: var(--farm-delay, 0ms);
+}
+
+/* Safety net: if JS never fires (slow connection, no hydration yet),
+   show content after 1.5 s so nothing stays permanently invisible */
+@media (prefers-reduced-motion: no-preference) {
+  .farm-reveal:not(.farm-reveal--visible) {
+    animation: revealFallback 0s 1.5s forwards;
+  }
+}
+
+@keyframes revealFallback {
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .farm-reveal--up {
@@ -951,7 +1676,8 @@
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .farm-modal-content {
+  .farm-modal-content,
+  .farm-modal {
     grid-template-columns: 1fr;
   }
 }
@@ -979,6 +1705,26 @@
   .farm-tab-grid,
   .farm-log-grid {
     grid-template-columns: 1fr;
+  }
+
+  .farm-log-intro__eyebrow {
+    gap: 8px;
+  }
+
+  .farm-log-intro__line {
+    display: none;
+  }
+
+  .farm-log-section-header {
+    flex-wrap: wrap;
+  }
+
+  .farm-log-section-divider {
+    display: none;
+  }
+
+  .farm-log-erp-note {
+    padding: 20px;
   }
   
   .farm-hero__corner {

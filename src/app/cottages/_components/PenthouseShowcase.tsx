@@ -1,119 +1,152 @@
-'use client'
+﻿'use client'
 
 // ─────────────────────────────────────────────────────────────
-// PenthouseShowcase.tsx  — Lazy-loaded showcase section
+// PenthouseShowcase.tsx  — Lazy-loaded Neem Penthouse hero section
 //
-// This is dynamically imported in StaysGrid so it doesn't add
-// to the initial JS bundle. It only loads when the page is
-// scrolled enough to warrant it (triggered by Suspense boundary).
+// Renders the exact Neem Penthouse design shown in the screenshot.
+// This is only used for the featured penthouse showcase on the cottages page.
 // ─────────────────────────────────────────────────────────────
 
+import { memo, useCallback } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import type { Stay, BoardOption } from '../_data/stays-data'
+import type { Stay } from '../_data/stays-data'
 
-interface Props {
+interface PenthouseShowcaseProps {
   stay: Stay
   onOpen: () => void
 }
 
-export function PenthouseShowcase({ stay, onOpen }: Props) {
+function PenthouseShowcaseInner({ stay, onOpen }: PenthouseShowcaseProps) {
+  const handleOpen = useCallback(() => onOpen(), [onOpen])
+
   return (
     <motion.section
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: '-100px' }}
-      className="relative py-24 px-4 sm:px-6 md:px-10 overflow-hidden border-y border-white/5"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-120px' }}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
+      className="relative py-24 px-4 sm:px-6 md:px-10 overflow-hidden"
     >
-      {/* Background */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[32px]">
+      <div className="max-w-8xl mx-auto grid gap-8 lg:grid-cols-[1.05fr_0.95fr] items-start">
+        <div className="relative rounded-[32px] border border-white/5 bg-[#0a0a0a] p-8 sm:p-10 lg:p-12 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(212,168,75,0.12),transparent_40%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30 pointer-events-none" />
 
-  <section className="relative min-h-screen overflow-hidden">
-  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[28px]">
-  <div className="absolute inset-0 pointer-events-none">
-    <Image
-      src={stay.images[0]}
-      alt={stay.name}
-      fill
-      priority={stay.featured}
-      sizes="100vw"
-      className="object-cover"
-    />
+          <div className="relative z-10">
+            <p className="text-[9px] uppercase tracking-[0.45em] text-[var(--gold)]/70 mb-6">
+              THE PENTHOUSE EXPERIENCE · {stay.floor.toUpperCase()}
+            </p>
+            <h2 className="font-display text-[clamp(3.25rem,7vw,5.5rem)] leading-[0.88] uppercase tracking-[-0.04em] text-white mb-8">
+              {stay.name}
+            </h2>
+            <p className="font-body text-base sm:text-lg leading-[1.95] text-white/60 max-w-2xl mb-8">
+              "{stay.storyLine}"
+            </p>
 
-    <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/90 to-[#0a0a0a]" />
-  </div>
-</div>
-
-  {/* CONTENT */}
-  <div className="relative z-10">
-    ...
-  </div>
-</section>
-
-</div>
-
-      <div className="relative max-w-8xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
-        <div>
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-[1px] bg-[var(--gold)]" />
-            <span className="text-[var(--gold)] font-mono text-[9px] tracking-[0.5em] uppercase">
-              The Penthouse Experience · {stay.floor}
-            </span>
-          </div>
-
-          <h2 className="font-display text-5xl md:text-7xl font-light mb-6 leading-[0.85] uppercase">{stay.name}</h2>
-          <p className="story-quote font-body text-lg text-white/50 italic leading-relaxed mb-8 pl-1">"{stay.storyLine}"</p>
-
-          <div className="flex flex-wrap gap-2 mb-10">
-            {stay.amenities.slice(0, 6).map((a, i) => (
-              <span key={i} className="px-3 py-1 border border-[var(--gold)]/20 rounded-full text-[9px] uppercase tracking-wider text-white/40">{a}</span>
-            ))}
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8">
-            <div>
-              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">From · per guest / night</p>
-              <p className="font-display text-3xl text-[var(--gold)]">KES {stay.rates.bedOnly.toLocaleString()}</p>
-              <p className="text-[8px] text-white/20 mt-1">Bed Only · per night</p>
+            <div className="flex flex-wrap gap-2 mb-10">
+              {['GYM', 'SWIMMING POOL', 'CONFERENCE FACILITIES', 'FARM TOURS', 'MOVIE NIGHTS', 'CYCLING'].map((amenity) => (
+                <span
+                  key={amenity}
+                  className="px-3 py-2 text-[9px] uppercase tracking-[0.25em] text-white/60 border border-white/10 rounded-full"
+                >
+                  {amenity}
+                </span>
+              ))}
             </div>
-            <button onClick={onOpen} className="btn-gold !px-10 !py-4 !text-[10px] !rounded-2xl">
-              View Penthouse →
-            </button>
+
+            <div className="grid grid-cols-[auto_1fr] gap-6 items-end">
+              <div>
+                <p className="text-[8px] uppercase tracking-[0.45em] text-white/30 mb-2">
+                  FROM · PER GUEST / NIGHT
+                </p>
+                <p className="font-display text-5xl sm:text-6xl text-[var(--gold)] leading-none">
+                  KES {stay.rates.bedOnly.toLocaleString()}
+                </p>
+                <p className="text-[9px] uppercase tracking-[0.35em] text-white/30 mt-2">
+                  Bed Only · per night
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpen}
+                className="h-14 px-10 rounded-full bg-[var(--gold)] text-black text-[10px] uppercase tracking-[0.35em] font-semibold shadow-[0_12px_50px_rgba(212,168,75,0.18)] hover:bg-[#d4af3f]/90 transition-colors duration-200"
+              >
+                View Penthouse →
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Image mosaic */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gridTemplateRows: '1fr 1fr',
-            gap: '12px',
-            height: 'clamp(280px, 40vw, 420px)',
-          }}
-        >
-          {stay.images.map((img, i) => (
-            <motion.div
-              key={img}
-              whileHover={{ scale: 1.02 }}
-              onClick={onOpen}
-              className="relative overflow-hidden cursor-pointer border border-white/5 rounded-2xl"
-              style={i === 0 ? { gridRow: '1 / 3' } : {}}
-             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-  <Image
-    src={img}
-    alt={`${stay.name} ${i + 1}`}
-    fill
-    loading="lazy"
-    sizes="(max-width: 768px) 50vw, 25vw"
-    className="object-cover grayscale-[0.3] hover:grayscale-0 transition-all duration-700"
-  />
-</div>
-            </motion.div>
-          ))}
+        <div className="grid gap-4 md:grid-cols-[1.05fr_0.95fr] md:grid-rows-[repeat(3,minmax(0,auto))]">
+          <div
+            className="relative rounded-[32px] overflow-hidden border border-white/5 h-[360px] md:row-span-3 md:h-full group"
+            role="button"
+            tabIndex={0}
+            onClick={handleOpen}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpen() }}
+          >
+            <Image
+              src={stay.images[0]}
+              alt={`${stay.name} exterior`}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transform-gpu transition-transform duration-500 group-hover:scale-105 group-hover:[transform:perspective(900px)_rotateX(2deg)_rotateY(-2deg)_scale(1.02)]"
+            />
+          </div>
+
+          <div
+            className="relative rounded-[28px] overflow-hidden border border-white/5 h-[176px] sm:h-[220px] group"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpen() }}
+            onClick={handleOpen}
+          >
+            <Image
+              src={stay.images[1]}
+              alt={`${stay.name} interior`}
+              fill
+              sizes="(max-width: 768px) 100vw, 35vw"
+              className="object-cover transform-gpu transition-transform duration-500 group-hover:scale-105 group-hover:[transform:perspective(800px)_rotateX(2deg)_rotateY(-2deg)_scale(1.02)]"
+            />
+          </div>
+
+          <div
+            className="relative rounded-[28px] overflow-hidden border border-white/5 h-[176px] sm:h-[220px] group"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpen() }}
+            onClick={handleOpen}
+          >
+            <Image
+              src={stay.images[2]}
+              alt={`${stay.name} bedroom`}
+              fill
+              sizes="(max-width: 768px) 100vw, 35vw"
+              className="object-cover transform-gpu transition-transform duration-500 group-hover:scale-105 group-hover:[transform:perspective(800px)_rotateX(2deg)_rotateY(-2deg)_scale(1.02)]"
+            />
+          </div>
+
+          <div
+            className="relative rounded-[32px] overflow-hidden border border-white/5 h-[220px] sm:h-[260px] group"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpen() }}
+            onClick={handleOpen}
+          >
+            <Image
+              src={stay.images[3]}
+              alt={`${stay.name} terrace`}
+              fill
+              sizes="100vw"
+              className="object-cover transform-gpu transition-transform duration-500 group-hover:scale-105 group-hover:[transform:perspective(800px)_rotateX(2deg)_rotateY(-2deg)_scale(1.02)]"
+            />
+          </div>
         </div>
       </div>
     </motion.section>
   )
 }
+
+export const PenthouseShowcase = memo(PenthouseShowcaseInner)

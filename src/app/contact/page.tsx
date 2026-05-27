@@ -27,7 +27,6 @@
 import type { Metadata } from 'next'
 import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
-import MoxieChat from '@/components/MoxieChat'
 import { BookingShell } from './_components/BookingShell'
 
 export const metadata: Metadata = {
@@ -42,7 +41,6 @@ export default function BookPage() {
       <NavWrapper />
       <BookingShell />
       <Footer />
-      <MoxieChat />
     </main>
   )
 }
