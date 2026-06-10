@@ -467,8 +467,8 @@ export const stays: Stay[] = [
     status: 'available',
     accent: 'var(--neon)',
     images: [
-      '/images/shea-cottage1.jpeg', '/images/shea-cottage2.jpeg',
-      '/images/shea-cottage3.jpeg', '/images/shea-cottage4.jpeg',
+      '/images/Shea-cottage1.jpeg', '/images/Shea-cottage2.jpeg',
+      '/images/Shea-cottage3.jpeg', '/images/Shea-cottage4.jpeg',
     ],
     features: ['Crop field view', 'Outdoor shower', 'Sunrise deck', 'Bonfire access'],
     amenities: POKOMO_AMENITIES,

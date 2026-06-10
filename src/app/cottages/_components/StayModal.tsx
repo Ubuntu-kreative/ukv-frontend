@@ -16,6 +16,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback, memo } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -25,12 +26,13 @@ import type { Stay, BoardOption } from '../_data/stays-data'
 import { BOARD_LABELS, BOARD_INCLUDES, BOARD_OPTIONS } from '../_data/stays-data'
 
 // ── Gallery image (pure CSS tilt — no spring subscriptions) ───────────
-function GalleryImage({ src, alt, index, onClick }: {
-  src: string; alt: string; index: number; onClick: () => void
+function GalleryImage({ src, alt, index, onClick, style }: {
+  src: string; alt: string; index: number; onClick: () => void; style?: React.CSSProperties
 }) {
   return (
     <div
       onClick={onClick}
+      style={style}
       className="relative overflow-hidden group cursor-zoom-in w-full h-full [transform-style:preserve-3d] transition-transform duration-300 hover:[transform:perspective(800px)_rotateX(2deg)_rotateY(-2deg)_scale(1.01)]"
     >
       <Image
@@ -59,6 +61,9 @@ interface StayModalProps {
 }
 
 function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGuestsChange }: StayModalProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const addItem  = useCartStore((s) => s.addItem)
   const openCart = useCartStore((s) => s.openCart)
   const inCart   = useCartStore((s) => s.items.some((i) => i.id === `${c.id}-${selectedBoard}`))
@@ -144,29 +149,30 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
     },
   ]
 
-  return (
-    <>
+  if (!mounted) return null
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] isolation-auto">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-0 md:p-4 lg:p-6"
-        style={{ isolation: 'isolate' }}
+        className="absolute inset-0 flex items-center justify-center p-0 md:p-4 lg:p-6"
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/92"
+          className="absolute inset-0 bg-black/92 cursor-pointer"
           onClick={onClose}
         />
 
         {/* Modal container */}
         <motion.div
-          initial={{ scale: 0.97, opacity: 0, y: 16 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.97, opacity: 0, y: 16 }}
-          transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-[1520px] h-[100dvh] md:h-[92vh] bg-[#060606] flex flex-col lg:flex-row overflow-hidden md:rounded-2xl"
-          style={{ zIndex: 1 }}
+          initial={{ scale: 0.98, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.98, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="relative w-full max-w-[1520px] h-full md:h-[92vh] bg-[#060606] flex flex-col lg:flex-row overflow-hidden md:rounded-2xl shadow-2xl"
+          style={{ zIndex: 50 }}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.025),transparent_55%)] pointer-events-none" />
 
@@ -186,7 +192,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
             {/* Image grid — explicit dimensions prevent layout thrash */}
             <div
               className="w-full flex-shrink-0"
-              style={{ height: 'clamp(260px, 42vh, 420px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '2px', background: '#111' }}
+              style={{ minHeight: '300px', maxHeight: '60vh', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gridTemplateRows: 'auto auto auto', gap: '16px', background: '#111' }}
             >
               {c.images.map((img, i) => (
                 <GalleryImage
@@ -195,6 +201,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                   alt={`${c.name} ${i + 1}`}
                   index={i}
                   onClick={() => setZoomedImg(img)}
+                  style={i === 0 ? { gridColumn: 1, gridRow: 'span 3' } : {}}
                 />
               ))}
             </div>
@@ -399,7 +406,8 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>,
+    document.body
   )
 }
 

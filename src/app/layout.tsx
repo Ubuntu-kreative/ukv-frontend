@@ -6,6 +6,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
+import { cormorant, dmSans, playfair, dmMono } from '@/lib/fonts'
 import ClientLayout from '@/components/ClientLayout'
 import Cursor from '@/components/Cursor'
 import PageTransition from '@/components/PageTransition'
@@ -15,6 +16,7 @@ import { CartProvider } from '@/context/CartContext'
 import { CartPanel } from '@/components/cart/CartPanel'
 
 import { Toaster } from 'react-hot-toast'
+import AuthProvider from '@/components/providers/AuthProvider'
 
 // ─────────────────────────────────────────────────────────────────────
 // METADATA
@@ -113,6 +115,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: '#0A0A0A',
+  viewportFit: 'cover',
+  colorScheme: 'dark',
+  userScalable: true,
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -129,17 +134,18 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
+      className={`${cormorant.variable} ${dmSans.variable} ${playfair.variable} ${dmMono.variable}`}
     >
       <head>
-        {/* Performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-
+        {/* iOS Safari specific meta tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Ubuntu" />
+               {/* PWA manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        {/* Apple touch icons */}
+        <link rel="apple-touch-icon" href="/branding/ubuntu-mark2.png" />
+        {/* Performance — Mux video preconnect */}
         <link rel="preconnect" href="https://stream.mux.com" />
       </head>
 
@@ -170,24 +176,24 @@ export default function RootLayout({
           }}
         />
 
-        <CartProvider>
-          <ClientLayout>
-            {/* Cursor */}
-            <Cursor />
+        <AuthProvider>
+  <CartProvider>
+    <ClientLayout>
+      {/* Cursor */}
+      <Cursor />
 
-            {/* Main App */}
-            <main className="relative z-[2] min-h-screen">
+      {/* Main App */}
+      <main className="relative z-[2] min-h-screen">
+        <PageTransition>
+          {children}
+        </PageTransition>
+      </main>
 
-              <PageTransition>
-                {children}
-              </PageTransition>
-
-            </main>
-
-            {/* SINGLE authoritative cart panel */}
-            <CartPanel />
-          </ClientLayout>
-        </CartProvider>
+      {/* SINGLE authoritative cart panel */}
+      <CartPanel />
+    </ClientLayout>
+  </CartProvider>
+</AuthProvider>
 
         {/* Toast System */}
         <Toaster

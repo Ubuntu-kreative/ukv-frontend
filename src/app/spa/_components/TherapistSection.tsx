@@ -71,13 +71,13 @@ export default function TherapistSection() {
               variants={SLIDE} initial="enter" animate="center" exit="exit"
               className="border border-white/5 rounded-[2.5rem] overflow-hidden bg-[#0a0a0a]"
             >
-              <div className="relative h-[320px]">
+              <div className="relative h-[480px]">
                 <Image
                   src={active.image} alt={active.name} fill
                   sizes="(max-width:1024px) 100vw, 50vw"
-                  className="object-cover object-top"
+                  className="object-cover" style={{ objectPosition: "50% 15%" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                 <div className="absolute inset-0" style={{ background: `radial-gradient(circle at center, ${active.aura}, transparent 70%)` }} />
               </div>
               <div className="p-9">

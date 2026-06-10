@@ -76,7 +76,7 @@ export default function WellnessJourneyBuilder() {
               <div className="relative w-full md:w-[280px] h-[200px] rounded-[1.5rem] overflow-hidden flex-shrink-0">
                 <Image
                   src={recommended.image} alt={recommended.name} fill
-                  sizes="280px" className="object-cover"
+                  sizes="(max-width:768px) 100vw, 280px" className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               </div>

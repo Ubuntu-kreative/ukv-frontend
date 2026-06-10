@@ -105,7 +105,7 @@ export default function Hero() {
             transition: 'opacity 1.8s ease',
           }}
         >
-          <source src="/videos/Hero-main01.mp4" type="video/mp4" />
+          <source src="/videos/Hero-Main01.mp4" type="video/mp4" />
         </video>
       </motion.div>
 

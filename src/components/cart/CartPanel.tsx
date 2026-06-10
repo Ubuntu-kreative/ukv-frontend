@@ -342,7 +342,14 @@ function StkWaitingScreen({ phone, amount, onSuccess, onTimeout }: {
     const iv = setInterval(() => setDots(d => d.length >= 3 ? '.' : d + '.'), 500)
     return () => clearInterval(iv)
   }, [])
-  useEffect(() => { const t = setTimeout(onSuccess, 4200); return () => clearTimeout(t) }, [onSuccess])
+  
+  // SIMULATION: In production, this would poll an API for the real transaction status.
+  // We've added a 4.2s delay to simulate the user receiving and approving the STK push.
+  useEffect(() => { 
+    const t = setTimeout(onSuccess, 4200); 
+    return () => clearTimeout(t) 
+  }, [onSuccess])
+
   const pct = Math.round(((90 - seconds) / 90) * 100)
   return (
     <div className="flex flex-col items-center justify-center py-10 px-5 text-center">
@@ -352,21 +359,26 @@ function StkWaitingScreen({ phone, amount, onSuccess, onTimeout }: {
         <div className="absolute inset-0 flex items-center justify-center text-[28px]">📱</div>
       </div>
       <h3 className="text-[22px] font-light mb-2" style={{ fontFamily:'var(--font-display)', color:'var(--cream)' }}>
-        Check your phone{dots}
+        Simulating STK Push{dots}
       </h3>
-      <p className="text-[12px] mb-1" style={{ color:'var(--muted)' }}>A Safaricom M-Pesa prompt has been sent to</p>
+      <p className="text-[12px] mb-1" style={{ color:'var(--muted)' }}>Check your phone for the M-Pesa prompt simulation</p>
       <p className="text-[14px] mb-5 tracking-[0.08em]" style={{ color:'var(--gold)', fontFamily:'var(--font-body)' }}>{phone}</p>
-      <p className="text-[12px] mb-6" style={{ color:'var(--muted)' }}>
-        Enter your <strong style={{ color:'var(--cream)' }}>M-Pesa PIN</strong> to pay{' '}
-        <strong style={{ color:'var(--gold)' }}>KES {amount.toLocaleString()}</strong>
-      </p>
+      
+      <div className="flex flex-col items-center gap-4 p-6 border border-[var(--gold)]/20 rounded-xl bg-[var(--gold)]/5 mb-8">
+        <div className="animate-pulse flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-[var(--gold)]" />
+          <span className="text-[10px] uppercase tracking-widest text-[var(--gold)]">Waiting for simulation approval...</span>
+        </div>
+      </div>
+
       <div className="w-full h-1 bg-white/5 mb-2 overflow-hidden">
         <div className="h-full bg-[var(--gold)] transition-all duration-1000" style={{ width:`${pct}%` }} />
       </div>
       <p className="text-[9px] tracking-widest uppercase mb-8" style={{ color:'var(--muted)' }}>Prompt expires in {seconds}s</p>
+      
       <div className="w-full p-4 text-left" style={{ background:'var(--bg3)', border:'0.5px solid rgba(200,168,75,0.2)' }}>
         <p className="text-[8px] tracking-[0.18em] uppercase mb-3" style={{ color:'var(--gold)', fontFamily:'var(--font-body)' }}>
-          Didn&apos;t receive a prompt? Pay via Paybill:
+          Real-world Paybill details:
         </p>
         <div className="space-y-1.5">
           {[['M-Pesa → Lipa na M-Pesa','Pay Bill'],['Paybill Number',MPESA_PAYBILL],['Account Number',MPESA_ACCOUNT],['Business Name',MPESA_NAME],['Amount',`KES ${amount.toLocaleString()}`]].map(([k,v]) => (

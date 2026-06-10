@@ -25,58 +25,31 @@ export function PenthouseShowcase({ stay, onOpen }: Props) {
       viewport={{ once: true, margin: '-100px' }}
       className="relative py-24 px-4 sm:px-6 md:px-10 overflow-hidden border-y border-white/5"
     >
-      {/* Background */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[32px]">
-
-  <section className="relative min-h-screen overflow-hidden">
-  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[28px]">
-  <div className="absolute inset-0 pointer-events-none">
-    <Image
-      src={stay.images[0]}
-      alt={stay.name}
-      fill
-      priority={stay.featured}
-      sizes="100vw"
-      className="object-cover"
-    />
-
-    <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/90 to-[#0a0a0a]" />
-  </div>
-</div>
-
-  {/* CONTENT */}
-  <div className="relative z-10">
-    ...
-  </div>
-</section>
-
-</div>
-
       <div className="relative max-w-8xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
-        <div>
-          <div className="flex items-center gap-4 mb-8">
+        <div className="relative px-8 py-10 rounded-[32px] bg-gradient-to-br from-white/[0.02] to-white/[0.01] backdrop-blur-sm shadow-[0_0_1px_rgba(212,175,55,0.2), 0_8px_32px_rgba(0,0,0,0.6), inset_0_1px_1px_rgba(212,175,55,0.08)]">
+          <div className="flex items-center gap-4 mb-10">
             <div className="w-12 h-[1px] bg-[var(--gold)]" />
-            <span className="text-[var(--gold)] font-mono text-[9px] tracking-[0.5em] uppercase">
+            <span className="text-[var(--gold)] font-mono text-[8px] tracking-[0.6em] uppercase font-medium">
               The Penthouse Experience · {stay.floor}
             </span>
           </div>
 
-          <h2 className="font-display text-5xl md:text-7xl font-light mb-6 leading-[0.85] uppercase">{stay.name}</h2>
-          <p className="story-quote font-body text-lg text-white/50 italic leading-relaxed mb-8 pl-1">"{stay.storyLine}"</p>
+          <h2 className="font-display text-6xl md:text-7xl font-light mb-10 leading-[0.9] tracking-[-0.02em] uppercase text-white">{stay.name}</h2>
+          <p className="story-quote font-body text-base text-white/60 italic leading-[1.7] mb-12 pl-1">"{stay.storyLine}"</p>
 
-          <div className="flex flex-wrap gap-2 mb-10">
+          <div className="flex flex-wrap gap-2.5 mb-14">
             {stay.amenities.slice(0, 6).map((a, i) => (
-              <span key={i} className="px-3 py-1 border border-[var(--gold)]/20 rounded-full text-[9px] uppercase tracking-wider text-white/40">{a}</span>
+              <span key={i} className="px-3.5 py-1.5 border border-[var(--gold)]/25 rounded-full text-[8px] uppercase tracking-widest text-white/45 font-medium">{a}</span>
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8">
+          <div className="flex flex-col gap-8">
             <div>
-              <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1">From · per guest / night</p>
-              <p className="font-display text-3xl text-[var(--gold)]">KES {stay.rates.bedOnly.toLocaleString()}</p>
-              <p className="text-[8px] text-white/20 mt-1">Bed Only · per night</p>
+              <p className="text-[8px] text-white/30 uppercase tracking-widest mb-3 font-medium">From · Per Guest / Night</p>
+              <p className="font-display text-6xl md:text-7xl text-[var(--gold)] font-light leading-none mb-3">KES {stay.rates.bedOnly.toLocaleString()}</p>
+              <p className="text-[8px] text-white/25 uppercase tracking-widest font-medium">Bed Only · Per Night</p>
             </div>
-            <button onClick={onOpen} className="btn-gold !px-10 !py-4 !text-[10px] !rounded-2xl">
+            <button onClick={onOpen} className="btn-gold !px-10 !py-4 !text-[10px] !rounded-2xl w-full md:w-auto">
               View Penthouse →
             </button>
           </div>
@@ -86,10 +59,10 @@ export function PenthouseShowcase({ stay, onOpen }: Props) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gridTemplateRows: '1fr 1fr',
-            gap: '12px',
-            height: 'clamp(280px, 40vw, 420px)',
+            gridTemplateColumns: '1.25fr 1fr',
+            gridTemplateRows: '1fr 1fr 1fr',
+            gap: '12px 16px',
+            height: '680px',
           }}
         >
           {stay.images.map((img, i) => (
@@ -97,10 +70,10 @@ export function PenthouseShowcase({ stay, onOpen }: Props) {
               key={img}
               whileHover={{ scale: 1.02 }}
               onClick={onOpen}
-              className="relative overflow-hidden cursor-pointer border border-white/5 rounded-2xl"
-              style={i === 0 ? { gridRow: '1 / 3' } : {}}
+              className="relative overflow-hidden cursor-pointer rounded-[44px]"
+              style={i === 0 ? { gridColumn: 1, gridRow: 'span 3' } : {}}
              >
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
+              <div className="relative w-full h-full overflow-hidden rounded-[44px]">
   <Image
     src={img}
     alt={`${stay.name} ${i + 1}`}

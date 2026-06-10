@@ -1,3 +1,20 @@
+/**
+ * Moxie Types — Phase 2A.1 Foundation
+ * Central re-export of all Moxie-related types
+ */
+
+// ─── Re-exports from Lib Modules ────────────────────────────────────────────
+
+// Page Context
+export type { PageContext, PageName, FocusArea } from '@/lib/moxie/pageContext'
+
+// Guest Profile
+export type { GuestProfile, Occasion, BudgetTier, RoomPreference } from '@/lib/moxie/guestProfile'
+
+// Conversation Memory
+export type { Message, ConversationMemory } from '@/lib/moxie/conversationMemory'
+export { ConversationMemoryManager } from '@/lib/moxie/conversationMemory'
+
 // ─── Core Domain Types ─────────────────────────────────────────────────────
 
 export interface Ritual {

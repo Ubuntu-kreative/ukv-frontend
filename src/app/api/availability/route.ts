@@ -1,10 +1,3 @@
-// src/app/api/availability/route.ts
-// ─────────────────────────────────────────────────────────────────────────────
-// Ubuntu Kreative Village — Availability API
-// GET /api/availability?from=YYYY-MM-DD&to=YYYY-MM-DD
-// Returns bookings + maintenance blocks for the given date range.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient }              from '@supabase/supabase-js'
 
@@ -14,9 +7,6 @@ function getSupabase() {
   if (!url || !key) throw new Error('Missing Supabase env vars')
   return createClient(url, key, { auth: { persistSession: false } })
 }
-
-// Total number of bookable rooms — used to determine full occupancy
-const TOTAL_ROOMS = 15
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -38,6 +28,18 @@ export async function GET(req: NextRequest) {
 
   try {
     const supabase = getSupabase()
+
+    // Fetch total room count
+    const { data: roomsData, error: roomsError } = await supabase
+      .from('rooms')
+      .select('id')
+
+    if (roomsError) {
+      console.error('[Availability API] rooms count error:', roomsError)
+      return NextResponse.json({ error: 'Failed to fetch room count' }, { status: 500 })
+    }
+
+    const totalRooms = roomsData?.length ?? 0
 
     // Fetch confirmed bookings overlapping the window
     const { data: bookings, error: bErr } = await supabase
@@ -68,7 +70,7 @@ export async function GET(req: NextRequest) {
       {
         bookings:    bookings    ?? [],
         maintenance: maintenance ?? [],
-        totalRooms:  TOTAL_ROOMS,
+        totalRooms,
         from,
         to,
       },

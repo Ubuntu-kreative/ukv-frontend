@@ -24,10 +24,23 @@ export const metadata: Metadata = {
     title:       'Ubuntu Kreative Village',
     description: 'Ecological luxury. Farm provenance. Ubuntu consciousness.',
     type:        'website',
+    url:         'https://ubuntuecolodge.com',
+    images: [
+      {
+        url: 'https://ubuntuecolodge.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Ubuntu Kreative Village - Eco Lodge Kenya',
+      },
+    ],
   },
   twitter: {
     card:  'summary_large_image',
     title: 'Ubuntu Kreative Village',
+    description: 'Ecological luxury. Farm provenance. Ubuntu consciousness.',
+  },
+  alternates: {
+    canonical: 'https://ubuntuecolodge.com',
   },
 }
 

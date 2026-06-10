@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import MoxieChat from '@/components/MoxieChat'
 
 interface ClientLayoutProps {
   children: React.ReactNode
@@ -36,5 +37,10 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     return () => clearInterval(interval)
   }, [])
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <MoxieChat />
+    </>
+  )
 }

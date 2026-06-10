@@ -68,6 +68,9 @@ import FinalCTA            from './_components/FinalCTA'
 import WellnessClientLayer from './_components/WellnessClientLayer'
 
 // ─── SEO Metadata — only possible in Server Components ───────────────────────
+// ── ISR CONFIGURATION — revalidate every 12 hours for rituals/availability updates ──
+export const revalidate = 43200
+
 export const metadata: Metadata = {
   title:       'Arohamai Spa | Ubuntu Eco Lodge — Holistic Wellness Nairobi',
   description: 'Mud baths, Moroccan hammam, sauna, massage therapies, facials and signature healing packages at Arohamai Spa, Ubuntu Eco Lodge, Nairobi.',
@@ -75,6 +78,23 @@ export const metadata: Metadata = {
     title:       'Arohamai Spa at Ubuntu Eco Lodge',
     description: 'Holistic wellness from skin to body. Affordable luxury inspired by healing, nature, and restoration.',
     type:        'website',
+    url:         'https://ubuntuecolodge.com/spa',
+    images: [
+      {
+        url: 'https://ubuntuecolodge.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Arohamai Spa - Holistic Wellness',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Arohamai Spa | Holistic Wellness at Ubuntu Eco Lodge',
+    description: 'Mud baths, hammam, sauna, and healing rituals inspired by African wellness traditions.',
+  },
+  alternates: {
+    canonical: 'https://ubuntuecolodge.com/spa',
   },
 }
 

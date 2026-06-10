@@ -1,7 +1,34 @@
+import type { Metadata } from 'next'
 import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 import MoxieChat from '@/components/MoxieChat'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'About Ubuntu Kreative Village | Our Story & Philosophy',
+  description: 'Discover the philosophy of Ubuntu at our eco lodge in Kenya. Learn about our commitment to regenerative agriculture, African wisdom, and holistic hospitality.',
+  openGraph: {
+    title: 'About Ubuntu Kreative Village | Our Story & Philosophy',
+    description: 'Discover the philosophy of Ubuntu at our eco lodge in Kenya. Learn about our commitment to regenerative agriculture, African wisdom, and holistic hospitality.',
+    type: 'website',
+    images: [
+      {
+        url: 'https://ubuntuecolodge.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Ubuntu Kreative Village - Our Story',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Ubuntu Kreative Village',
+    description: 'Discover the philosophy of Ubuntu at our eco lodge in Kenya.',
+  },
+  alternates: {
+    canonical: 'https://ubuntuecolodge.com/about',
+  },
+}
 
 const TEAM = [
   {
@@ -87,7 +114,7 @@ const TIMELINE = [
 
 export default function AboutPage() {
   return (
-    <main style={{ background: 'var(--obsidian)', minHeight: '100vh' }}>
+    <main style={{ background: 'var(--obsidian)', minHeight: '100dvh' }}>
       <NavWrapper />
 
       {/* ── Hero ── */}

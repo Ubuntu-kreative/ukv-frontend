@@ -1,23 +1,18 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { getAdminClient } from '@/lib/supabase/admin'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LOCAL INITIALIZATION CLIENT ENGINE PROXIES (Bypasses compilation generic locks)
+// AUTHORIZATION HELPER
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getAuthClient() {
-  const { createClient } = require('@supabase/supabase-js')
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-function adminDb(): any {
-  const { createClient } = require('@supabase/supabase-js')
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  ) as any
+async function requireAdmin() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.isAdmin) {
+    return null
+  }
+  return session
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -26,17 +21,16 @@ function adminDb(): any {
 
 export async function GET(request: Request) {
   try {
-    const supabase = getAuthClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized operational request context' }, { status: 401 })
+    const session = await requireAdmin()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const db = getAdminClient()
     const { searchParams } = new URL(request.url)
     const guestId = searchParams.get('guestId')
 
-    let query = adminDb().from('bookings').select('*')
+    let query = db.from('bookings').select('*')
     if (guestId) {
       query = query.eq('guest_id', guestId)
     }
@@ -52,11 +46,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const input = await request.json()
-    const admin = adminDb()
+    const session = await requireAdmin()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    // Error Type 2 Override Configuration (Upsert parsing validation)
-    const { data: guestRecord, error: guestError } = await admin
+    const input = await request.json()
+    const db = getAdminClient()
+
+    const { data: guestRecord, error: guestError } = await db
       .from('guests')
       .upsert(
         {
@@ -73,7 +71,7 @@ export async function POST(request: Request) {
     if (guestError) throw guestError
 
     const bookingPayload = {
-      guest_id: guestRecord.id,
+      guest_id: (guestRecord as any)?.id,
       room_id: input.booking.roomId,
       check_in: input.booking.checkIn,
       check_out: input.booking.checkOut,
@@ -81,7 +79,7 @@ export async function POST(request: Request) {
       total_price: input.booking.totalPrice,
     }
 
-    const { data: booking, error: bookingError } = await admin
+    const { data: booking, error: bookingError } = await db
       .from('bookings')
       .insert(bookingPayload as any)
       .select()
@@ -97,21 +95,25 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, updatePayload, action } = await request.json()
-    const admin = adminDb()
-
-    if (!id) {
-      return NextResponse.json({ error: 'Missing target validation identifier mapping' }, { status: 400 })
+    const session = await requireAdmin()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Error Type 3 System Overrides (Double tracking modification updates)
+    const { id, updatePayload, action } = await request.json()
+    const db = getAdminClient()
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing booking ID' }, { status: 400 })
+    }
+
     if (action === 'cancel') {
-      const { data: cancelledBooking, error: cancelError } = await admin
+      const { data: cancelledBooking, error: cancelError } = await (db as any)
         .from('bookings')
         .update({
           status: 'cancelled' as string,
           updated_at: new Date().toISOString(),
-        } as unknown as any)
+        })
         .eq('id', id)
         .select()
         .single()
@@ -120,9 +122,9 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ success: true, data: cancelledBooking })
     }
 
-    const { data: updatedBooking, error: updateError } = await admin
+    const { data: updatedBooking, error: updateError } = await (db as any)
       .from('bookings')
-      .update(updatePayload as unknown as any)
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single()

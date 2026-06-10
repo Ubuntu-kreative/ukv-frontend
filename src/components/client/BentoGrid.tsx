@@ -976,7 +976,7 @@ const BentoCard = memo(function BentoCard({
 }) {
   const [expanded, setExpanded] = useState(false)
   const [visible,  setVisible]  = useState(false)
-  const divRef = useRef<HTMLDivElement>(null)
+  const divRef = useRef<HTMLButtonElement>(null)
 
   // FIX-B: register with the shared observer via ref callback
   useEffect(() => {
@@ -992,13 +992,13 @@ const BentoCard = memo(function BentoCard({
     }
   }, [])
 
-  const handleCardClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleCardClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const path = e.nativeEvent.composedPath?.() ?? []
     if (path.some(el => el instanceof HTMLElement && el.tagName === 'A')) return
     setExpanded(p => !p)
   }, [])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key !== 'Enter' && e.key !== ' ') return
     if ((e.target as HTMLElement).closest('a')) return
     e.preventDefault()
@@ -1016,7 +1016,7 @@ const BentoCard = memo(function BentoCard({
   }), [])
 
   return (
-    <div
+    <button
       ref={divRef}
       className={`ukv-card${visible ? ' ukv-card-enter' : ''}`}
       style={{
@@ -1025,10 +1025,7 @@ const BentoCard = memo(function BentoCard({
         opacity:                 visible ? undefined : 0,
       } as CSSProperties}
       onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      role="button"
       aria-expanded={expanded}
-      tabIndex={0}
     >
       {/* Compositor-only decorations */}
       <div className="ukv-card-accent-line" />
@@ -1100,7 +1097,7 @@ const BentoCard = memo(function BentoCard({
           </div>
         </div>
       </div>
-    </div>
+    </button>
   )
 })
 BentoCard.displayName = 'BentoCard'

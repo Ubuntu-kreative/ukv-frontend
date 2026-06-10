@@ -200,7 +200,7 @@ export default function DailyRhythm() {
                   </div>
                 ))
               : rhythm.map((entry, i) => (
-                  <motion.div
+                  <motion.button
                     key={entry.time}
                     initial={{ opacity: 0, x: -12 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -208,9 +208,6 @@ export default function DailyRhythm() {
                     transition={{ duration: 0.5, delay: i * 0.05 }}
                     className={`rhythm-item ${entry.isActive ? 'rhythm-item--active' : ''}`}
                     onClick={() => setSelectedEntry(entry === selectedEntry ? null : entry)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && setSelectedEntry(entry === selectedEntry ? null : entry)}
                     aria-expanded={selectedEntry === entry}
                   >
                     <div className="flex items-center gap-4">
@@ -239,7 +236,7 @@ export default function DailyRhythm() {
                         </span>
                       </div>
                     </div>
-                  </motion.div>
+                  </motion.button>
                 ))}
           </div>
 

@@ -316,11 +316,11 @@ export function AdminShell({
   const path = usePathname()
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: T.bg }}>
+    <div style={{ display: 'flex', minHeight: '100dvh', background: T.bg }}>
       {/* Sidebar */}
       <aside style={{
         width: 220, background: T.sidebar, display: 'flex',
-        flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh',
+        flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100dvh',
       }}>
         <div style={{ padding: '20px 18px 12px' }}>
           <p style={{ margin: 0, color: T.accent, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase' }}>Ubuntu Kreative Village</p>

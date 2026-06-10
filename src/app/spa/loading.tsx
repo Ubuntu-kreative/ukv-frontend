@@ -17,7 +17,7 @@ export default function SpaLoading() {
       {/* Same hero image as SpaHero — feels continuous, not broken */}
       <Image
         src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=2070&auto=format&fit=crop"
-        alt=""
+        alt="Loading Arohamai Spa"
         fill
         priority
         sizes="100vw"

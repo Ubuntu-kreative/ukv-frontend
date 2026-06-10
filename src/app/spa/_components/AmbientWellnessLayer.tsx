@@ -132,7 +132,7 @@ export default function AmbientWellnessLayer() {
     if (usingFallbackRef.current) { startFallback(); return }
 
     if (audioRef.current) {
-      audioRef.current.src = '/audio/forest-ambience.mp3'
+      audioRef.current.src = '/audio/kalsstockmedia-native-american-style-flute-music-324301.mp3'
       const p = audioRef.current.play()
       if (p !== undefined) {
         p

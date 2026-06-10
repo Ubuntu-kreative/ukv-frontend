@@ -66,16 +66,32 @@ function updateMemory(sessionId: string, conversation: Message[]): void {
   }
 }
 
-// ── Types ─────────────────────────────────────────────────────────────
 interface Message {
   role:    'user' | 'assistant' | 'system'
   content: string
 }
 
+interface GuestProfile {
+  name?: string
+  email?: string
+  phone?: string
+  checkInDate?: string
+  checkOutDate?: string
+  numGuests?: number
+  dietary?: string[]
+  allergies?: string[]
+  occasion?: string
+  budget?: string
+  roomPreference?: string
+  [key: string]: any
+}
+
 interface RequestBody {
-  messages:  Message[]
-  sessionId: string
-  pathname:  string
+  messages:      Message[]
+  sessionId:     string
+  pathname:      string
+  pageContext?:  string // Page name, e.g., 'restaurant', 'spa', 'cottages'
+  guestProfile?: GuestProfile
 }
 
 // ── Tool Definitions ──────────────────────────────────────────────────
@@ -231,7 +247,7 @@ async function callLLM(
 // ── Route Handler ─────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const { messages, sessionId, pathname }: RequestBody = await req.json()
+    const { messages, sessionId, pathname, pageContext, guestProfile }: RequestBody = await req.json()
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Invalid messages' }, { status: 400 })
@@ -256,6 +272,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ── Build guest profile context ──
+    let profileContext = ''
+    if (guestProfile && Object.keys(guestProfile).length > 0) {
+      const profileLines: string[] = []
+      if (guestProfile.name) profileLines.push(`Name: ${guestProfile.name}`)
+      if (guestProfile.email) profileLines.push(`Email: ${guestProfile.email}`)
+      if (guestProfile.phone) profileLines.push(`Phone: ${guestProfile.phone}`)
+      if (guestProfile.numGuests) profileLines.push(`Guests: ${guestProfile.numGuests}`)
+      if (guestProfile.checkInDate) profileLines.push(`Check-in: ${guestProfile.checkInDate}`)
+      if (guestProfile.checkOutDate) profileLines.push(`Check-out: ${guestProfile.checkOutDate}`)
+      if (guestProfile.dietary?.length) profileLines.push(`Dietary: ${guestProfile.dietary.join(', ')}`)
+      if (guestProfile.allergies?.length) profileLines.push(`Allergies: ${guestProfile.allergies.join(', ')}`)
+      if (guestProfile.occasion) profileLines.push(`Occasion: ${guestProfile.occasion}`)
+      if (guestProfile.budget) profileLines.push(`Budget: ${guestProfile.budget}`)
+      if (guestProfile.roomPreference) profileLines.push(`Room Preference: ${guestProfile.roomPreference}`)
+
+      if (profileLines.length > 0) {
+        profileContext = '\n\nGUEST PROFILE:\n' + profileLines.join('\n')
+      }
+    }
+
     // ── Fetch guest memory ──
     const memory    = getMemory(sessionId)
     const currentHr = new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
@@ -265,7 +302,7 @@ export async function POST(req: NextRequest) {
       pathname,
       guestMemory: memory || undefined,
       currentTime: currentHr,
-    }) + menuContext
+    }) + menuContext + profileContext
 
     // ── Call LLM ──
     const { text, toolCall } = await callLLM(
@@ -311,10 +348,11 @@ export async function POST(req: NextRequest) {
     const responseText = text || getFallbackResponse(lastUser)
 
     return NextResponse.json({
-      content:  responseText,
-      toolCall: toolCall || null,
-      toolResult: toolResult || null,
+      content:      responseText,
+      toolCall:     toolCall || null,
+      toolResult:   toolResult || null,
       sessionId,
+      guestProfile: guestProfile || null,
     })
 
   } catch (err) {

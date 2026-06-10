@@ -3,18 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint"
-},
+    "predev": "node scripts/check-port.js",
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint"
+  },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.64",
     "@ai-sdk/react": "^3.0.186",
     "@gsap/react": "^2.1.2",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/ssr": "^0.10.3",
-    "@supabase/supabase-js": "^2.105.4",
+    "@supabase/supabase-js": "^2.107.0",
     "@tanstack/react-query": "^5.100.5",
     "ai": "^6.0.184",
     "framer-motion": "^12.38.0",
@@ -27,6 +28,7 @@
     "lenis": "^1.3.23",
     "lucide-react": "^1.16.0",
     "next": "^16.2.6",
+    "next-auth": "^4.24.14",
     "next-sanity": "^12.4.5",
     "node-cron": "^4.2.1",
     "react": "^19.2.6",
@@ -34,6 +36,7 @@
     "react-hot-toast": "^2.6.0",
     "resend": "^6.12.2",
     "sanity": "^5.25.1",
+    "server-only": "^0.0.1",
     "stripe": "^22.1.0",
     "styled-components": "^6.4.1",
     "zustand": "^5.0.13"

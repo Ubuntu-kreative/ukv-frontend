@@ -32,8 +32,29 @@ import { BookingShell } from './_components/BookingShell'
 
 export const metadata: Metadata = {
   title: 'Book a Stay | Ubuntu Kreative Village',
-  description: 'Reserve your cottage, spa treatment, farm experience or private event at Ubuntu Kreative Village — Kenya\'s premier off-grid eco lodge.',
-  openGraph: { images: ['/images/Cottages-front.jpeg'] },
+  description: 'Reserve a Pokomo Cottage, Farmhouse Suite or Penthouse at Ubuntu Kreative Village, Nairobi. Book Arohamai Spa, farm-to-fork dining and private events. Maasai Lodge Road, Kajiado County.',
+  openGraph: {
+    title: 'Book a Stay | Ubuntu Kreative Village',
+    description: 'Reserve a Pokomo Cottage, Farmhouse Suite or Penthouse at Ubuntu Kreative Village, Nairobi. Book Arohamai Spa, farm experiences and private events.',
+    type: 'website',
+    url: 'https://ubuntuecolodge.com/contact',
+    images: [
+      {
+        url: 'https://ubuntuecolodge.com/images/Cottages-front.jpeg',
+        width: 1200,
+        height: 630,
+        alt: 'Ubuntu Kreative Village - Pokomo Cottage & Farm House',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Book a Stay | Ubuntu Kreative Village',
+    description: 'Reserve cottages, spa treatments, farm experiences and private events.',
+  },
+  alternates: {
+    canonical: 'https://ubuntuecolodge.com/contact',
+  },
 }
 
 export default function BookPage() {

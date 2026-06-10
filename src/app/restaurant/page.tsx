@@ -23,13 +23,33 @@ import MenuTicker     from './_components/MenuTicker'
 import MenuGrid       from './_components/MenuGrid'
 import ReservationCTA from './_components/ReservationCTA'
 
+// ── ISR CONFIGURATION — revalidate every 6 hours for menu updates ──
+export const revalidate = 21600
+
 export const metadata: Metadata = {
   title:       'Ubuntu Feast | Farm-to-Fork Editorial Dining',
   description: 'Farm-to-fork dining rooted in Ubuntu philosophy. Every dish traced from field to fire in our living farm.',
   openGraph: {
-    title:       'Ubuntu Kreative Village Restaurant',
+    title:       'Ubuntu Feast | Farm-to-Fork Editorial Dining',
     description: 'Cinematic farm-to-fork dining in the heart of the living estate.',
     type:        'website',
+    url:         'https://ubuntuecolodge.com/restaurant',
+    images: [
+      {
+        url:    'https://ubuntuecolodge.com/images/restaurant-hero1.jpeg',
+        width:  1200,
+        height: 630,
+        alt:    'Ubuntu Feast - Farm-to-Fork Dining',
+      },
+    ],
+  },
+  twitter: {
+    card:        'summary_large_image',
+    title:       'Ubuntu Feast | Farm-to-Fork Editorial Dining',
+    description: 'Farm-to-fork dining rooted in Ubuntu philosophy.',
+  },
+  alternates: {
+    canonical: 'https://ubuntuecolodge.com/restaurant',
   },
 }
 

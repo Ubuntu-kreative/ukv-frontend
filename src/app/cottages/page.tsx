@@ -28,7 +28,26 @@ export const metadata: Metadata = {
   title: 'Cottages & Residences | Ubuntu Kreative Village',
   description: 'Off-grid sanctuaries powered by the sun. Farm House rooms, Pokomo Cottages, and Penthouse suites in the Kenyan highlands.',
   openGraph: {
-    images: ['/images/Cottages-front.jpeg'],
+    title: 'Cottages & Residences | Ubuntu Kreative Village',
+    description: 'Off-grid sanctuaries powered by the sun. Farm House rooms, Pokomo Cottages, and Penthouse suites in the Kenyan highlands.',
+    type: 'website',
+    url: 'https://ubuntuecolodge.com/cottages',
+    images: [
+      {
+        url: 'https://ubuntuecolodge.com/images/Cottages-front.jpeg',
+        width: 1200,
+        height: 630,
+        alt: 'Pokomo Cottages at Ubuntu Kreative Village',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cottages & Residences | Ubuntu Kreative Village',
+    description: 'Off-grid sanctuaries powered by the sun in the Kenyan highlands.',
+  },
+  alternates: {
+    canonical: 'https://ubuntuecolodge.com/cottages',
   },
 }
 

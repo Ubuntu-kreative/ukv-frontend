@@ -1,11 +1,14 @@
 // src/types/supabase.ts
 // Drop-in Supabase schema types — fixes all `never` errors from untyped clients
+// UPDATED: BSF tables added (bsf_checklist_items, bsf_shipments,
+//          bsf_production_log, bsf_milestone_status)
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
   public: {
     Tables: {
+      // ── Existing tables (unchanged) ──────────────────────────────────────
       bookings: {
         Row: {
           id: string
@@ -250,9 +253,112 @@ export type Database = {
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
       }
+
+      // ── BSF tables (NEW) ─────────────────────────────────────────────────
+      bsf_checklist_items: {
+        Row: {
+          id:           string
+          completed:    boolean
+          completed_by: string | null
+          completed_at: string | null
+          updated_at:   string
+        }
+        Insert: {
+          id:           string
+          completed?:   boolean
+          completed_by?: string | null
+          completed_at?: string | null
+          updated_at?:  string
+        }
+        Update: {
+          completed?:    boolean
+          completed_by?: string | null
+          completed_at?: string | null
+          updated_at?:   string
+        }
+      }
+
+      bsf_shipments: {
+        Row: {
+          id:              string
+          week_of:         string
+          product_id:      string
+          committed_kg:    number
+          actual_kg:       number | null
+          qc_passed:       boolean | null
+          tracking_number: string | null
+          carrier:         string | null
+          notes:           string | null
+          dispatched_at:   string | null
+          created_by:      string | null
+          created_at:      string
+          updated_at:      string
+        }
+        Insert: {
+          id?:             string
+          week_of:         string
+          product_id:      string
+          committed_kg:    number
+          actual_kg?:      number | null
+          qc_passed?:      boolean | null
+          tracking_number?: string | null
+          carrier?:        string | null
+          notes?:          string | null
+          dispatched_at?:  string | null
+          created_by?:     string | null
+        }
+        Update: Record<string, unknown>
+      }
+
+      bsf_production_log: {
+        Row: {
+          id:            string
+          week_of:       string
+          eggs_kg:       number
+          neonates_kg:   number
+          larvae_kg:     number
+          mortality_pct: number | null
+          feed_input_kg: number | null
+          notes:         string | null
+          logged_by:     string | null
+          created_at:    string
+        }
+        Insert: {
+          id?:            string
+          week_of:        string
+          eggs_kg:        number
+          neonates_kg?:   number
+          larvae_kg?:     number
+          mortality_pct?: number | null
+          feed_input_kg?: number | null
+          notes?:         string | null
+          logged_by?:     string | null
+        }
+        Update: Record<string, unknown>
+      }
+
+      bsf_milestone_status: {
+        Row: {
+          id:         string
+          status:     string
+          updated_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          id:          string
+          status?:     string
+          updated_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          status?:     string
+          updated_by?: string | null
+          updated_at?: string
+        }
+      }
     }
-    Views: Record<string, never>
+    Views:     Record<string, never>
     Functions: Record<string, never>
-    Enums: Record<string, never>
+    Enums:     Record<string, never>
   }
 }

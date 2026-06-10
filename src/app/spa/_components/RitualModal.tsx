@@ -10,14 +10,31 @@
  * Every state change anywhere on the page could potentially affect it.
  * Now it's a leaf — it only re-renders when `ritual` or `onClose` changes.
  *
- * BUGS FIXED (from original):
+ * BUGS FIXED (from previous version):
  * BUG 1 — onClose infinite scroll thrash: fixed via useRef stable pattern
  * BUG 3 — RecoveryMeter never animating: fixed via scrollRef as viewport root
  * BUG 4 — FloatingParticles style accumulation: fixed via singleton guard
  * BUG 5 — JS timer stagger on timeline: replaced with CSS animation-delay
+ *
+ * TYPOGRAPHY FIX:
+ * All text sizes scaled to readable proportions:
+ *   • Labels/eyebrows: text-xs (12px) — was 7–9px
+ *   • Body copy: text-sm (14px) — was 11–12px
+ *   • Subheadings: text-base / text-lg — was 10–11px
+ *   • Headings: text-3xl / text-4xl — unchanged (already good)
+ *   • Prices: text-4xl / text-5xl — unchanged
+ * Font families:
+ *   • All headings: font-display (your brand display font)
+ *   • All body/labels: font-sans with proper weight
+ *   • Mono elements (mood, soundscape, timeline): font-mono
+ *
+ * ANIMATION FIX:
+ * Modal entry changed from scale(0.97)+fade to a cinematic upward reveal
+ * with a staggered content fade — feels professional and seamless.
  */
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -29,10 +46,34 @@ import { RITUAL_ACCENTS, DEFAULT_ACCENT, type Ritual } from '../_data/spa-data'
 // ─── ANIMATION CONSTANTS — module-level, never recreated ─────────────────────
 const SLOW_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
-const MODAL_VARIANTS = {
-  hidden:  { opacity: 0, scale: 0.97, y: 8  },
-  visible: { opacity: 1, scale: 1,    y: 0  },
-  exit:    { opacity: 0, scale: 0.96, y: 6  },
+// Cinematic upward reveal — more professional than a plain scale
+const BACKDROP_VARIANTS = {
+  hidden:  { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.3 } },
+  exit:    { opacity: 0, transition: { duration: 0.25 } },
+}
+
+const PANEL_VARIANTS = {
+  hidden:  { opacity: 0, y: 48, scale: 0.98 },
+  visible: {
+    opacity: 1, y: 0, scale: 1,
+    transition: { duration: 0.55, ease: SLOW_EASE },
+  },
+  exit: {
+    opacity: 0, y: 24, scale: 0.97,
+    transition: { duration: 0.3, ease: [0.4, 0, 1, 1] as [number, number, number, number] },
+  },
+}
+
+// Stagger children inside the content panel
+const CONTENT_VARIANTS = {
+  hidden:  {},
+  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.18 } },
+}
+
+const ITEM_VARIANTS = {
+  hidden:  { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: SLOW_EASE } },
 }
 
 // ─── RECOVERY METER ──────────────────────────────────────────────────────────
@@ -48,17 +89,17 @@ function RecoveryMeter({
 }) {
   return (
     <div>
-      <div className="flex justify-between mb-1.5 text-[9px] uppercase tracking-[0.25em] text-white/35">
+      <div className="flex justify-between mb-2 text-xs uppercase tracking-[0.2em] text-white/50 font-sans">
         <span>{label}</span>
-        <span>{value}%</span>
+        <span className="text-gold font-medium">{value}%</span>
       </div>
-      <div className="h-1 bg-white/5 overflow-hidden rounded-full">
+      <div className="h-[3px] bg-white/8 overflow-hidden rounded-full">
         <motion.div
           initial={{ width: 0 }}
           whileInView={{ width: `${value}%` }}
           transition={{ duration: 1.6, ease: 'easeOut' }}
           viewport={{ once: true, root: containerRef }}
-          className="h-full bg-gradient-to-r from-gold/40 to-gold rounded-full"
+          className="h-full bg-gradient-to-r from-gold/50 to-gold rounded-full"
         />
       </div>
     </div>
@@ -66,8 +107,6 @@ function RecoveryMeter({
 }
 
 // ─── MAGNETIC BUTTON ─────────────────────────────────────────────────────────
-// Module-level component so springs are stable. Springs created once on mount,
-// Framer Motion cleans them up on unmount via its internal subscription system.
 import { useMotionValue, useSpring } from 'framer-motion'
 
 function MagneticButton({ children, className, onClick }: {
@@ -97,6 +136,16 @@ function MagneticButton({ children, className, onClick }: {
   )
 }
 
+// ─── STAT PILL ───────────────────────────────────────────────────────────────
+function StatPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border border-white/8 rounded-2xl p-4 flex flex-col gap-1.5 bg-white/[0.02]">
+      <p className="text-xs uppercase tracking-[0.25em] text-white/30 font-sans">{label}</p>
+      <p className="text-gold text-sm font-mono font-medium leading-tight">{value}</p>
+    </div>
+  )
+}
+
 // ─── MODAL ───────────────────────────────────────────────────────────────────
 
 interface RitualModalProps {
@@ -105,12 +154,14 @@ interface RitualModalProps {
 }
 
 export default function RitualModal({ ritual, onClose }: RitualModalProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const accent    = RITUAL_ACCENTS[ritual.id] ?? DEFAULT_ACCENT
   const addItem   = useCartStore((s) => s.addItem)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // BUG 1 FIX: stable ref pattern — effect runs ONCE (empty deps []).
-  // The ref always holds the latest onClose without re-running the effect.
   const onCloseRef = useRef(onClose)
   useEffect(() => { onCloseRef.current = onClose })
 
@@ -125,7 +176,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
       document.body.style.overflow = original
       window.removeEventListener('keydown', handler)
     }
-  }, []) // ← intentionally empty — runs exactly once on mount/unmount
+  }, [])
 
   const addToCart = useCallback(() => {
     addItem({
@@ -140,192 +191,231 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
     onClose()
   }, [addItem, ritual, onClose])
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.35 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={ritual.name}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl" />
+  if (!mounted) return null
 
-      {/* Panel */}
+  return createPortal(
+    <AnimatePresence mode="wait">
       <motion.div
-        variants={MODAL_VARIANTS}
+        key="ritual-modal-backdrop"
+        variants={BACKDROP_VARIANTS}
         initial="hidden"
         animate="visible"
         exit="exit"
-        transition={{ duration: 0.5, ease: SLOW_EASE }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative z-10 w-full max-w-6xl flex flex-col lg:flex-row rounded-[2.5rem] overflow-hidden border border-white/8 bg-[#080808] shadow-2xl"
-        style={{ maxHeight: 'calc(100svh - 48px)' }}
+        className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center sm:p-4 md:p-6"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ritual.name}
       >
-        {/* ── Left: image panel ── */}
-        <div className="relative lg:w-[42%] min-h-[260px] lg:min-h-0 flex-shrink-0 overflow-hidden">
-          <Image
-            src={ritual.image}
-            alt={ritual.name}
-            fill
-            sizes="(max-width:1024px) 100vw, 42vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/18 via-transparent to-black/55 lg:bg-gradient-to-r lg:from-transparent lg:to-[#080808]" />
-          <div
-            className="absolute inset-0 opacity-65"
-            style={{ background: `radial-gradient(circle at 50% 50%, ${accent.glow}, transparent 70%)` }}
-          />
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/88 backdrop-blur-2xl" />
 
-          {/* Particles — CSS only, no JS state */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="arohamai-particle"
-                style={{
-                  left:              `${i * (100 / 6)}%`,
-                  animationDuration: `${14 + i * 0.7}s`,
-                  animationDelay:    `${i * 0.6}s`,
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="absolute top-6 left-6 flex flex-wrap gap-2 z-10">
-            <span className="px-3 py-1.5 text-[8px] uppercase tracking-[0.28em] border border-gold/25 bg-black/52 backdrop-blur-xl text-gold rounded-full">
-              {ritual.categoryTag}
-            </span>
-            <span className="px-3 py-1.5 text-[8px] uppercase tracking-[0.28em] border border-white/10 bg-black/42 backdrop-blur-xl text-white/52 rounded-full">
-              {ritual.status}
-            </span>
-          </div>
-          <div className="absolute bottom-6 left-6 z-10">
-            <p className="text-[8px] uppercase tracking-[0.32em] text-gold/45">{accent.label}</p>
-          </div>
-        </div>
-
-        {/* ── Right: content panel ── */}
-        <div
-          ref={scrollRef}
-          className="lg:w-[58%] overflow-y-auto p-7 md:p-10 flex flex-col gap-6"
+        {/* ── Panel ── */}
+        <motion.div
+          variants={PANEL_VARIANTS}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          onClick={(e) => e.stopPropagation()}
+          className="relative z-10 w-full max-w-6xl flex flex-col lg:flex-row rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden border border-white/10 bg-[#080808] shadow-[0_40px_120px_rgba(0,0,0,0.9)]"
+          style={{ maxHeight: 'min(calc(100vh - 2rem), 90vh)' }}
         >
-          {/* Header */}
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[9px] uppercase tracking-[0.38em] text-gold mb-2">Arohamai Spa</p>
-              <h2 className="font-display text-4xl md:text-5xl leading-none">{ritual.name}</h2>
-            </div>
-            <button
-              onClick={onClose}
-              aria-label="Close modal"
-              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:border-white/25 transition-all flex-shrink-0 mt-1 ml-4"
-            >
-              ✕
-            </button>
-          </div>
 
-          <p className="text-white/42 leading-relaxed italic text-sm">"{ritual.description}"</p>
-
-          {/* Stats grid */}
-          <div className="grid grid-cols-3 gap-3">
-            {([['Duration', ritual.duration], ['Heat', ritual.heatLevel], ['Pressure', ritual.pressure]] as const).map(([l, v]) => (
-              <div key={l} className="border border-white/5 rounded-2xl p-3.5">
-                <p className="text-[7px] uppercase tracking-[0.3em] text-white/22 mb-1.5">{l}</p>
-                <p className="text-gold text-[10px] font-mono leading-tight">{v}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Aroma profile */}
-          <div>
-            <p className="text-[8px] uppercase tracking-[0.3em] text-white/25 mb-3">Aroma Profile</p>
-            <div className="flex flex-wrap gap-2">
-              {ritual.aromaNotes.map((note) => (
-                <span key={note} className="px-4 py-1.5 border border-gold/20 text-gold text-[8px] uppercase tracking-[0.22em] rounded-full">
-                  {note}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* BUG 5 FIX: CSS animation-delay, no JS timers */}
-          <div>
-            <p className="text-[8px] uppercase tracking-[0.3em] text-white/25 mb-4">Ritual Timeline</p>
-            <div className="space-y-2">
-              {ritual.timeline.map((step, i) => (
+          {/* ── LEFT: image panel ── */}
+          <div className="relative lg:w-[40%] min-h-[240px] sm:min-h-[320px] lg:min-h-0 flex-shrink-0 overflow-hidden">
+            <Image
+              src={ritual.image}
+              alt={ritual.name}
+              fill
+              sizes="(max-width:1024px) 100vw, 40vw"
+              className="object-cover"
+              priority
+            />
+            {/* Layered overlays */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 lg:bg-gradient-to-r lg:from-transparent lg:to-[#080808]" />
+            <div
+              className="absolute inset-0 opacity-60"
+              style={{ background: `radial-gradient(circle at 50% 50%, ${accent.glow}, transparent 68%)` }}
+            />
+            {/* Floating particles */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="timeline-step flex gap-3 items-start"
-                  style={{ animationDelay: `${i * 60}ms` }}
-                >
-                  <div className="w-1 h-1 rounded-full bg-gold/38 mt-1.5 flex-shrink-0" />
-                  <p className="text-white/42 text-xs font-mono">{step}</p>
+                  className="arohamai-particle"
+                  style={{
+                    left:              `${i * (100 / 6)}%`,
+                    animationDuration: `${14 + i * 0.7}s`,
+                    animationDelay:    `${i * 0.6}s`,
+                  }}
+                />
+              ))}
+            </div>
+            {/* Badges */}
+            <div className="absolute top-5 left-5 flex flex-wrap gap-2 z-10">
+              <span className="px-3.5 py-1.5 text-xs uppercase tracking-[0.22em] border border-gold/30 bg-black/55 backdrop-blur-xl text-gold rounded-full font-medium">
+                {ritual.categoryTag}
+              </span>
+              <span className="px-3.5 py-1.5 text-xs uppercase tracking-[0.22em] border border-white/12 bg-black/45 backdrop-blur-xl text-white/65 rounded-full">
+                {ritual.status}
+              </span>
+            </div>
+            {/* Accent label bottom */}
+            <div className="absolute bottom-5 left-5 z-10">
+              <p className="text-xs uppercase tracking-[0.28em] text-gold/50 font-sans">{accent.label}</p>
+            </div>
+          </div>
+
+          {/* ── RIGHT: content panel ── */}
+          <motion.div
+            ref={scrollRef}
+            variants={CONTENT_VARIANTS}
+            initial="hidden"
+            animate="visible"
+            className="lg:w-[60%] overflow-y-auto p-7 md:p-10 flex flex-col gap-7"
+          >
+
+            {/* Header row */}
+            <motion.div variants={ITEM_VARIANTS} className="flex justify-between items-start gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-gold mb-2.5 font-sans font-medium">
+                  Arohamai Spa
+                </p>
+                <h2 className="font-display text-4xl md:text-5xl leading-[0.9] text-white">
+                  {ritual.name}
+                </h2>
+              </div>
+              <button
+                onClick={onClose}
+                aria-label="Close modal"
+                className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/35 hover:text-white hover:border-white/30 transition-all flex-shrink-0 mt-1 ml-2 text-sm"
+              >
+                ✕
+              </button>
+            </motion.div>
+
+            {/* Description */}
+            <motion.p variants={ITEM_VARIANTS} className="text-white/55 leading-relaxed italic text-[15px] font-light border-l-2 border-gold/20 pl-4">
+              &ldquo;{ritual.description}&rdquo;
+            </motion.p>
+
+            {/* Stats grid */}
+            <motion.div variants={ITEM_VARIANTS} className="grid grid-cols-3 gap-3">
+              <StatPill label="Duration" value={ritual.duration} />
+              <StatPill label="Heat"     value={ritual.heatLevel} />
+              <StatPill label="Pressure" value={ritual.pressure} />
+            </motion.div>
+
+            {/* Mood + Soundscape row */}
+            <motion.div variants={ITEM_VARIANTS} className="grid grid-cols-2 gap-3">
+              <div className="border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
+                <p className="text-xs uppercase tracking-[0.25em] text-white/30 mb-1.5 font-sans">Mood</p>
+                <p className="text-gold text-sm font-mono">{ritual.mood}</p>
+              </div>
+              <div className="border border-white/5 rounded-2xl p-4 bg-white/[0.02] flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full border border-gold/20 flex items-center justify-center text-gold text-sm flex-shrink-0 mt-0.5">♪</div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.25em] text-white/30 mb-1.5 font-sans">Soundscape</p>
+                  <p className="text-white/60 text-sm font-sans leading-snug">{ritual.soundscape}</p>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            </motion.div>
 
-          {/* BUG 3 FIX: scrollRef as viewport root */}
-          <div>
-            <p className="text-[8px] uppercase tracking-[0.3em] text-white/25 mb-4">Recovery Intelligence</p>
-            <div className="space-y-3">
-              <RecoveryMeter label="Stress Recovery"    value={ritual.recovery.stress}    containerRef={scrollRef} />
-              <RecoveryMeter label="Sleep Quality"      value={ritual.recovery.sleep}     containerRef={scrollRef} />
-              <RecoveryMeter label="Energy Restoration" value={ritual.recovery.energy}    containerRef={scrollRef} />
-              <RecoveryMeter label="Emotional Reset"    value={ritual.recovery.emotional} containerRef={scrollRef} />
-            </div>
-          </div>
+            {/* Aroma profile */}
+            {ritual.aromaNotes && ritual.aromaNotes.length > 0 && (
+              <motion.div variants={ITEM_VARIANTS}>
+                <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-3 font-sans">Aroma Profile</p>
+                <div className="flex flex-wrap gap-2">
+                  {ritual.aromaNotes.map((note) => (
+                    <span key={note} className="px-4 py-1.5 border border-gold/22 text-gold text-xs uppercase tracking-[0.18em] rounded-full font-medium">
+                      {note}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-          {/* Add-ons */}
-          <div>
-            <p className="text-[8px] uppercase tracking-[0.3em] text-white/25 mb-3">Enhancements</p>
-            <div className="flex flex-wrap gap-2">
-              {ritual.addOns.map((addon) => (
-                <span key={addon} className="px-3.5 py-1.5 border border-white/8 text-white/38 text-[8px] uppercase tracking-[0.18em] rounded-full hover:border-gold/22 hover:text-gold transition-all duration-300 cursor-pointer">
-                  + {addon}
-                </span>
-              ))}
-            </div>
-          </div>
+            {/* Ritual timeline */}
+            {ritual.timeline && ritual.timeline.length > 0 && (
+              <motion.div variants={ITEM_VARIANTS}>
+                <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-4 font-sans">Ritual Timeline</p>
+                <div className="space-y-3">
+                  {ritual.timeline.map((step, i) => (
+                    <div
+                      key={i}
+                      className="timeline-step flex gap-3 items-start"
+                      style={{ animationDelay: `${i * 60}ms` }}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-gold/45 mt-[5px] flex-shrink-0" />
+                      <p className="text-white/55 text-sm font-sans leading-relaxed">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-          {/* Soundscape */}
-          <div className="border border-white/5 rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-8 h-8 rounded-full border border-gold/18 flex items-center justify-center text-gold text-xs flex-shrink-0">♪</div>
-            <div>
-              <p className="text-[7px] uppercase tracking-[0.3em] text-white/22 mb-1">Soundscape</p>
-              <p className="text-white/55 text-xs">{ritual.soundscape}</p>
-            </div>
-          </div>
+            {/* Recovery intelligence — BUG 3 FIX: scrollRef as viewport root */}
+            <motion.div variants={ITEM_VARIANTS}>
+              <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-4 font-sans">Recovery Intelligence</p>
+              <div className="space-y-4">
+                <RecoveryMeter label="Stress Recovery"    value={ritual.recovery.stress}    containerRef={scrollRef} />
+                <RecoveryMeter label="Sleep Quality"      value={ritual.recovery.sleep}     containerRef={scrollRef} />
+                <RecoveryMeter label="Energy Restoration" value={ritual.recovery.energy}    containerRef={scrollRef} />
+                <RecoveryMeter label="Emotional Reset"    value={ritual.recovery.emotional} containerRef={scrollRef} />
+              </div>
+            </motion.div>
 
-          {/* Footer CTA */}
-          <div className="border-t border-white/5 pt-6">
-            <div className="mb-5">
-              <p className="text-[8px] uppercase tracking-[0.22em] text-white/18 mb-1">Investment</p>
-              <p className="font-display text-4xl text-gold">KES {ritual.price.toLocaleString()}</p>
-              <p className="text-[7px] uppercase tracking-[0.18em] text-white/18">{ritual.duration} · Per Session</p>
-            </div>
-            <div className="flex gap-3">
-              <MagneticButton
-                className="flex-1 btn-gold !py-4 !text-[10px]"
-                onClick={addToCart}
-              >
-                ADD TO WELLNESS CART
-              </MagneticButton>
-              <Link
-                href="/contact"
-                className="px-7 py-4 border border-white/10 hover:border-gold/28 text-[9px] uppercase tracking-[0.22em] transition-all duration-500 rounded-full text-center whitespace-nowrap"
-              >
-                BOOK NOW
-              </Link>
-            </div>
-          </div>
-        </div>
+            {/* Add-ons */}
+            {ritual.addOns && ritual.addOns.length > 0 && (
+              <motion.div variants={ITEM_VARIANTS}>
+                <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-3 font-sans">Enhancements</p>
+                <div className="flex flex-wrap gap-2">
+                  {ritual.addOns.map((addon) => (
+                    <span
+                      key={addon}
+                      className="px-4 py-2 border border-white/10 text-white/45 text-xs uppercase tracking-[0.15em] rounded-full hover:border-gold/25 hover:text-gold transition-all duration-300 cursor-pointer font-sans"
+                    >
+                      + {addon}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Footer CTA */}
+            <motion.div variants={ITEM_VARIANTS} className="border-t border-white/8 pt-7 mt-auto">
+              <div className="flex items-end justify-between mb-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/22 mb-1.5 font-sans">Investment</p>
+                  <p className="font-display text-4xl md:text-5xl text-gold leading-none">
+                    KES {ritual.price.toLocaleString()}
+                  </p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/22 mt-1.5 font-sans">
+                    {ritual.duration} · Per Session
+                  </p>
+                </div>
+                <span className="text-xs uppercase tracking-[0.2em] text-white/20 font-sans">Arohamai Spa</span>
+              </div>
+              <div className="flex gap-3">
+                <MagneticButton
+                  className="flex-1 btn-gold !py-4 !text-[11px] !tracking-[0.2em]"
+                  onClick={addToCart}
+                >
+                  ADD TO WELLNESS CART
+                </MagneticButton>
+                <Link
+                  href="/contact"
+                  className="px-7 py-4 border border-white/12 hover:border-gold/30 text-sm uppercase tracking-[0.2em] transition-all duration-500 rounded-full text-center whitespace-nowrap text-white/55 hover:text-gold"
+                >
+                  BOOK NOW
+                </Link>
+              </div>
+            </motion.div>
+
+          </motion.div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </AnimatePresence>,
+    document.body
   )
 }

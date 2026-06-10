@@ -1,6 +1,16 @@
+import type { Metadata } from 'next'
 import NavWrapper from '@/components/NavWrapper'
 import Footer from '@/components/Footer'
 import MoxieChat from '@/components/MoxieChat'
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Ubuntu Kreative Village',
+  description: 'Privacy policy and data handling practices at Ubuntu Kreative Village eco lodge. Learn how we protect your personal information.',
+  robots: 'noindex, follow',
+  alternates: {
+    canonical: 'https://ubuntuecolodge.com/privacy-policy',
+  },
+}
 
 const SECTIONS = [
   {
@@ -123,7 +133,7 @@ Website: www.odpc.go.ke`,
 
 export default function PrivacyPolicyPage() {
   return (
-    <main style={{ background: 'var(--obsidian)', minHeight: '100vh' }}>
+    <main style={{ background: 'var(--obsidian)', minHeight: '100dvh' }}>
       <NavWrapper />
 
       {/* ── Hero ── */}

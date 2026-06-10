@@ -72,6 +72,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { useFeastStore } from '../_store/feast-store'
 import { useCartStore }  from '@/context/cartStore'
@@ -144,6 +145,9 @@ interface LogModalProps {
 }
 
 export default function LogModal({ item, onClose }: LogModalProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const stageItem     = useFeastStore(s => s.stageItem)
   const updateQty     = useFeastStore(s => s.updateQty)
   const getStagedItem = useFeastStore(s => s.getStagedItem)
@@ -229,11 +233,13 @@ export default function LogModal({ item, onClose }: LogModalProps) {
   const safeAllergens   = item.allergens   ?? []
   const safeTags        = item.tags        ?? []
 
-  return (
+  if (!mounted) return null
+
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/95 backdrop-blur-2xl p-0 sm:p-4 md:p-6">
+      <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-black/95 backdrop-blur-2xl p-0 sm:p-4 md:p-6">
         <div className="absolute inset-0" onClick={onClose} />
-        <div className="relative w-full max-w-6xl h-[95dvh] sm:h-[90vh] flex flex-col md:flex-row bg-[#060606] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,0.9)] rounded-t-3xl sm:rounded-2xl border border-white/[0.06]">
+        <div className="relative w-full max-w-6xl h-[95dvh] sm:h-[90vh] flex flex-col md:flex-row bg-[#060606] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,0.9)] rounded-t-3xl sm:rounded-2xl border border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
 
           {/* ── Left: image ── */}
           <div className="relative md:w-[46%] h-56 sm:h-72 md:h-full flex-shrink-0 bg-black overflow-hidden group rounded-t-3xl sm:rounded-tl-2xl sm:rounded-bl-2xl md:rounded-tr-none">
@@ -497,6 +503,7 @@ export default function LogModal({ item, onClose }: LogModalProps) {
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.body
   )
 }

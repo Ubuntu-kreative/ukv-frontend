@@ -646,13 +646,13 @@ export default function Footer() {
             }}
           >
             {/* Logo */}
-            <Link href="/" style={{ display: 'inline-block', marginBottom: 20, textDecoration: 'none' }}>
+            <Link href="/" target="_self" style={{ display: 'inline-block', marginBottom: 20, textDecoration: 'none' }}>
               <img 
-                src="/branding/ubuntu-mark2.png" 
-                alt="Ubuntu Kreative Village Logo"
+                src="/branding/ubuntu-logo-dark-transparent.png" 
+                alt="Ubuntu Logo"
                 style={{ 
-                  height: "48px",
-                  width: "auto",
+                  width: "clamp(90px, 12vw, 120px)",
+                  height: "auto",
                   marginBottom: 8
                 }}
               />
@@ -773,6 +773,12 @@ export default function Footer() {
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}>
               Contact
+            </Link>
+            <span style={{ color: 'rgba(255,255,255,0.1)' }}>&middot;</span>
+            <Link href="/admin/login" style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}>
+              Staff Portal
             </Link>
             <span style={{ color: 'rgba(255,255,255,0.1)' }}>&middot;</span>
             <span style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.12)' }}>

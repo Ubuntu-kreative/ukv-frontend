@@ -227,6 +227,38 @@ function validateMeta(
   return { valid: true, parsed: result.data, errors: {} }
 }
 
+function confirmationMessage(type: InquiryType, name: string): string {
+  const first = name.split(' ')[0]
+  const msgs: Record<InquiryType, string> = {
+    contact:    `Thank you, ${first}. We've received your message and will respond within 24 hours.`,
+    spa:        `Thank you, ${first}. Your Arohamai Spa inquiry is with us. We'll confirm your treatment details shortly.`,
+    restaurant: `Thank you, ${first}. Our farm-to-fork team will confirm your dining reservation soon.`,
+    retreat:    `Thank you, ${first}. We're reviewing your retreat request and will send a personalised proposal.`,
+    events:     `Thank you, ${first}. Our events team will reach out within 48 hours to begin planning.`,
+  }
+  return msgs[type]
+}
+
+async function queueNotification(
+  inquiryId: string,
+  type:      InquiryType,
+  name:      string,
+  email:     string
+): Promise<void> {
+  const webhookUrl = process.env.INQUIRY_WEBHOOK_URL
+  if (!webhookUrl) return
+
+  await fetch(webhookUrl, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text:      `🌿 New ${type} inquiry from *${name}* (${email})`,
+      inquiryId,
+      type,
+    }),
+  })
+}
+
 // ── POST — Submit inquiry ─────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -445,39 +477,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       total:      count ?? 0,
       totalPages: Math.ceil((count ?? 0) / limit),
     },
-  })
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function confirmationMessage(type: InquiryType, name: string): string {
-  const first = name.split(' ')[0]
-  const msgs: Record<InquiryType, string> = {
-    contact:    `Thank you, ${first}. We've received your message and will respond within 24 hours.`,
-    spa:        `Thank you, ${first}. Your Arohamai Spa inquiry is with us. We'll confirm your treatment details shortly.`,
-    restaurant: `Thank you, ${first}. Our farm-to-fork team will confirm your dining reservation soon.`,
-    retreat:    `Thank you, ${first}. We're reviewing your retreat request and will send a personalised proposal.`,
-    events:     `Thank you, ${first}. Our events team will reach out within 48 hours to begin planning.`,
-  }
-  return msgs[type]
-}
-
-async function queueNotification(
-  inquiryId: string,
-  type:      InquiryType,
-  name:      string,
-  email:     string
-): Promise<void> {
-  const webhookUrl = process.env.INQUIRY_WEBHOOK_URL
-  if (!webhookUrl) return
-
-  await fetch(webhookUrl, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text:      `🌿 New ${type} inquiry from *${name}* (${email})`,
-      inquiryId,
-      type,
-    }),
   })
 }

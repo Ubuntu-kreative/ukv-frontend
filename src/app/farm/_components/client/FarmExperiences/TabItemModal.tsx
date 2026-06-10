@@ -3,10 +3,11 @@
  * FarmExperiences/TabItemModal.tsx
  *
  * Lazy-loaded — NOT in the initial JS bundle.
- * Saves ~8 KB from the initial hydration payload.
+ * Two-panel cinematic layout matching ExperienceModal quality.
  */
 
 import { useCallback, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import type { TabItem } from '../../../_data/farm-data'
 import { addTabItemAction } from './actions'
@@ -19,29 +20,23 @@ interface TabItemModalProps {
 }
 
 export function TabItemModal({ item, openCart, onClose }: TabItemModalProps) {
-  const [justAdded, triggerJustAdded] = useJustAdded()
-
   useModalScrollLock(onClose)
 
-  // All inline style objects memoized per item reference
-  const overlayStyle = useMemo(() => ({
-    background: `radial-gradient(ellipse at center, ${item.accentColor}12, transparent 70%)`,
-  }), [item.accentColor])
-
-  const borderStyle = useMemo(() => ({
-    borderColor: `${item.accentColor}30`,
-  }), [item.accentColor])
-
-  const tagStyle = useMemo(() => ({
-    color:       item.accentColor,
-    background:  `${item.accentColor}18`,
-    borderColor: `${item.accentColor}44`,
-  }), [item.accentColor])
+  const [justAdded, triggerJustAdded] = useJustAdded()
 
   const highlightStyle = useMemo(() => ({
     color:       item.accentColor,
     background:  `${item.accentColor}10`,
-    borderColor: `${item.accentColor}25`,
+    borderColor: `${item.accentColor}28`,
+  }), [item.accentColor])
+
+  // Accent-tinted image bottom overlay
+  const accentOverlayStyle = useMemo(() => ({
+    background: `linear-gradient(180deg,
+      rgba(4,6,3,0.45) 0%,
+      rgba(4,6,3,0.05) 30%,
+      ${item.accentColor}18 65%,
+      rgba(4,6,3,0.92) 100%)`,
   }), [item.accentColor])
 
   const handleAdd = useCallback(() => {
@@ -51,54 +46,59 @@ export function TabItemModal({ item, openCart, onClose }: TabItemModalProps) {
 
   const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), [])
 
-  return (
+  return createPortal(
     <div
-      className="farm-modal-backdrop"
+      className="farm-modal-overlay"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={item.name}
-    >
-      <div className="farm-tab-modal" onClick={stopProp} style={borderStyle}>
+      >
+      <div
+        className="farm-modal-shell farm-modal-shell--tilt"
+        onClick={stopProp}
+       >
+        {/* ── LEFT: Image Panel ── */}
+        <div className="farm-modal__image-meta">
+           <h2 className="farm-modal__image-title font-display">
+           {item.name}
+           </h2>
 
-        <div className="farm-tab-modal__image-wrap">
-          <Image
-            src={item.image}
-            alt={item.name}
-            fill
-            sizes="100vw"
-            style={{ objectFit: 'cover' }}
-            priority
-          />
-          <div className="farm-tab-modal__image-overlay" style={overlayStyle} />
-          <button onClick={onClose} className="farm-modal__close" aria-label="Close">✕</button>
-          <span className="farm-tab-modal__tag" style={tagStyle}>
-            {item.tag}
-          </span>
-          <div className="farm-tab-modal__image-footer">
-            <h2 className="farm-tab-modal__title font-display">{item.name}</h2>
+         {(item.duration || item.capacity) && (
+          <div className="farm-modal__image-pills">
+
+         {item.duration && (
+        <span className="farm-modal__image-pill">
+          <span>⏱</span>
+          <span>{item.duration}</span>
+        </span>
+        )}
+
+           {item.capacity && (
+              <span className="farm-modal__image-pill">
+          <span>👥</span>
+          <span>{item.capacity} Guests</span>
+                </span>
+            )}
+
+             </div>
+            )}
+            </div>
+
+      {/* ── RIGHT: Content Panel ── */}
+        <div className="farm-modal__content">
+
+          <div className="farm-modal__header">
+            <span className="farm-modal__category">{item.tag}</span>
             {item.price && (
-              <span className="farm-tab-modal__price font-display">
-                KES {item.price.toLocaleString()}
-                <span className="farm-tab-modal__price-unit"> / person</span>
-              </span>
+              <div className="farm-modal__price-row" style={{ marginTop: 8 }}>
+                <span className="farm-modal__price font-display">KES {item.price.toLocaleString()}</span>
+                <span className="farm-modal__price-unit">/ person</span>
+              </div>
             )}
           </div>
-        </div>
 
-        <div className="farm-tab-modal__content">
-          {(item.duration || item.capacity) && (
-            <div className="farm-tab-modal__meta-row">
-              {item.duration && (
-                <span className="farm-tab-modal__meta-tag">⏱ {item.duration}</span>
-              )}
-              {item.capacity && (
-                <span className="farm-tab-modal__meta-tag">👥 {item.capacity} guests</span>
-              )}
-            </div>
-          )}
-
-          <p className="farm-tab-modal__description">{item.description}</p>
+          <p className="farm-modal__description">{item.description}</p>
 
           <div>
             <div className="farm-modal__section-label">Highlights</div>
@@ -111,36 +111,51 @@ export function TabItemModal({ item, openCart, onClose }: TabItemModalProps) {
             </div>
           </div>
 
-          {item.price ? (
-            <div className="farm-tab-modal__cta-row">
+          <div className="farm-modal__cta-section">
+            {item.price ? (
+              <>
+                {justAdded ? (
+                  /* Seamless cart reveal after adding */
+                  <div className="farm-modal__btn-row farm-modal__btn-row--seamless">
+                    <button
+                      onClick={handleAdd}
+                      className="farm-modal__btn farm-modal__btn--ghost"
+                    >
+                      + Add More
+                    </button>
+                    <button
+                      onClick={openCart}
+                      className="farm-modal__btn farm-modal__btn--primary farm-modal__btn--cart-cta"
+                    >
+                      <span>View Cart</span>
+                      <span className="farm-modal__cart-badge">→</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleAdd}
+                    className="farm-modal__btn farm-modal__btn--primary farm-modal__btn--full"
+                  >
+                    + Add to Cart
+                  </button>
+                )}
+                {justAdded && (
+                  <p className="farm-modal__cart-note">✓ Added — ready in your cart</p>
+                )}
+              </>
+            ) : (
               <button
-                onClick={handleAdd}
-                className={`farm-modal__btn farm-modal__btn--primary farm-modal__btn--full${
-                  justAdded ? ' farm-modal__btn--added' : ''
-                }`}
+                onClick={onClose}
+                className="farm-modal__btn farm-modal__btn--ghost farm-modal__btn--full"
               >
-                {justAdded ? '✓ Added to Cart' : '+ Add to Cart'}
+                Close
               </button>
-              {justAdded && (
-                <button
-                  onClick={openCart}
-                  className="farm-modal__btn farm-modal__btn--neon"
-                >
-                  View Cart →
-                </button>
-              )}
-            </div>
-          ) : (
-            <button
-              onClick={onClose}
-              className="farm-modal__btn farm-modal__btn--ghost farm-modal__btn--full"
-            >
-              Close
-            </button>
-          )}
+            )}
+          </div>
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

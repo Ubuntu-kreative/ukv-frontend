@@ -1,62 +1,44 @@
 'use client'
 /**
- * _components/client/FarmScrollReveal.tsx  — PERFORMANCE-OPTIMISED
+ * _components/client/FarmScrollReveal.tsx  — PERFORMANCE-OPTIMISED v4
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * PERF-07  MUTATIONOBSERVER SELF-TRIGGER LOOP  ← SECONDARY FREEZE CAUSE
+ * FIXES IN THIS VERSION
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * The original MutationObserver watched document.body with { childList: true,
- * subtree: true }. Inside its callback, activateElements() mutated the DOM
- * by calling el.classList.add('farm-reveal', 'farm-reveal--up') and
- * el.style.setProperty('--farm-delay', ...).
+ * FIX-A  MutationObserver self-trigger loop → re-entrancy guard
+ * FIX-B  Re-entrancy guard narrowed to activateElements() call only
+ * FIX-C  MO scan guard — only act on genuinely new [data-reveal] nodes
+ * FIX-D  Soft-nav above-fold disappear — viewport check before IO registration
+ * FIX-E  MO_LIFETIME_MS=600 killed too early — removed, MO lives full lifetime
+ * FIX-F  `processing` flag too broad — narrowed to DOM-write step only
  *
- * classList.add() and style.setProperty() on an observed element's descendant
- * DO NOT fire childList mutations — BUT if any browser or framework (e.g.
- * React DevTools, Zustand react-tracked, Next.js router) also triggers
- * attribute changes on those same elements immediately after, the observer
- * fires again, re-scanning the subtree, which can create a feedback loop
- * of rapid successive MutationObserver callbacks on every cart update.
- *
- * More critically: the observer had NO GUARD against re-processing already-
- * activated elements. If a parent node was re-mounted (e.g. React reconciler
- * swapping a subtree during a state change), the observer would re-scan its
- * entire subtree, calling activateElements() on elements that already had
- * 'farm-reveal'. The `if (el.classList.contains('farm-reveal')) return` guard
- * existed, but the *outer scan* still iterated ALL descendants on EVERY
- * mutation — on a large DOM this is O(N) per mutation, and cart interactions
- * trigger multiple mutations.
- *
- * FIX-A: MutationObserver is DISCONNECTED after FarmExperiences has mounted.
- *   We only need it for the dynamic-import race window (roughly 0–500ms).
- *   A 600ms timeout disconnects the observer once all dynamic islands have
- *   had time to paint. After that, all [data-reveal] elements are in the DOM
- *   and the IntersectionObserver handles them indefinitely.
- *
- * FIX-B: Observer uses a `processing` flag (re-entrancy guard). If the
- *   callback is already running, new mutations that fire during DOM writes
- *   are ignored. This eliminates any remaining feedback-loop risk.
- *
- * FIX-C: Descendant scan is guarded by checking if any NEW [data-reveal]
- *   nodes were actually found before calling activateElements, avoiding
- *   redundant work on purely structural mutations (class changes, etc.).
- *
+ * FIX-G  (v4) getBoundingClientRect() returns wrong values on soft nav
  * ─────────────────────────────────────────────────────────────────────────────
- * BUG-07 (original) / BUG-08 (original) — preserved from previous audit.
- * All other observer and stagger logic is unchanged.
+ * THE BUG: React's useEffect fires synchronously after render, before the
+ * browser has completed layout for the new page. On soft nav (Next.js <Link>),
+ * getBoundingClientRect() returns 0 or stale values for all elements because
+ * the browser hasn't painted yet. This means the FIX-D viewport check
+ * (rect.top < vh) evaluates incorrectly — elements that should scroll-animate
+ * get instantly revealed, or vice versa.
+ *
+ * THE FIX: Wrap the initial activateElements() pass in a double
+ * requestAnimationFrame. The double-rAF pattern ("rAF inside rAF") defers
+ * execution until after the browser has completed layout AND painted at least
+ * one frame, guaranteeing that getBoundingClientRect() returns accurate
+ * positions. Single rAF is not enough — it runs before paint. Double rAF
+ * runs after the first paint, when layout is settled.
+ *
+ * The MutationObserver is started immediately (before the rAF) so it doesn't
+ * miss any nodes added by dynamic islands during the rAF wait window.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { useEffect } from 'react'
 
-// How long to keep the MutationObserver alive after mount.
-// This covers the ssr:false hydration window for FarmExperiences.
-// After this time all dynamic nodes are in the DOM; the MO is no longer needed.
-const MO_LIFETIME_MS = 600
-
 export default function FarmScrollReveal() {
   useEffect(() => {
-    // IntersectionObserver: created once, reused for all elements
+    // ── IntersectionObserver ─────────────────────────────────────────────────
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -69,20 +51,28 @@ export default function FarmScrollReveal() {
       { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
     )
 
-    /**
-     * Applies reveal classes + stagger delays, then observes with IO.
-     * Idempotent: already-activated elements are skipped.
-     */
+    // ── activateElements ─────────────────────────────────────────────────────
+    // FIX-D: Elements already in the viewport are revealed instantly.
+    // FIX-G: Only called after double-rAF so getBoundingClientRect is accurate.
     function activateElements(elements: NodeListOf<HTMLElement> | HTMLElement[]) {
       if (!elements.length) return
 
+      const vh = window.innerHeight
       const groups = new Map<Element, HTMLElement[]>()
 
       Array.from(elements).forEach((el) => {
-        if (el.classList.contains('farm-reveal')) return  // idempotency guard
+        if (el.classList.contains('farm-reveal')) return
 
         const direction = el.dataset.reveal ?? 'up'
         el.classList.add('farm-reveal', `farm-reveal--${direction}`)
+
+        // FIX-D: already in viewport → reveal immediately, no IO
+        const rect = el.getBoundingClientRect()
+        if (rect.top < vh) {
+          el.style.setProperty('--farm-delay', '0ms')
+          el.classList.add('farm-reveal--visible')
+          return
+        }
 
         const parent =
           el.closest('.farm-exp-grid, .farm-tab-grid, .farm-log-grid, .farm-stats-bar__inner') ??
@@ -103,48 +93,73 @@ export default function FarmScrollReveal() {
       })
     }
 
-    // Initial pass: server-rendered nodes (FarmHero, FarmLog, FarmStatsBar)
-    activateElements(document.querySelectorAll<HTMLElement>('[data-reveal]'))
+    // ── MutationObserver ─────────────────────────────────────────────────────
+    // Started immediately — before the rAF — so no dynamic nodes are missed
+    // during the layout wait window.
+    let idleCbId: number | ReturnType<typeof setTimeout> | null = null
+    let pendingEls: HTMLElement[] = []
+    let processing = false
 
-    // ── FIX-A + FIX-B + FIX-C: MutationObserver with tight lifetime + guard
-    let processing = false  // FIX-B: re-entrancy guard
-
-    const mo = new MutationObserver((mutations) => {
-      if (processing) return  // FIX-B: ignore mutations caused by our own DOM writes
+    function flushPending() {
+      idleCbId = null
+      if (!pendingEls.length) return
+      const batch = pendingEls
+      pendingEls = []
+      if (processing) return
       processing = true
-
       try {
-        const newRevealEls: HTMLElement[] = []
-
-        mutations.forEach((m) => {
-          m.addedNodes.forEach((node) => {
-            if (!(node instanceof HTMLElement)) return
-            // FIX-C: only scan nodes that were *added* (not attribute changes)
-            if (node.dataset.reveal && !node.classList.contains('farm-reveal')) {
-              newRevealEls.push(node)
-            }
-            node.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
-              if (!el.classList.contains('farm-reveal')) newRevealEls.push(el)
-            })
-          })
-        })
-
-        // FIX-C: skip activateElements call if nothing new was found
-        if (newRevealEls.length) activateElements(newRevealEls)
+        activateElements(batch)
       } finally {
         processing = false
+      }
+    }
+
+    const mo = new MutationObserver((mutations) => {
+      mutations.forEach((m) => {
+        m.addedNodes.forEach((node) => {
+          if (!(node instanceof HTMLElement)) return
+          if (node.dataset.reveal && !node.classList.contains('farm-reveal')) {
+            pendingEls.push(node)
+          }
+          node.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+            if (!el.classList.contains('farm-reveal')) pendingEls.push(el)
+          })
+        })
+      })
+
+      if (!pendingEls.length) return
+      if (idleCbId !== null) return
+
+      if (typeof window.requestIdleCallback === 'function') {
+        idleCbId = window.requestIdleCallback(flushPending, { timeout: 300 })
+      } else {
+        idleCbId = setTimeout(flushPending, 100)
       }
     })
 
     mo.observe(document.body, { childList: true, subtree: true })
 
-    // FIX-A: disconnect MO after the dynamic-import race window closes.
-    // The IO stays alive for the page lifetime (it's lightweight; it only
-    // fires when elements scroll into view and immediately unobserves them).
-    const moTimeout = setTimeout(() => mo.disconnect(), MO_LIFETIME_MS)
+    // ── FIX-G: Initial pass deferred via double-rAF ──────────────────────────
+    // Single rAF fires before paint (layout not settled).
+    // Double rAF fires after first paint — getBoundingClientRect is accurate.
+    let raf1: number
+    let raf2: number
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        activateElements(document.querySelectorAll<HTMLElement>('[data-reveal]'))
+      })
+    })
 
     return () => {
-      clearTimeout(moTimeout)
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+      if (idleCbId !== null) {
+        if (typeof window.cancelIdleCallback === 'function') {
+          window.cancelIdleCallback(idleCbId as number)
+        } else {
+          clearTimeout(idleCbId as ReturnType<typeof setTimeout>)
+        }
+      }
       io.disconnect()
       mo.disconnect()
     }

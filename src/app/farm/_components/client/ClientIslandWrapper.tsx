@@ -1,15 +1,15 @@
 'use client'
 
-import FarmExperiences from './FarmExperiences'
 import FarmVideoLoader from './FarmVideoLoader'
 import FarmScrollReveal from './FarmScrollReveal'
+import MoxieChat from '@/components/MoxieChat'
 
 export default function ClientIslandWrapper() {
   return (
     <>
       <FarmScrollReveal />
-      <FarmExperiences />
       <FarmVideoLoader />
+      <MoxieChat />
     </>
   )
 }

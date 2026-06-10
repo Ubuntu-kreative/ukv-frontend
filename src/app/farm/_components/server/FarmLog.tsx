@@ -12,6 +12,7 @@
 import Image from 'next/image'
 import { LIVESTOCK, CROPS, FIELDS } from '../../_data/farm-data'
 import type { LivestockItem, CropItem, FieldItem } from '../../_data/farm-data'
+import AskMoxieButton from '../client/AskMoxieButton'
 
 // ─── MOISTURE BAR — server-rendered at final width (no JS animation) ──────────
 function MoistureBar({ value, accent }: { value: number; accent: string }) {
@@ -294,9 +295,7 @@ export default function FarmLog() {
         <p className="farm-log-erp-note__body">
           Phase 4 will connect this page to live FarmERP data. Ask Moxie about any animal or crop right now.
         </p>
-        <a href="#" className="farm-btn farm-btn--neon">
-          Ask Moxie About the Farm →
-        </a>
+        <AskMoxieButton />
       </div>
     </div>
   )
