@@ -2,7 +2,7 @@
  * Global Moxie Chat State Store
  * Controls Moxie chat bubble visibility and state across the entire app
  *
- * Phase 2A.1 Enhancement: Added conversation persistence, guest profile, and session management
+ * Moxie Store — Conversation persistence and guest profile management
  */
 
 import { create } from 'zustand'

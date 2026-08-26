@@ -94,7 +94,7 @@ export default function RestaurantHero() {
           <a href="#menu" className="ukv-hero__cta ukv-hero__cta--primary">
             Explore the Menu
           </a>
-          <a href="/reservations" className="ukv-hero__cta ukv-hero__cta--secondary">
+          <a href="/contact" className="ukv-hero__cta ukv-hero__cta--secondary">
             Reserve a Table
           </a>
         </div>

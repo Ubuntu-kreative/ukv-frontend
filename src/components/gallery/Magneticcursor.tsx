@@ -4,13 +4,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useState } from 'react'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 
 export function MagneticCursor({ accentColor }: { accentColor: string }) {
+  const prefersReducedMotion = useReducedMotion()
   const cx = useMotionValue(-200)
   const cy = useMotionValue(-200)
-  const sx = useSpring(cx, { stiffness: 80, damping: 18, mass: 0.6 })
-  const sy = useSpring(cy, { stiffness: 80, damping: 18, mass: 0.6 })
+  const sx = useSpring(cx, { stiffness: prefersReducedMotion ? 1000 : 80, damping: prefersReducedMotion ? 100 : 18, mass: 0.6 })
+  const sy = useSpring(cy, { stiffness: prefersReducedMotion ? 1000 : 80, damping: prefersReducedMotion ? 100 : 18, mass: 0.6 })
   const [expanded, setExpanded] = useState(false)
   const [visible, setVisible] = useState(false)
 
@@ -49,7 +50,7 @@ export function MagneticCursor({ accentColor }: { accentColor: string }) {
           borderColor: accentColor,
           opacity: expanded ? 0.7 : 0.45,
         }}
-        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 22 }}
         style={{
           borderRadius: '50%',
           border: '1px solid',
@@ -60,7 +61,7 @@ export function MagneticCursor({ accentColor }: { accentColor: string }) {
       />
       <motion.div
         animate={{ scale: expanded ? 0.4 : 1, backgroundColor: accentColor }}
-        transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 24 }}
         style={{
           width: 5, height: 5, borderRadius: '50%',
           position: 'absolute',

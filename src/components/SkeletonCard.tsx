@@ -1,5 +1,5 @@
 // ── SkeletonCard ──────────────────────────────────────────────
-// Shimmer loading state shown when FarmERP or WordPress is slow.
+// Shimmer loading state shown while farm data is loading.
 // Used in BentoGrid while data is fetching.
 // Also shown when kill_switch is active for a service.
 

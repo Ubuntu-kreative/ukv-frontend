@@ -243,7 +243,7 @@ export default function FarmLog() {
           <div className="farm-log-intro__line" />
           <span>Farm Log · The Pulse</span>
           <span className="farm-hero__live-dot" aria-hidden="true" />
-          <span className="farm-log-intro__sync">FarmERP synced 8m ago</span>
+          <span className="farm-log-intro__sync">Farm data synced 8m ago</span>
           <div className="farm-log-intro__line" />
         </div>
         <h2 className="farm-log-intro__heading font-display" data-reveal="up" data-reveal-delay="80">
@@ -251,7 +251,7 @@ export default function FarmLog() {
           <em className="farm-log-intro__heading-accent">right now.</em>
         </h2>
         <p className="farm-log-intro__body" data-reveal="up" data-reveal-delay="160">
-          Every animal, crop, and field tracked in real time via FarmERP. This data powers your dinner,
+          Every animal, crop, and field tracked in real time. This live data powers your dinner,
           your spa treatments, and Moxie's provenance answers.
         </p>
       </div>
@@ -290,10 +290,10 @@ export default function FarmLog() {
       <div className="farm-log-erp-note" data-reveal="up">
         <div className="farm-log-erp-note__header">
           <span className="farm-hero__live-dot" aria-hidden="true" />
-          <span>Powered by FarmERP · Synced every 60 minutes</span>
+          <span>Live Farm Data · Updated every hour</span>
         </div>
         <p className="farm-log-erp-note__body">
-          Phase 4 will connect this page to live FarmERP data. Ask Moxie about any animal or crop right now.
+          Curious about the animals or crops you see? Ask Moxie — she knows every detail about what's happening on the farm right now.
         </p>
         <AskMoxieButton />
       </div>

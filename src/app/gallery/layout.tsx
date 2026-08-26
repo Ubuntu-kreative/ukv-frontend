@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Ubuntu Kreative Village — Gallery Layout
-// SERVER COMPONENT — SEO metadata only, no interactivity
+// Ubuntu Kreative Village — Gallery Layout  (Server Component)
+// SEO metadata only — no interactivity.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Metadata } from 'next'
@@ -34,10 +34,6 @@ export const metadata: Metadata = {
   },
 }
 
-export default function GalleryLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function GalleryLayout({ children }: { children: React.ReactNode }) {
   return children
 }

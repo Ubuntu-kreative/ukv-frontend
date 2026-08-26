@@ -54,6 +54,7 @@ const FOOTER_COLS = [
     links: [
       { label: 'About Ubuntu',   href: '/about'          },
       { label: 'The Living Farm',href: '/farm'           },
+      { label: 'Journal',        href: '/journal'        },
       { label: 'Gallery',        href: '/gallery'        },
       { label: 'Contact',        href: '/contact'        },
       { label: 'Privacy Policy', href: '/privacy-policy' },
@@ -131,7 +132,7 @@ function MagneticLink({
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         fontFamily: 'var(--font-body)',
-        fontSize: '12px',
+        fontSize: '14px',
         color: hovered ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.38)',
         letterSpacing: '0.04em',
         textDecoration: 'none',
@@ -219,7 +220,7 @@ useEffect(() => {
         <span
           style={{
             fontFamily: 'var(--font-body)',
-            fontSize: '10px', letterSpacing: '0.18em',
+            fontSize: '13px', letterSpacing: '0.18em',
             textTransform: 'uppercase',
             color: 'rgba(255,255,255,0.45)',
           }}
@@ -244,14 +245,14 @@ useEffect(() => {
             }}
           >
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: s.dot, boxShadow: `0 0 5px ${s.dot}`, display: 'inline-block' }} />
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
               {s.label}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Architecture Bible badge — preserved exactly */}
+      {/* Ubuntu Kreative Village branding footer badge */}
       <div
         style={{
           display: 'inline-flex', alignItems: 'center',
@@ -264,12 +265,12 @@ useEffect(() => {
         <span
           style={{
             fontFamily: 'var(--font-body)',
-            fontSize: '8px', letterSpacing: '0.18em',
+            fontSize: '11px', letterSpacing: '0.18em',
             textTransform: 'uppercase',
             color: 'rgba(0,255,65,0.5)',
           }}
         >
-          Architecture Bible v2.0 · Phase 2 of 6
+          Ubuntu Kreative Village · Est. 2019
         </span>
       </div>
     </div>
@@ -298,7 +299,7 @@ function Newsletter() {
           style={{
             display: 'block',
             fontFamily: 'var(--font-body)',
-            fontSize: '8px', letterSpacing: '0.28em',
+            fontSize: '11px', letterSpacing: '0.28em',
             textTransform: 'uppercase',
             color: 'rgba(255,255,255,0.22)',
             marginBottom: 10,
@@ -309,7 +310,7 @@ function Newsletter() {
         <p
           style={{
             fontFamily: 'var(--font-body)',
-            fontSize: '11px', lineHeight: 1.8,
+            fontSize: '13px', lineHeight: 1.8,
             color: 'rgba(255,255,255,0.35)',
             maxWidth: 240,
           }}
@@ -329,7 +330,7 @@ function Newsletter() {
           <span
             style={{
               fontFamily: 'var(--font-body)',
-              fontSize: '10px', letterSpacing: '0.14em',
+              fontSize: '13px', letterSpacing: '0.14em',
               color: 'rgba(0,255,65,0.7)',
             }}
           >
@@ -361,7 +362,7 @@ function Newsletter() {
                 flex: 1, padding: '10px 14px',
                 background: 'transparent', border: 'none', outline: 'none',
                 fontFamily: 'var(--font-body)',
-                fontSize: '11px', letterSpacing: '0.04em',
+                fontSize: '13px', letterSpacing: '0.04em',
                 color: 'rgba(255,255,255,0.65)',
               }}
             />
@@ -373,7 +374,7 @@ function Newsletter() {
                 border: 'none', borderLeft: '1px solid rgba(212,168,83,0.2)',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-body)',
-                fontSize: '8px', letterSpacing: '0.2em',
+                fontSize: '11px', letterSpacing: '0.2em',
                 textTransform: 'uppercase',
                 color: 'rgba(212,168,83,0.8)',
                 transition: 'background 0.25s ease',
@@ -388,7 +389,7 @@ function Newsletter() {
           <span
             style={{
               fontFamily: 'var(--font-body)',
-              fontSize: '8px', letterSpacing: '0.1em',
+              fontSize: '11px', letterSpacing: '0.1em',
               color: 'rgba(255,255,255,0.16)',
             }}
           >
@@ -523,7 +524,7 @@ export default function Footer() {
         {/* Eyebrow */}
         <div style={{
           fontFamily: 'var(--font-body)',
-          fontSize: '9px', letterSpacing: '0.35em',
+          fontSize: '12px', letterSpacing: '0.35em',
           textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)',
           marginBottom: 18,
         }}>
@@ -544,7 +545,7 @@ export default function Footer() {
         {/* Philosophy — preserved exactly */}
         <p style={{
           fontFamily: 'var(--font-body)',
-          fontSize: 'clamp(11px, 1.2vw, 13px)',
+          fontSize: 'clamp(13px, 1.4vw, 15px)',
           color: 'rgba(255,255,255,0.32)', lineHeight: 1.85,
           maxWidth: 420, margin: '0 auto 32px',
         }}>
@@ -651,12 +652,22 @@ export default function Footer() {
                 src="/branding/ubuntu-logo-dark-transparent.png" 
                 alt="Ubuntu Logo"
                 style={{ 
-                  width: "clamp(90px, 12vw, 120px)",
+                  width: "clamp(100px, 14vw, 140px)",
                   height: "auto",
-                  marginBottom: 8
+                  marginBottom: 8,
+                  transition: 'transform 0.35s cubic-bezier(0.16,1,0.3,1)',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={e => {
+                  const img = e.currentTarget as HTMLImageElement
+                  img.style.transform = 'scale(1.15)'
+                }}
+                onMouseLeave={e => {
+                  const img = e.currentTarget as HTMLImageElement
+                  img.style.transform = 'scale(1)'
                 }}
               />
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--neon)', marginTop: 8 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '13px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--neon)', marginTop: 8, fontWeight: 300 }}>
                 Kreative Village
               </div>
             </Link>
@@ -680,11 +691,12 @@ export default function Footer() {
             >
               <h4
                 style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '8px', letterSpacing: '0.3em',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '13px', letterSpacing: '0.3em',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.22)',
                   marginBottom: 18,
+                  fontWeight: 400,
                 }}
               >
                 {col.title}
@@ -743,7 +755,7 @@ export default function Footer() {
           {/* Copyright — preserved exactly */}
           <p style={{
             fontFamily: 'var(--font-body)',
-            fontSize: '9px', letterSpacing: '0.1em',
+            fontSize: '12px', letterSpacing: '0.1em',
             color: 'rgba(255,255,255,0.18)',
           }}>
             &copy; {year} Ubuntu Kreative Village &middot; Kenya &middot; ubuntuecolodge.com
@@ -752,7 +764,7 @@ export default function Footer() {
           {/* Center — emotional exit message */}
           <p style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(9px, 1vw, 11px)',
+            fontSize: 'clamp(12px, 1.3vw, 14px)',
             fontStyle: 'italic',
             color: 'rgba(255,255,255,0.12)',
             textAlign: 'center',
@@ -763,25 +775,25 @@ export default function Footer() {
 
           {/* Right — preserved links + compliance */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <Link href="/privacy-policy" style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
+            <Link href="/privacy-policy" style={{ fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}>
               Privacy Policy
             </Link>
             <span style={{ color: 'rgba(255,255,255,0.1)' }}>&middot;</span>
-            <Link href="/contact" style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
+            <Link href="/contact" style={{ fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}>
               Contact
             </Link>
             <span style={{ color: 'rgba(255,255,255,0.1)' }}>&middot;</span>
-            <Link href="/admin/login" style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
+            <Link href="/admin/login" style={{ fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.18)', textDecoration: 'none', transition: 'color 0.2s' }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.45)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.18)' }}>
               Staff Portal
             </Link>
             <span style={{ color: 'rgba(255,255,255,0.1)' }}>&middot;</span>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.12)' }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.12)' }}>
               Kenya DPA Compliant
             </span>
           </div>

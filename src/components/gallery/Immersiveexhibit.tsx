@@ -183,7 +183,7 @@ function MetaCard({ label, value, accent }: { label: string; value: string; acce
 type Props = { exhibit: Exhibit; onClose: () => void }
 
 function ImmersiveExhibitInner({ exhibit, onClose }: Props) {
-  const atm = exhibit.atmosphere
+  const atm = exhibit.atmosphere ?? { bg: 'rgba(10,12,9,0.98)', overlay: 'rgba(0,0,0,0.5)' }
   const hasVideo = !!(exhibit.video?.directUrl || exhibit.video?.youtubeId)
   const [revealed, setRevealed] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -258,13 +258,13 @@ function ImmersiveExhibitInner({ exhibit, onClose }: Props) {
           top: '15%', left: '55%',
           width: '50vw', height: '50vw',
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${atm.glow} 0%, transparent 65%)`,
+          background: `radial-gradient(circle, ${accent}66 0%, transparent 65%)`,
           filter: 'blur(90px)',
           pointerEvents: 'none',
         }}
       />
 
-      <ParticleField color={atm.particle} count={28} />
+      <ParticleField color={accent} count={28} />
 
       {/* ── Close ── */}
       <button

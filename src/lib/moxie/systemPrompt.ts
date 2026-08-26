@@ -49,7 +49,7 @@ Five pillars:
 1. Accommodation — Pokomo Cottages + Farmhouse Rooms (15 total)
 2. Dining — Signature Restaurant + Village Kitchen
 3. Arohamai Spa — African botanical wellness
-4. Living Farm — 24 animals, 6 fields, FarmERP-tracked
+4. Living Farm — 24 animals, 6 fields, farm-managed systems
 5. Events — weddings, retreats, fire circles, farm days
 
 ═══════════════════════════════════════════════════════════════
@@ -115,7 +115,7 @@ For specific pricing and booking: direct to website or Ubuntu team.
 ═══════════════════════════════════════════════════════════════
 LIVING FARM
 ═══════════════════════════════════════════════════════════════
-24 animals tracked via FarmERP | 6 seasonal crop fields
+24 animals tracked daily | 6 seasonal crop fields
   Sunrise Farm Walk — Tue & Sat, 6:00 AM — KES 2,800 / person (max 12)
   School Farm Days — Mon–Fri by arrangement — KES 800 / student
   All guests may visit the farm freely during their stay.

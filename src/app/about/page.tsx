@@ -41,7 +41,7 @@ const TEAM = [
   {
     name: 'Head of Farm Operations',
     role: 'The Living Farm',
-    bio: 'Trained in both traditional Kenyan farming methods and modern precision agriculture. Manages all FarmERP integrations, livestock health protocols, and the daily rhythm of the six fields. The farm runs because of this team.',
+    bio: 'Trained in both traditional Kenyan farming methods and modern precision agriculture. Oversees livestock health, crop rotation, and the daily rhythm of the six fields. The farm runs because of this team.',
     accent: 'var(--neon)',
     initial: 'F',
   },
@@ -68,8 +68,8 @@ const TEAM = [
   },
   {
     name: 'Moxie',
-    role: 'AI Concierge · All 6 Logs',
-    bio: 'Moxie is not a chatbot. She is a living layer of intelligence woven through the entire village system — reading the Farm Log, Restaurant Log, Spa Log, and Guest Passport in real time to serve every guest with complete, contextual knowledge.',
+    role: 'AI Concierge',
+    bio: 'Moxie is your personal guide to Ubuntu Kreative Village. She knows the farm\'s rhythms, the restaurant\'s specialties, the spa\'s rituals, and your preferences. Available 24/7 to enhance your stay with personalized recommendations and support.',
     accent: 'var(--neon)',
     initial: 'M',
   },
@@ -106,10 +106,10 @@ const TIMELINE = [
   { year: '2019', event: 'Land acquired in the Kenyan highlands. First crops planted by hand.', accent: 'var(--neon)' },
   { year: '2021', event: 'First Pokomo Cottage completed. First farm-stay guests welcome.', accent: 'var(--gold)' },
   { year: '2022', event: 'Arohamai Spa opens. Botanical garden planted. First artist in residence.', accent: '#F0A8B8' },
-  { year: '2023', event: 'FarmERP integration begins. Farm-to-fork restaurant opens to public.', accent: 'var(--neon)' },
-  { year: '2024', event: 'All four Pokomo Cottages and two Farmhouse Suites operational. Moxie AI development begins.', accent: 'var(--gold)' },
-  { year: '2025', event: 'Architecture Bible v2 written. Full digital platform build begins.', accent: '#A8D8F0' },
-  { year: '2026', event: 'ubuntuecolodge.com launches. Moxie goes live. Phase 1 of 6 complete.', accent: 'var(--neon)' },
+  { year: '2023', event: 'Farm-to-fork restaurant opens to public. Signature menu established.', accent: 'var(--neon)' },
+  { year: '2024', event: 'All four Pokomo Cottages and two Farmhouse Suites operational. Moxie concierge service launches.', accent: 'var(--gold)' },
+  { year: '2025', event: 'Website platform launches. Enhanced digital guest experience begins.', accent: '#A8D8F0' },
+  { year: '2026', event: 'ubuntuecolodge.com launches. Moxie AI concierge goes live.', accent: 'var(--neon)' },
 ]
 
 export default function AboutPage() {
@@ -201,10 +201,10 @@ export default function AboutPage() {
             ))}
           </div>
 
-          {/* ── The System ── */}
+          {/* ── Your Experience ── */}
           <div className="flex items-center gap-4 mb-12">
             <h2 className="font-display" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 300, color: 'var(--neon)' }}>
-              The System
+              Your Experience
             </h2>
             <div className="neon-divider flex-1" />
           </div>
@@ -218,25 +218,23 @@ export default function AboutPage() {
             }}
           >
             <p className="font-body text-[12px] leading-loose mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Ubuntu Kreative Village runs on a custom-built digital platform designed to last 50 years.
-              Six interconnected data logs — the Guest Log, Farm Log, Restaurant Log, Spa Log, Audit Log,
-              and System Log — form the nervous system of the entire operation.
+              At Ubuntu Kreative Village, every element of your stay is woven together seamlessly. From the moment you arrive, every experience — your accommodation, meals, spa treatments, farm connection, and cultural immersion — works in harmony to create something genuine and transformative.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {[
-                { log: 'Guest Log', label: 'The Passport', color: '#B8A9F0' },
-                { log: 'Farm Log', label: 'The Pulse', color: 'var(--neon)' },
-                { log: 'Restaurant Log', label: 'The Menu', color: 'var(--gold)' },
-                { log: 'Spa Log', label: 'The Ritual', color: '#F0A8B8' },
-                { log: 'Audit Log', label: 'The Memory', color: '#A8D8F0' },
-                { log: 'System Log', label: 'The Guardian', color: '#A8F0D8' },
+                { title: 'Stay', description: 'Pokomo Cottages · Farmhouse Suites', color: '#B8A9F0' },
+                { title: 'Nourish', description: 'Farm-to-fork restaurant · Daily menu', color: 'var(--neon)' },
+                { title: 'Restore', description: 'Arohamai Spa · Botanical treatments', color: 'var(--gold)' },
+                { title: 'Connect', description: 'Farm walks · Seasonal harvests', color: '#F0A8B8' },
+                { title: 'Create', description: 'Gallery · Artist residency', color: '#A8D8F0' },
+                { title: 'Explore', description: 'Moxie concierge · 24/7 support', color: '#A8F0D8' },
               ].map(l => (
-                <div key={l.log} className="text-center p-4" style={{ border: `1px solid ${l.color}22`, borderRadius: '8px', background: `${l.color}08` }}>
+                <div key={l.title} className="text-center p-4" style={{ border: `1px solid ${l.color}22`, borderRadius: '8px', background: `${l.color}08` }}>
                   <div className="font-body text-[8px] tracking-widest uppercase mb-1" style={{ color: l.color }}>
-                    {l.label}
+                    {l.title}
                   </div>
-                  <div className="font-display" style={{ fontSize: '0.95rem', fontWeight: 300, color: 'var(--cream)' }}>
-                    {l.log}
+                  <div className="font-display" style={{ fontSize: '0.85rem', fontWeight: 300, color: 'var(--cream)' }}>
+                    {l.description}
                   </div>
                 </div>
               ))}

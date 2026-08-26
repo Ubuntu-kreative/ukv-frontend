@@ -94,7 +94,7 @@ export const CATEGORIES: Category[] = [
   { id: 'Specials',         label: 'Specials',          emoji: '🔥', subtitle: 'Mbuzi, chicken and fish — your way, your method, your moment.' },
   { id: 'Accompaniments',   label: 'Accompaniments',    emoji: '🌾', subtitle: 'From the fields. Simple, honest, made to share.' },
   { id: 'Pizzas',           label: 'Pizzas',            emoji: '🍕', subtitle: 'Stone-baked in the Ubuntu oven. Farm-sourced toppings.' },
-  { id: 'Pork & Grill',     label: 'Pork & Grill',      emoji: '🥩', subtitle: 'Open flame. Smoke. The oldest way to cook — still the best.' },
+
   { id: 'Salads & Snacks',  label: 'Salads & Snacks',   emoji: '🥗', subtitle: 'Light bites from the farm and fire.' },
   { id: 'Soups',            label: 'Soups',             emoji: '🍲', subtitle: 'Slow-cooked. Patient. The kind of warmth that takes time.' },
   { id: 'Sauces',           label: 'Sauces',            emoji: '🫙', subtitle: 'House-made condiments to elevate every plate.' },
@@ -112,29 +112,29 @@ export const DISHES: Dish[] = [
   {
     id: 'bk-1', category: 'Breakfast', name: 'The Classic Eco Lodge Delight',
     image: '/images/The-Classic-Eco-Lodge-Delight.jpeg',
-    description: 'Sweet potatoes, pancakes, sausages and boiled eggs.',
+    description: 'Sweet potatoes, pancakes, beef sausages and boiled eggs.',
     storyLine: 'The village wakes before you do. By the time this plate reaches your table, the sweet potatoes have come from Field C and the eggs collected from the morning count. Served with coffee, hot milk, black tea or freshly squeezed juice.',
     price: 1500,
     tags: ['High Protein'],
     chefChoice: true, popular: true,
     field: 'Farm Kitchen', freshness: 99, phLevel: '6.8', temp: 'Warm', offset: '0.6kg',
-    ingredients: ['Sweet Potatoes', 'Pancakes', 'Grilled Sausages', 'Boiled Eggs'],
+    ingredients: ['Sweet Potatoes', 'Pancakes', 'Grilled Beef Sausages', 'Boiled Eggs'],
     availability: 'Available Today', pairing: 'Pairs with African Tea or Fresh Juice',
     prepTime: 20, calories: 720, allergens: ['Gluten', 'Eggs', 'Dairy'], servingSize: 'Full plate + drink',
     trendScore: 88, co2Score: 'low',
   },
   {
-    id: 'bk-2', category: 'Breakfast', name: 'The English Farm Breakfast',
-    image: '/images/The-English-Farm-Breakfast.jpeg',
-    description: 'Sausages, omelettes, bacon, beans and fruit cuts.',
-    storyLine: 'A full plate of farm-raised proteins and garden vegetables. Sausage, omelette or sunny-side egg, streaky bacon, baked beans and seasonal fruits. Choose African tea, coffee, juice or hot milk.',
+    id: 'bk-2', category: 'Breakfast', name: 'The Farm Breakfast',
+    image: '/images/The-Farm-Breakfast.jpeg',
+    description: 'Grilled farm chicken, omelettes, beans and fruit cuts.',
+    storyLine: 'A full plate of farm-raised proteins and garden vegetables. Grilled chicken, omelette or sunny-side egg, baked beans and seasonal fruits. Choose African tea, coffee, juice or hot milk.',
     price: 2200,
     tags: ['High Protein'],
     featured: true, chefChoice: true,
     field: 'Farm Kitchen', freshness: 98, phLevel: '6.5', temp: 'Hot', offset: '0.9kg',
-    ingredients: ['Sausages', 'Omelette', 'Bacon', 'Baked Beans', 'Fruit Cuts'],
+    ingredients: ['Grilled Chicken', 'Omelette', 'Baked Beans', 'Fruit Cuts'],
     availability: 'Available Today',
-    prepTime: 25, calories: 960, allergens: ['Gluten', 'Eggs', 'Dairy'], servingSize: 'Full plate + drink',
+    prepTime: 25, calories: 880, allergens: ['Gluten', 'Eggs', 'Dairy'], servingSize: 'Full plate + drink',
     trendScore: 82, co2Score: 'low',
   },
   {
@@ -155,7 +155,7 @@ export const DISHES: Dish[] = [
   // ── MAIN COURSE ───────────────────────────────────────────────────────────
   {
     id: 'mc-1', category: 'Main Course', name: 'The Mighty Traditional Platter',
-    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200',
+    image: '/images/The-Mighty-Traditional-Platter.jpeg',
     description: 'Wet fry mbuzi, dry fry chicken, fries, ugali, mashed potatoes and kachumbari salad.',
     storyLine: 'The Ubuntu table at its most generous. Wet fry goat from the Boma herd and dry fry yard chicken on a single platter, surrounded by fries, hand-pounded ugali, mashed potato and a raw kachumbari that cuts through everything. This is celebration food.',
     price: 4500,
@@ -285,7 +285,7 @@ export const DISHES: Dish[] = [
   // ── SPECIALS ──────────────────────────────────────────────────────────────
   {
     id: 'sp-1', category: 'Specials', name: 'Mbuzi — Wet Fry, Dry Fry or Choma',
-    image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=800',
+    image: '/images/Mbuzi-Wet-Fry-Dry-Fry-or-Choma.jpeg',
     description: 'Boma goat cooked your preferred way — wet fry, dry fry or open-flame choma.',
     storyLine: 'Wet fry carries the tomato and onion depth; dry fry crisps the edges; choma is the oldest way — just fire, meat and time.',
     price: 2500,
@@ -328,7 +328,7 @@ export const DISHES: Dish[] = [
 
   // ── ACCOMPANIMENTS ────────────────────────────────────────────────────────
   { id: 'ac-1',  category: 'Accompaniments', name: 'Ugali',             price: 300,  image: '/images/Ugali.jpeg',              description: 'Hand-stirred maize ugali, the Ubuntu staple.',                     storyLine: 'Stone-ground maize slowly hand-stirred over the fire until it pulls cleanly from the pot.', tags: ['Vegan', 'GF'],        field: 'Corn Patch',      freshness: 100, temp: 'Hot',              ingredients: ['Maize Flour', 'Water'],                                      prepTime: 10, calories: 280,  allergens: ['None'],           servingSize: '1 portion',        trendScore: 60, co2Score: 'low', availability: 'Available Today' },
-  { id: 'ac-2',  category: 'Accompaniments', name: 'Chapati (Pair)',    price: 300,  image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=800', description: 'Soft-layered, hand-rolled chapati — two per serving.',        storyLine: 'Rolled and cooked to order on a flat griddle. Soft inside, golden outside.',               tags: ['Vegan'],             field: 'Farm Kitchen',    freshness: 100, temp: 'Fresh off griddle', ingredients: ['Wheat Flour', 'Oil', 'Salt'],                                prepTime: 8,  calories: 260,  allergens: ['Gluten'],         servingSize: '2 chapati',        trendScore: 65, co2Score: 'low', availability: 'Available Today' },
+  { id: 'ac-2',  category: 'Accompaniments', name: 'Chapati (Pair)',    price: 300,  image: '/images/Chapati-(Pair).jpeg', description: 'Soft-layered, hand-rolled chapati — two per serving.',        storyLine: 'Rolled and cooked to order on a flat griddle. Soft inside, golden outside.',               tags: ['Vegan'],             field: 'Farm Kitchen',    freshness: 100, temp: 'Fresh off griddle', ingredients: ['Wheat Flour', 'Oil', 'Salt'],                                prepTime: 8,  calories: 260,  allergens: ['Gluten'],         servingSize: '2 chapati',        trendScore: 65, co2Score: 'low', availability: 'Available Today' },
   { id: 'ac-3',  category: 'Accompaniments', name: 'Mashed Potatoes',  price: 500,  image: '/images/Mashed-Potatoes.jpeg',    description: 'Creamy farm mashed potatoes with butter.',                         storyLine: 'Field C potatoes boiled and mashed with cultured dairy butter until silky.',                tags: ['Vegetarian', 'GF'], field: 'Field C',         freshness: 98,  temp: 'Hot',              ingredients: ['Irish Potatoes', 'Butter', 'Salt'],                          prepTime: 12, calories: 320,  allergens: ['Dairy'],          servingSize: '1 portion',        trendScore: 58, co2Score: 'low', availability: 'Available Today' },
   { id: 'ac-4',  category: 'Accompaniments', name: 'Fries',            price: 500,  image: '/images/Ubuntu-Farm-Fries.jpeg',  description: 'Hand-cut potatoes, double-fried, sea-salted.',                     storyLine: 'Potatoes from Field C, cut by hand, fried twice for maximum crunch.',                       tags: ['Vegan', 'GF'],      field: 'Field C',         freshness: 98,  temp: 'Crisp Hot',        ingredients: ['Potatoes', 'Oil', 'Sea Salt'],                               prepTime: 12, calories: 380,  allergens: ['None'],           servingSize: 'Generous portion', trendScore: 72, co2Score: 'low', availability: 'Available Today' },
   { id: 'ac-5',  category: 'Accompaniments', name: 'Sauté Vegetables', price: 500,  image: '/images/Sauté-Vegetables1.jpeg', description: 'Seasonal farm vegetables, sautéed in herb butter.',           storyLine: 'Whatever the garden is giving this morning — sautéed in herb butter over high heat.',        tags: ['Vegetarian', 'GF'], field: 'Kitchen Garden',  freshness: 100, temp: 'Sautéed Hot',      ingredients: ['Seasonal Vegetables', 'Herb Butter', 'Garlic'],              prepTime: 8,  calories: 140,  allergens: ['Dairy'],          servingSize: '1 portion',        trendScore: 50, co2Score: 'low', availability: 'Available Today' },
@@ -344,8 +344,8 @@ export const DISHES: Dish[] = [
   // ── PIZZAS ────────────────────────────────────────────────────────────────
   { id: 'pz-1', category: 'Pizzas', name: 'BBQ / Beef / Chicken Pizza (Medium)', price: 1200, image: '/images/BBQ-Beef-Chicken-Pizza-(Medium).jpeg', description: 'Your choice of BBQ, beef, or chicken on a medium stone-baked pizza.',   tags: ['High Protein'], customisable: true, field: 'Stone Oven', freshness: 98, temp: '300°C Stone Baked', ingredients: ['Pizza Dough', 'Tomato Sauce', 'Mozzarella', 'Choice of BBQ / Beef / Chicken'], prepTime: 18, calories: 720,  allergens: ['Gluten', 'Dairy'], servingSize: 'Medium — 6 slices', trendScore: 78, co2Score: 'low', availability: 'Available Today', storyLine: 'Farm-sourced proteins meet artisan craftsmanship on a hand-stretched base baked in the Ubuntu stone oven.' },
   { id: 'pz-2', category: 'Pizzas', name: 'BBQ / Beef / Chicken Pizza (Large)',  price: 2300, image: '/images/BBQ-Beef-Chicken-Pizza-(Large).jpeg',  description: 'Your choice of BBQ, beef, or chicken on a large stone-baked artisan pizza.', tags: ['High Protein'], customisable: true, field: 'Stone Oven', freshness: 98, temp: '300°C Stone Baked', ingredients: ['Pizza Dough', 'Tomato Sauce', 'Mozzarella', 'Choice of BBQ / Beef / Chicken'], prepTime: 22, calories: 1080, allergens: ['Gluten', 'Dairy'], servingSize: 'Large — 8 slices',  trendScore: 80, co2Score: 'low', availability: 'Available Today', storyLine: 'Built for gathering and baked for sharing.' },
-  { id: 'pz-3', category: 'Pizzas', name: 'Hawaiian Pizza (Medium)',              price: 1300, image: '/images/Hawaiian-Pizza-(Medium).jpeg',         description: 'Smoked ham, orchard pineapple, and mozzarella on a medium base.',          tags: ['High Protein'], field: 'Stone Oven', freshness: 97, temp: '300°C Stone Baked', ingredients: ['Pizza Dough', 'Tomato Sauce', 'Mozzarella', 'Ham', 'Pineapple'],             prepTime: 18, calories: 760,  allergens: ['Gluten', 'Dairy'], servingSize: 'Medium — 6 slices', trendScore: 74, co2Score: 'low', availability: 'Available Today', storyLine: 'Orchard pineapple, ham and house-made tomato sauce on a base fired in the Ubuntu stone oven.' },
-  { id: 'pz-4', category: 'Pizzas', name: 'Hawaiian Pizza (Large)',               price: 2000, image: '/images/Hawaiian-Pizza-(Large).jpeg',          description: 'Smoked ham, orchard pineapple, and mozzarella on a large base.',           tags: ['High Protein'], field: 'Stone Oven', freshness: 97, temp: '300°C Stone Baked', ingredients: ['Pizza Dough', 'Tomato Sauce', 'Mozzarella', 'Ham', 'Pineapple'],             prepTime: 22, calories: 1120, allergens: ['Gluten', 'Dairy'], servingSize: 'Large — 8 slices',  trendScore: 76, co2Score: 'low', availability: 'Available Today', storyLine: 'The full Hawaiian experience on our largest stone-baked base.' },
+
+
   { id: 'pz-5', category: 'Pizzas', name: 'Margherita Pizza (Medium)',            price: 1000,  image: '/images/Margherita-Pizza-(Medium).jpeg',       description: 'Classic tomato, mozzarella, and fresh basil on a medium base.',            tags: ['Vegetarian'],   field: 'Stone Oven', freshness: 99, temp: '300°C Stone Baked', ingredients: ['Pizza Dough', 'Tomato Sauce', 'Mozzarella', 'Fresh Basil'],                 prepTime: 15, calories: 620,  allergens: ['Gluten', 'Dairy'], servingSize: 'Medium — 6 slices', trendScore: 65, co2Score: 'low', availability: 'Available Today', storyLine: "The purist's choice. Simple ingredients prepared with care." },
   { id: 'pz-6', category: 'Pizzas', name: 'Margherita Pizza (Large)',             price: 1800, image: '/images/Margherita-Pizza-(Large).jpeg',        description: 'Classic tomato, mozzarella, and basil on a large base.',                   tags: ['Vegetarian'],   field: 'Stone Oven', freshness: 99, temp: '300°C Stone Baked', ingredients: ['Pizza Dough', 'Tomato Sauce', 'Mozzarella', 'Fresh Basil'],                 prepTime: 18, calories: 960,  allergens: ['Gluten', 'Dairy'], servingSize: 'Large — 8 slices',  trendScore: 67, co2Score: 'low', availability: 'Available Today', storyLine: 'The classic on our largest base. Simple, elegant, and exactly right when shared.' },
   // Pizza extra toppings
@@ -353,23 +353,9 @@ export const DISHES: Dish[] = [
   { id: 'pz-t2', category: 'Pizzas', name: 'Extra Topping — Pineapple', price: 400, image: '/images/Hawaiian-Pizza-(Medium).jpeg', description: 'Add orchard pineapple to any pizza.', tags: ['Vegan'],         field: 'Orchard',     freshness: 100, temp: 'N/A', ingredients: ['Pineapple'], prepTime: 1, calories: 40, allergens: ['None'], servingSize: 'Per pizza', trendScore: 40, co2Score: 'low', availability: 'Available Today', storyLine: 'Fresh orchard pineapple.' },
   { id: 'pz-t3', category: 'Pizzas', name: 'Extra Topping — Cheese', price: 500, image: '/images/Margherita-Pizza-(Medium).jpeg', description: 'Add extra mozzarella to any pizza.', tags: ['Vegetarian'],   field: 'Stone Oven',  freshness: 99,  temp: 'N/A', ingredients: ['Mozzarella'], prepTime: 1, calories: 90, allergens: ['Dairy'], servingSize: 'Per pizza', trendScore: 55, co2Score: 'low', availability: 'Available Today', storyLine: 'More cheese. Always the right call.' },
 
-  // ── PORK & GRILL ──────────────────────────────────────────────────────────
+  // ── GRILLED MAINS ────────────────────────────────────────────────────────
   {
-    id: 'pg-1', category: 'Pork & Grill', name: 'Pork Chops — Dry or Wet Fry',
-    image: '/images/Pork-Chops-Dry-or-Wet-Fry.jpeg',
-    description: 'Thick-cut pork chops — dry fried to a crisp or wet fried in a rich tomato sauce.',
-    storyLine: 'Farm pork, marinated in garlic, ginger and a touch of honey, then cooked your way.',
-    price: 2500,
-    tags: ['High Protein', 'GF'],
-    chefChoice: true, customisable: true,
-    field: 'Farm Paddock', freshness: 95, phLevel: '6.2', temp: 'Choice of Method', offset: '1.2kg',
-    ingredients: ['Pork Chops', 'Garlic', 'Ginger', 'Honey', 'Spices'],
-    availability: 'Available Today',
-    prepTime: 25, calories: 640, allergens: ['None'], servingSize: '2 chops',
-    trendScore: 83, co2Score: 'low',
-  },
-  {
-    id: 'pg-2', category: 'Pork & Grill', name: 'Chicken Grill',
+    id: 'pg-2', category: 'Main Course', name: 'Chicken Grill',
     image: '/images/Chicken-Grill.jpeg',
     description: 'Herb-marinated farm chicken grilled slowly over open coals.',
     storyLine: 'Ubuntu yard chicken, marinated overnight in a blend of fresh herbs, slow-grilled over glowing hardwood coals.',
@@ -389,8 +375,8 @@ export const DISHES: Dish[] = [
   { id: 'ss-3', category: 'Salads & Snacks', name: 'Fruit Bowl Salad',       price: 500, image: '/images/Fruit-Bowl-Salad.jpeg', description: 'Farm-picked seasonal fruit bowl with honey drizzle.',             tags: ['Vegan', 'GF'],      field: 'Orchard',        freshness: 100, temp: 'Fresh',       ingredients: ['Seasonal Fruits', 'Honey Drizzle'],               prepTime: 5,  calories: 180, allergens: ['None'],           servingSize: '300g bowl',       trendScore: 65, co2Score: 'low', availability: 'Available Today', storyLine: 'Whatever the orchard offered this morning — mango, pawpaw, watermelon, passion. Cut at the pass and served immediately.' },
   { id: 'ss-4', category: 'Salads & Snacks', name: 'Fruit Cut Platter',      price: 800, image: '/images/Fruit-Cut-Platter.jpeg', description: 'Generous assorted hand-cut tropical fruit platter for sharing.',   tags: ['Vegan', 'GF'],      field: 'Orchard',        freshness: 100, temp: 'Fresh',       ingredients: ['Assorted Tropical Fruits', 'Mint Garnish'],       prepTime: 8,  calories: 320, allergens: ['None'],           servingSize: 'Sharing platter', trendScore: 68, co2Score: 'low', availability: 'Available Today', storyLine: 'The full spread of what the orchard is giving today. Built for two, best enjoyed by four.' },
   { id: 'ss-5', category: 'Salads & Snacks', name: 'Protein Rich Salad Bowl',price: 700, image: '/images/Protein-Rich-Salad-Bowl.jpeg', description: 'Composed salad with farm protein, greens and house dressing.',    tags: ['High Protein', 'GF'],field: 'Kitchen Garden', freshness: 100, temp: 'Fresh',       ingredients: ['Seasonal Greens', 'Farm Protein', 'House Dressing'],prepTime: 10, calories: 480, allergens: ['None'],           servingSize: '1 bowl',          trendScore: 71, co2Score: 'low', availability: 'Available Today', storyLine: 'Seasonal greens and a generous protein from the kitchen, composed and dressed in the Ubuntu house vinaigrette.' },
-  { id: 'ss-6', category: 'Salads & Snacks', name: 'Farm Sausages (2pc)',    price: 300, image: '/images/Farm-Sausages2pc.jpeg', description: 'Pork or beef sausages grilled over open flame.',                  tags: ['High Protein'],     field: 'Open Grill',     freshness: 97,  temp: 'Grilled Hot', ingredients: ['Pork / Beef Sausage'],                            prepTime: 10, calories: 220, allergens: ['Gluten'],         servingSize: '2 pieces',        trendScore: 60, co2Score: 'low', availability: 'Available Today', storyLine: 'Sourced from within the village supply chain, grilled slowly over open heat until the skin chars and blisters.' },
-  { id: 'ss-7', category: 'Salads & Snacks', name: 'Beef Samosa',            price: 300, image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=800', description: 'Crisp pastry triangles filled with spiced minced beef.',          tags: ['High Protein'],     field: 'Farm Kitchen',   freshness: 98,  temp: 'Fresh Fried', ingredients: ['Pastry', 'Spiced Minced Beef', 'Oil'],            chefChoice: true, prepTime: 8, calories: 280, allergens: ['Gluten'], servingSize: '2 pieces',        trendScore: 74, co2Score: 'low', availability: 'Available Today', storyLine: 'Folded by hand in the kitchen each morning with spiced minced beef. Fried to a perfect crunch.' },
+  { id: 'ss-6', category: 'Salads & Snacks', name: 'Beef Sausages (2pc)',    price: 300, image: '/images/Beef-Sausages2pc.jpeg', description: 'Farm beef sausages grilled over open flame.',                       tags: ['High Protein'],     field: 'Open Grill',     freshness: 97,  temp: 'Grilled Hot', ingredients: ['Beef Sausage'],                                 prepTime: 10, calories: 220, allergens: ['Gluten'],         servingSize: '2 pieces',        trendScore: 60, co2Score: 'low', availability: 'Available Today', storyLine: 'Sourced from within the village supply chain, grilled slowly over open heat until the skin chars and blisters.' },
+  { id: 'ss-7', category: 'Salads & Snacks', name: 'Beef Samosa',            price: 300, image: '/images/Beef-Samosa.jpeg', description: 'Crisp pastry triangles filled with spiced minced beef.',          tags: ['High Protein'],     field: 'Farm Kitchen',   freshness: 98,  temp: 'Fresh Fried', ingredients: ['Pastry', 'Spiced Minced Beef', 'Oil'],            chefChoice: true, prepTime: 8, calories: 280, allergens: ['Gluten'], servingSize: '2 pieces',        trendScore: 74, co2Score: 'low', availability: 'Available Today', storyLine: 'Folded by hand in the kitchen each morning with spiced minced beef. Fried to a perfect crunch.' },
   { id: 'ss-8', category: 'Salads & Snacks', name: 'Chicken Pie',            price: 500, image: '/images/Chicken-Pie.jpeg', description: 'Flaky shortcrust pastry with tender spiced chicken filling.',      tags: ['High Protein'],     field: 'Farm Kitchen',   freshness: 98,  temp: 'Warm Baked',  ingredients: ['Pastry', 'Chicken', 'Spices'],                    prepTime: 5,  calories: 370, allergens: ['Gluten'],         servingSize: '1 piece',         trendScore: 66, co2Score: 'low', availability: 'Available Today', storyLine: 'Baked in the Ubuntu kitchen — a simple thing done properly. Flaky shortcrust encasing a rich filling of spiced farm chicken.' },
   { id: 'ss-9', category: 'Salads & Snacks', name: 'Cinnamon Rolls',         price: 500, image: '/images/Cinnamon-Rolls.jpeg', description: 'Soft, warm cinnamon rolls fresh from the farm oven.',             tags: ['Vegetarian'],       field: 'Farm Bakery',    freshness: 100, temp: 'Warm',        ingredients: ['Flour', 'Cinnamon', 'Butter', 'Sugar', 'Eggs'],  prepTime: 5,  calories: 340, allergens: ['Gluten', 'Dairy', 'Eggs'], servingSize: '1 roll', trendScore: 69, co2Score: 'low', availability: 'Available Today', storyLine: 'Baked in the farm oven each morning. Soft, sweet, fragrant with cinnamon from the spice garden. Best eaten warm with a cup of African tea.' },
   { id: 'ss-10', category: 'Salads & Snacks', name: 'Pancakes',              price: 500, image: '/images/pancakes.jpeg',  description: 'Fresh farm eggs, milk, and flour mixed into a smooth batter and pan-fried over a regulated medium heat until golden brown.',  tags: ['High Protein'],   field: 'Farm Kitchen',  freshness: 97,  temp: 'Served Warm',  ingredients: ['Flour', 'Eggs', 'Farm Milk', 'Sugar', 'Salt', 'Oil'],  prepTime: 10,  calories: 220,  allergens: ['Gluten', 'Eggs', 'Milk'],  servingSize: '2 pieces',  trendScore: 60,  co2Score: 'low',  availability: 'Available Today',  storyLine: 'Prepared on a lightly oiled preheated pan using locally sourced ingredients from the village supply chain, then slowly cooked over controlled heat until beautifully golden brown.'},
@@ -467,7 +453,7 @@ export const TICKER_MESSAGES = [
   '◈ North Apiary honey extracted fresh this morning',
   '🌿 Cinnamon rolls fresh from the farm oven',
   '🐟 Lake Victoria fish arrived at dawn — limited tonight',
-  '🥩 Charcoal pork ribs marinating since yesterday',
+
   '🌱 Field C harvest brought in at 6am today',
   '🍯 New seasonal honey — wildflower & acacia blend',
   '🔥 Boma oven at temperature — wood-fired pizzas ready',

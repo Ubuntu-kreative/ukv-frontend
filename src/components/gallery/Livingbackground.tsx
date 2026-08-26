@@ -3,9 +3,11 @@
 // LivingBackground — animated grain + aurora drift
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 export function LivingBackground({ accent = '#A8D8F0' }: { accent?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div
       className="fixed inset-0 pointer-events-none overflow-hidden"
@@ -14,8 +16,8 @@ export function LivingBackground({ accent = '#A8D8F0' }: { accent?: string }) {
     >
       {/* Primary aurora orb */}
       <motion.div
-        animate={{ x: [0, 60, -40, 0], y: [0, -80, 40, 0], scale: [1, 1.15, 0.92, 1] }}
-        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
+        animate={prefersReducedMotion ? undefined : { x: [0, 60, -40, 0], y: [0, -80, 40, 0], scale: [1, 1.15, 0.92, 1] }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 28, repeat: Infinity, ease: 'easeInOut' }}
         style={{
           position: 'absolute', top: '10%', left: '-10%',
           width: '55vw', height: '55vw',
@@ -27,8 +29,8 @@ export function LivingBackground({ accent = '#A8D8F0' }: { accent?: string }) {
 
       {/* Secondary gold orb */}
       <motion.div
-        animate={{ x: [0, -50, 30, 0], y: [0, 60, -30, 0], scale: [1, 0.88, 1.12, 1] }}
-        transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut', delay: 8 }}
+        animate={prefersReducedMotion ? undefined : { x: [0, -50, 30, 0], y: [0, 60, -30, 0], scale: [1, 0.88, 1.12, 1] }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 36, repeat: Infinity, ease: 'easeInOut', delay: 8 }}
         style={{
           position: 'absolute', bottom: '5%', right: '-8%',
           width: '45vw', height: '45vw',
@@ -40,8 +42,8 @@ export function LivingBackground({ accent = '#A8D8F0' }: { accent?: string }) {
 
       {/* Tertiary mid orb */}
       <motion.div
-        animate={{ x: [0, 80, -20, 0], y: [0, -40, 60, 0], scale: [1, 1.08, 0.95, 1] }}
-        transition={{ duration: 44, repeat: Infinity, ease: 'easeInOut', delay: 14 }}
+        animate={prefersReducedMotion ? undefined : { x: [0, 80, -20, 0], y: [0, -40, 60, 0], scale: [1, 1.08, 0.95, 1] }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 44, repeat: Infinity, ease: 'easeInOut', delay: 14 }}
         style={{
           position: 'absolute', top: '45%', left: '35%',
           width: '30vw', height: '30vw',

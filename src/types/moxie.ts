@@ -1,5 +1,5 @@
 /**
- * Moxie Types — Phase 2A.1 Foundation
+ * Moxie Types — Core conversation and guest interface structures
  * Central re-export of all Moxie-related types
  */
 

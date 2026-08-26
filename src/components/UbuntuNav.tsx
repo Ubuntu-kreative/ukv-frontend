@@ -26,6 +26,7 @@ const NAV_LINKS = [
   { label: "Spa",          href: "/spa",        key: "spa"        },
   { label: "Farm",         href: "/farm",       key: "farm"       },
   { label: "Events",       href: "/events",     key: "events"     },
+  { label: "Journal",      href: "/journal",    key: "journal"    },
   { label: "Gallery",      href: "/gallery",    key: "gallery"    },
 ];
 
@@ -89,6 +90,16 @@ const MEGA: Record<string, SectionData> = {
       { title: "Share",   items: ["Instagram →", "Download Photos", "Contact Press"] },
     ],
     quick: ["Photos", "Videos", "Virtual Tour", "Press Kit"],
+  },
+  journal: {
+    section: "JOURNAL", page: "Stories, Travel & Community",
+    cols: [
+      { title: "Read", items: ["Latest Stories", "Travel Guides", "Culture & Community"] },
+      { title: "Explore", items: ["Events", "Sustainability", "Wellness"] },
+      { title: "Featured", items: ["Creative Residencies", "Digital Nomad Life", "Food & Dining"] },
+      { title: "Connect", items: ["All Stories →", "By Category", "By Author"] },
+    ],
+    quick: ["Latest Stories", "Travel Guides", "Culture", "All Articles"],
   },
 };
 

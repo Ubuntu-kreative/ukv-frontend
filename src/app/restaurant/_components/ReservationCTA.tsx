@@ -27,7 +27,7 @@ export default function ReservationCTA() {
         </p>
 
         <div className="ukv-res-cta__actions">
-          <a href="/reservations" className="ukv-hero__cta ukv-hero__cta--primary">
+          <a href="/contact" className="ukv-hero__cta ukv-hero__cta--primary">
             Book a Table
           </a>
           <a href="/contact" className="ukv-hero__cta ukv-hero__cta--secondary">

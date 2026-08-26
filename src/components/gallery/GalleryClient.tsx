@@ -15,15 +15,27 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion'
+import Image from 'next/image'
+import { motion, AnimatePresence, MotionConfig, useReducedMotion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, EffectFade } from 'swiper/modules'
+import type { Swiper as SwiperType } from 'swiper'
+import 'swiper/css'
+import 'swiper/css/effect-fade'
 
-import type { Exhibit, Workshop, CraftMarketItem } from './Gallery.data'
-import { HERO_VIDEO } from './Gallery.data'
+import type { Exhibit, Workshop, CraftMarketItem, GalleryPhoto } from './Gallery.data'
+import { HERO_VIDEO, HERO_SLIDES, PHOTOS_BY_CHAPTER } from './Gallery.data'
 import { ExhibitVaultCard } from './Exhibitvaultcard'
 import { ImmersiveExhibit } from './Immersiveexhibit'
 import { LivingBackground } from './Livingbackground'
 import { MagneticCursor } from './Magneticcursor'
 import { VideoPlayer } from './VideoPlayer'
+
+// Phase 1: Photo-first storytelling components
+import { ImageLightbox } from './ImageLightbox'
+import { LatestMemoriesChapter } from './LatestMemoriesChapter'
+import { PhotoCluster } from './PhotoCluster'
+import { GalleryHighlights } from './GalleryHighlights'
 
 // ─── Soft-import optional global components ───────────────────────────────────
 let NavWrapper: React.ComponentType<Record<string,unknown>> | null = null
@@ -59,6 +71,25 @@ type Props = {
   workshops:   Workshop[]
   craftMarket: CraftMarketItem[]
   stats:       Stat[]
+  photos?:     GalleryPhoto[]  // Phase 1: Optional photos for gallery chapters
+}
+
+function useHasFinePointer() {
+  const [hasFinePointer, setHasFinePointer] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(pointer: fine)')
+    const update = () => setHasFinePointer(mediaQuery.matches)
+    update()
+    mediaQuery.addEventListener('change', update)
+    window.addEventListener('resize', update)
+    return () => {
+      mediaQuery.removeEventListener('change', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+
+  return hasFinePointer
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -71,15 +102,12 @@ type VillageNode = {
   sub: string
   icon: string
   accent: string
-  angle: number     // degrees on orbit ring
   ring: 'inner' | 'outer'
   story: string
   image: string
   hours: string
   highlights: string[]
 }
-
-const FRONT_ANGLE = 90 // degrees — node closest to this faces the viewer
 
 const VILLAGE_NODES: VillageNode[] = [
   {
@@ -88,10 +116,9 @@ const VILLAGE_NODES: VillageNode[] = [
     sub: 'Main Hall',
     icon: '◈',
     accent: '#A8D8F0',
-    angle: 0,
     ring: 'outer',
     story: 'Three living exhibitions of African contemporary art — rotating with the seasons of the village.',
-    image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80',
+    image: '/images/Tropical-Art-Gallery.jpeg',
     hours: 'Daily · 9am – 6pm',
     highlights: ['3 rotating exhibitions', 'Guided tours on request', 'Artist talks every Saturday'],
   },
@@ -101,10 +128,9 @@ const VILLAGE_NODES: VillageNode[] = [
     sub: 'Earth & Fire',
     icon: '◎',
     accent: '#D4A853',
-    angle: 51,
     ring: 'outer',
     story: 'Wheel-thrown vessels shaped from soil found fifty metres from this studio. Clay from the Ubuntu land.',
-    image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&q=80',
+    image: '/images/Wheel-Pottery-&-Wood-Firing.jpeg',
     hours: 'Mon – Sat · 7am – 4pm',
     highlights: ['Live wheel demonstrations', 'Village clay source', 'Take home your piece'],
   },
@@ -114,10 +140,9 @@ const VILLAGE_NODES: VillageNode[] = [
     sub: 'Pattern & Memory',
     icon: '◉',
     accent: '#B8A9F0',
-    angle: 102,
     ring: 'outer',
     story: 'Traditional Maasai beadwork. Each colour carries meaning across generations, season, and ceremony.',
-    image: 'https://images.unsplash.com/photo-1573408301185-9519f94815b4?w=600&q=80',
+    image: '/images/Maasai-Beadwork-Intensive.jpeg',
     hours: 'Tue – Sun · 10am – 5pm',
     highlights: ['Maasai colour language', 'Beginner-friendly sessions', 'Custom pattern design'],
   },
@@ -127,10 +152,9 @@ const VILLAGE_NODES: VillageNode[] = [
     sub: 'Fire & Voice',
     icon: '✦',
     accent: '#E8956D',
-    angle: 153,
     ring: 'outer',
     story: 'At dusk, the fire circle opens. Elders, artists, and guests share stories under the open sky.',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80',
+    image: '/images/Story-Circle.jpeg',
     hours: 'Every evening · Sunset – late',
     highlights: ['Open-air gathering', 'Live music & poetry', 'All guests welcome'],
   },
@@ -140,10 +164,9 @@ const VILLAGE_NODES: VillageNode[] = [
     sub: 'Makers & Craft',
     icon: '⊞',
     accent: '#F0A8B8',
-    angle: 204,
     ring: 'outer',
     story: 'Virtuoso Kreative artisans, six guilds, one hall. A living market that breathes with the morning sun.',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+    image: '/images/Garden-Gathering-Oasis.jpeg',
     hours: 'Wed – Sun · 8am – 3pm',
     highlights: ['23 village artisans', '6 craft guilds', 'Direct-from-maker pricing'],
   },
@@ -153,10 +176,9 @@ const VILLAGE_NODES: VillageNode[] = [
     sub: 'Harvest & Land',
     icon: '◐',
     accent: '#00C851',
-    angle: 255,
     ring: 'outer',
     story: 'Walk the harvest rows at dawn. Pick herbs. Understand where your dinner begins.',
-    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80',
+    image: '/images/First-Light-Walk.jpeg',
     hours: 'Daily · Dawn tours at 5:30am',
     highlights: ['Harvest walk & pick', 'Farm-to-table connection', 'Herb & spice garden'],
   },
@@ -166,39 +188,80 @@ const VILLAGE_NODES: VillageNode[] = [
     sub: 'Rest & Ritual',
     icon: '◑',
     accent: '#A8F0D8',
-    angle: 307,
     ring: 'outer',
     story: 'Baobab oil, shea, morning stretching in open air. Wellness as craft, not commodity.',
-    image: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=600&q=80',
+    image: '/images/Arohamai-Signature-Healing-Package.jpeg',
     hours: 'Daily · 6am – 8pm',
     highlights: ['Open-air yoga', 'Baobab & shea rituals', 'Quiet rest pavilion'],
   },
 ]
 
-function getFocusedNodeId(orbitAngle: number): string {
-  let best = VILLAGE_NODES[0]
-  let bestDist = Infinity
-  for (const n of VILLAGE_NODES) {
-    const a = ((orbitAngle + n.angle) % 360 + 360) % 360
-    const dist = Math.min(Math.abs(a - FRONT_ANGLE), 360 - Math.abs(a - FRONT_ANGLE))
-    if (dist < bestDist) { bestDist = dist; best = n }
-  }
-  return best.id
-}
-
-function snapAngleForNode(node: VillageNode): number {
-  return FRONT_ANGLE - node.angle
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // CHAPTER 01 — ARRIVAL HERO
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HERO BACKGROUND CAROUSEL — 7 images, autoplay + manual swipe/scroll.
+// Fade transition (matches the cinematic dissolve feel of the rest of the
+// hero). Pauses autoplay while the user is actively dragging/touching and
+// resumes shortly after they let go (Swiper's disableOnInteraction:false +
+// pauseOnMouseEnter handles this without extra wiring).
+// ─────────────────────────────────────────────────────────────────────────────
+
+function HeroBackgroundCarousel({
+  fallback,
+  onSwiper,
+  onSlideChange,
+}: {
+  fallback?: string
+  onSwiper?: (swiper: SwiperType) => void
+  onSlideChange?: (index: number) => void
+}) {
+  const slides = HERO_SLIDES.length > 0
+    ? HERO_SLIDES
+    : [{ id: 'fallback', image: fallback ?? '', alt: 'Ubuntu Kreative Village' }]
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+      <Swiper
+        modules={[Autoplay, EffectFade]}
+        effect="fade"
+        fadeEffect={{ crossFade: true }}
+        loop
+        autoplay={{ delay: 5500, disableOnInteraction: false, pauseOnMouseEnter: true }}
+        speed={1200}
+        allowTouchMove
+        grabCursor
+        onSwiper={onSwiper}
+        onSlideChange={(s) => onSlideChange?.(s.realIndex)}
+        style={{ width: '100%', height: '100%' }}
+      >
+        {slides.map((slide, i) => (
+          <SwiperSlide key={slide.id}>
+            <Image
+              src={slide.image}
+              alt={slide.alt}
+              fill
+              priority={i === 0}
+              loading={i === 0 ? undefined : 'lazy'}
+              sizes="100vw"
+              style={{ objectFit: 'cover', opacity: 1, display: 'block' }}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  )
+}
+
 function ArrivalHero({ exhibits }: { exhibits: Exhibit[] }) {
+  const prefersReducedMotion = useReducedMotion()
   const heroRef = useRef<HTMLDivElement>(null)
+  const heroSwiperRef = useRef<SwiperType | null>(null)
+  const [activeSlide, setActiveSlide] = useState(0)
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '28%'])
-  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+  const y = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? ['0%', '0%'] : ['0%', '28%'])
+  const opacity = useTransform(scrollYProgress, [0, 0.7], prefersReducedMotion ? [1, 1] : [1, 0])
   const hasVideo = !!(HERO_VIDEO.directUrl || HERO_VIDEO.youtubeId)
   const current = exhibits.find(e => e.status === 'Current')
 
@@ -221,13 +284,10 @@ function ArrivalHero({ exhibits }: { exhibits: Exhibit[] }) {
             />
           </div>
         ) : (
-          <motion.img
-            initial={{ scale: 1.12 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 7, ease: 'easeOut' }}
-            src={HERO_VIDEO.poster ?? current?.heroImage}
-            alt="Ubuntu Kreative Village"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.22 }}
+          <HeroBackgroundCarousel
+            fallback={current?.heroImage}
+            onSwiper={(s) => { heroSwiperRef.current = s }}
+            onSlideChange={setActiveSlide}
           />
         )}
       </motion.div>
@@ -413,6 +473,37 @@ function ArrivalHero({ exhibits }: { exhibits: Exhibit[] }) {
           style={{ width: 1, height: 44, background: 'linear-gradient(to bottom, rgba(200,169,110,0.5), transparent)' }}
         />
       </motion.div>
+
+      {/* Hero carousel dot indicators — bottom-left, clear of the centered scroll cue */}
+      {!hasVideo && HERO_SLIDES.length > 1 && (
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          transition={{ delay: 1.6, duration: 1 }}
+          role="tablist"
+          aria-label="Hero image navigation"
+          style={{
+            position: 'absolute', bottom: 40, left: 'clamp(28px, 6vw, 88px)',
+            zIndex: 5, display: 'flex', alignItems: 'center', gap: 8,
+          }}
+        >
+          {HERO_SLIDES.map((slide, i) => (
+            <button
+              key={slide.id}
+              type="button"
+              aria-label={`Show slide ${i + 1} of ${HERO_SLIDES.length}`}
+              aria-selected={activeSlide === i}
+              role="tab"
+              onClick={() => heroSwiperRef.current?.slideToLoop(i)}
+              style={{
+                width: activeSlide === i ? 20 : 6, height: 6, borderRadius: 3,
+                border: 'none', padding: 0, cursor: 'pointer',
+                background: activeSlide === i ? '#C8A96E' : 'rgba(255,255,255,0.25)',
+                transition: 'all 0.35s ease',
+              }}
+            />
+          ))}
+        </motion.div>
+      )}
     </section>
   )
 }
@@ -476,14 +567,20 @@ function VillageNodeModal({
         }}
       >
         <div style={{ position: 'relative', height: 'clamp(220px, 32vw, 300px)', overflow: 'hidden' }}>
-          <motion.img
+          <motion.div
             initial={{ scale: 1.08 }}
             animate={{ scale: 1 }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            src={node.image}
-            alt={node.label}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            <Image
+              src={node.image}
+              alt={node.label}
+              fill
+              sizes="(max-width: 767px) 90vw, 720px"
+              style={{ objectFit: 'cover' }}
+            />
+          </motion.div>
           <div style={{
             position: 'absolute', inset: 0,
             background: `linear-gradient(to bottom, rgba(10,12,9,0.05) 0%, rgba(10,12,9,0.55) 55%, rgba(10,12,9,0.98) 100%)`,
@@ -572,7 +669,7 @@ function VillageNodeModal({
                   onOpenExhibit(cur)
                 }}
                 style={{
-                  flex: 1, minWidth: 160, padding: '14px 0', textAlign: 'center',
+                  flex: 1, minWidth: 0, padding: '14px 0', textAlign: 'center',
                   background: node.accent, color: '#06090A', border: 'none',
                   fontFamily: 'var(--font-body)', fontSize: FS.cta,
                   letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
@@ -583,7 +680,7 @@ function VillageNodeModal({
               </button>
             ) : (
               <Link href="/contact" style={{
-                flex: 1, minWidth: 160, padding: '14px 0', textAlign: 'center',
+                flex: 1, minWidth: 0, padding: '14px 0', textAlign: 'center',
                 background: node.accent, color: '#06090A',
                 fontFamily: 'var(--font-body)', fontSize: FS.cta,
                 letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
@@ -682,128 +779,29 @@ function GalleryChapterNav() {
 }
 
 function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExhibit: (e: Exhibit) => void }) {
-  const stageRef = useRef<HTMLDivElement>(null)
-  const [orbitSize, setOrbitSize] = useState({ outerR: 300, stageH: 720 })
-  const [angle, setAngle] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null)
+  const rowRef = useRef<HTMLDivElement>(null)
   const [activeNode, setActiveNode] = useState<VillageNode | null>(null)
 
-  const lastX = useRef(0)
-  const dragDist = useRef(0)
-  const stageDidDrag = useRef(false)
-  const angleRef = useRef(0)
-  const velRef = useRef(0)
-  const snapTarget = useRef<number | null>(null)
-  const coasting = useRef(false)
-  const raf = useRef<number | null>(null)
-
-  const focusedId = useMemo(() => getFocusedNodeId(angle), [angle])
-  const focusedNode = useMemo(
-    () => VILLAGE_NODES.find(n => n.id === focusedId) ?? VILLAGE_NODES[0],
-    [focusedId],
-  )
-
-  useEffect(() => {
-    const el = stageRef.current
-    if (!el) return
-    const update = () => {
-      const w = el.clientWidth
-      const outerR = Math.min(Math.max(w * 0.44, 280), 480)
-      setOrbitSize({ outerR, stageH: outerR * 2 + 400 })
-    }
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
-  const beginSnap = useCallback((node?: VillageNode) => {
-    const target = node ?? VILLAGE_NODES.find(n => n.id === getFocusedNodeId(angleRef.current))!
-    snapTarget.current = snapAngleForNode(target)
-    coasting.current = false
-    velRef.current = 0
-  }, [])
-
   const openNode = useCallback((node: VillageNode) => {
-    beginSnap(node)
     setActiveNode(node)
-  }, [beginSnap])
+  }, [])
 
   useEffect(() => {
-    let running = true
-    const tick = () => {
-      if (!running) return
-
-      if (snapTarget.current !== null && !isDragging && !activeNode) {
-        let delta = snapTarget.current - angleRef.current
-        delta = ((delta % 360) + 540) % 360 - 180
-        if (Math.abs(delta) < 0.25) {
-          angleRef.current = snapTarget.current
-          snapTarget.current = null
-        } else {
-          angleRef.current += delta * 0.11
-        }
-        setAngle(angleRef.current)
-      } else if (!isDragging && !activeNode) {
-        if (coasting.current) {
-          velRef.current *= 0.96
-          angleRef.current += velRef.current
-          if (Math.abs(velRef.current) < 0.12) {
-            coasting.current = false
-            beginSnap()
-          }
-        } else if (snapTarget.current === null) {
-          velRef.current = velRef.current * 0.97 + 0.003
-          angleRef.current += velRef.current
-        }
-        setAngle(angleRef.current)
-      }
-
-      raf.current = requestAnimationFrame(tick)
+    const row = rowRef.current
+    if (!row) return
+    const updateProgress = () => {
+      const maxScroll = row.scrollWidth - row.clientWidth
+      setScrollProgress(maxScroll > 0 ? row.scrollLeft / maxScroll : 0)
     }
-    raf.current = requestAnimationFrame(tick)
-    return () => { running = false; if (raf.current) cancelAnimationFrame(raf.current) }
-  }, [isDragging, activeNode, beginSnap])
+    updateProgress()
+    row.addEventListener('scroll', updateProgress, { passive: true })
+    return () => row.removeEventListener('scroll', updateProgress)
+  }, [])
 
-  function onStagePointerDown(e: React.PointerEvent) {
-    if ((e.target as HTMLElement).closest('[data-village-node]')) return
-    setIsDragging(true)
-    coasting.current = false
-    snapTarget.current = null
-    dragDist.current = 0
-    stageDidDrag.current = false
-    lastX.current = e.clientX
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const scrollByCard = (direction: number) => {
+    rowRef.current?.scrollBy({ left: direction * 378, behavior: 'smooth' })
   }
-
-  function onStagePointerMove(e: React.PointerEvent) {
-    if (!isDragging) return
-    const dx = e.clientX - lastX.current
-    dragDist.current += Math.abs(dx)
-    if (dragDist.current > 10) stageDidDrag.current = true
-    velRef.current = dx * 0.32
-    angleRef.current += velRef.current
-    setAngle(angleRef.current)
-    lastX.current = e.clientX
-  }
-
-  function onStagePointerUp(e: React.PointerEvent) {
-    if (!isDragging) return
-    setIsDragging(false)
-    ;(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
-    if (Math.abs(velRef.current) > 0.35) {
-      coasting.current = true
-    } else {
-      beginSnap()
-    }
-    setTimeout(() => { stageDidDrag.current = false }, 80)
-  }
-
-  const { outerR, stageH } = orbitSize
-  const cardW = Math.round(Math.min(Math.max(outerR * 0.72, 210), 290))
-  const cardH = Math.round(cardW * 1.24)
-  const imgH = Math.round(cardH * 0.60)
 
   return (
     <>
@@ -811,7 +809,7 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
       id="village-map"
       style={{
         position: 'relative',
-        padding: 'clamp(80px, 10vw, 120px) 0 clamp(100px, 12vw, 140px)',
+        padding: 'clamp(50px, 7vw, 80px) 0 clamp(65px, 8vw, 90px)',
         overflow: 'visible',
       }}
     >
@@ -824,7 +822,7 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
       }} />
 
       {/* Chapter header */}
-      <div style={{ textAlign: 'center', position: 'relative', zIndex: 5, marginBottom: 'clamp(48px, 6vw, 72px)' }}>
+      <div style={{ textAlign: 'center', position: 'relative', zIndex: 5, marginBottom: 'clamp(32px, 4vw, 48px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 12 }}>
           <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.38em', textTransform: 'uppercase', color: 'rgba(212,168,83,0.4)' }}>02</span>
           <div style={{ width: 36, height: 1, background: 'rgba(212,168,83,0.25)' }} />
@@ -844,7 +842,7 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
           letterSpacing: '0.04em', maxWidth: 520, margin: '0 auto',
           lineHeight: 1.85,
         }}>
-          Seven spaces. One ecosystem. Spin the ring — tap a space or press Enter to step inside.
+          Seven spaces, one ecosystem.
         </p>
         <motion.p
           animate={{ opacity: [0.35, 0.7, 0.35] }}
@@ -855,342 +853,114 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
             letterSpacing: '0.2em', textTransform: 'uppercase',
           }}
         >
-          ← Drag to explore →
+          Scroll to explore →
         </motion.p>
       </div>
 
-      {/* Orbit stage */}
+      {/* Scroll-snap gallery */}
       <div
-        ref={stageRef}
-        onPointerDown={onStagePointerDown}
-        onPointerMove={onStagePointerMove}
-        onPointerUp={onStagePointerUp}
-        onPointerCancel={onStagePointerUp}
-        style={{
-          height: stageH, position: 'relative',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: isDragging ? 'grabbing' : 'grab',
-          touchAction: 'none',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-        }}
+        style={{ position: 'relative' }}
       >
-        {/* Orbit tick marks */}
-        {Array.from({ length: 24 }).map((_, i) => {
-          const t = (i / 24) * Math.PI * 2
-          const tickR = outerR + 28
-          return (
-            <div key={`tick-${i}`} style={{
-              position: 'absolute',
-              left: '50%', top: '50%',
-              width: i % 6 === 0 ? 6 : 3,
-              height: i % 6 === 0 ? 6 : 3,
-              borderRadius: '50%',
-              background: i % 6 === 0 ? 'rgba(212,168,83,0.35)' : 'rgba(212,168,83,0.12)',
-              transform: `translate(calc(-50% + ${Math.cos(t) * tickR}px), calc(-50% + ${Math.sin(t) * tickR * 0.2}px))`,
-              pointerEvents: 'none',
-            }} />
-          )
-        })}
-
-        {/* Orbit rings */}
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            position: 'absolute',
-            width: (outerR * 2) + 40 + i * 70,
-            height: (outerR * 2) + 40 + i * 70,
-            borderRadius: '50%',
-            border: i === 0
-              ? `1px solid rgba(212,168,83,${0.12 - i * 0.03})`
-              : `1px ${i === 2 ? 'dashed' : 'solid'} rgba(212,168,83,${0.08 - i * 0.02})`,
-            pointerEvents: 'none',
-            boxShadow: i === 0 ? 'inset 0 0 80px rgba(212,168,83,0.03)' : 'none',
-          }} />
-        ))}
-
-        {/* Radial spokes */}
-        {VILLAGE_NODES.map(node => {
-          const theta = (angle + node.angle) * (Math.PI / 180)
-          const x = Math.cos(theta) * outerR * 0.92
-          const z = Math.sin(theta) * outerR * 0.92
-          const isFocused = node.id === focusedId
-          return (
-            <div key={`spoke-${node.id}`} style={{
-              position: 'absolute',
-              width: 1, height: outerR * 0.88,
-              background: `linear-gradient(to top, transparent, ${node.accent}${isFocused ? '35' : '10'})`,
-              transformOrigin: 'bottom center',
-              transform: `translate3d(${x}px, ${z * 0.18 - outerR * 0.44}px, 0) rotate(${-(angle + node.angle) + 90}deg)`,
-              pointerEvents: 'none', opacity: isFocused ? 0.9 : 0.35,
-              transition: 'opacity 0.4s',
-            }} />
-          )
-        })}
-
-        {/* Central hub */}
-        <div style={{ position: 'absolute', zIndex: 4, textAlign: 'center', pointerEvents: 'none' }}>
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            style={{
-              width: Math.min(Math.max(outerR * 0.42, 140), 180),
-              height: Math.min(Math.max(outerR * 0.42, 140), 180),
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(212,168,83,0.28) 0%, rgba(212,168,83,0.06) 45%, transparent 72%)',
-              border: '1px solid rgba(212,168,83,0.28)',
-              boxShadow: '0 0 80px rgba(212,168,83,0.18), 0 0 160px rgba(212,168,83,0.06)',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
-          >
-            <span style={{
-              fontFamily: 'var(--font-body)', fontSize: FS.cta,
-              letterSpacing: '0.28em', textTransform: 'uppercase',
-              color: 'rgba(212,168,83,0.85)',
-            }}>
-              Ubuntu
-            </span>
-            <span style={{
-              fontFamily: 'var(--font-body)', fontSize: FS.micro,
-              letterSpacing: '0.2em', textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.35)',
-            }}>
-              Village OS
-            </span>
-          </motion.div>
-        </div>
-
-        {/* Nodes */}
-        {VILLAGE_NODES.map((node) => {
-          const theta = (angle + node.angle) * (Math.PI / 180)
-          const x = Math.cos(theta) * outerR
-          const z = Math.sin(theta) * outerR
-          const depth = (z + outerR) / (outerR * 2)
-          const scale = depth * 0.38 + 0.72
-          const isForward = z > 0
-          const isFocused = node.id === focusedId
-          const isHovered = hoveredNode === node.id
-          const isActive = isFocused || isHovered
-
-          return (
-            <motion.div
+        <button
+          type="button"
+          aria-label="Scroll village spaces left"
+          className="village-map-arrow village-map-arrow-left"
+          onClick={() => scrollByCard(-1)}
+        >
+          ←
+        </button>
+        <button
+          type="button"
+          aria-label="Scroll village spaces right"
+          className="village-map-arrow village-map-arrow-right"
+          onClick={() => scrollByCard(1)}
+        >
+          →
+        </button>
+        <div
+          ref={rowRef}
+          aria-label="Village spaces"
+        style={{
+            display: 'flex', gap: 18, overflowX: 'auto', overflowY: 'visible',
+            scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none', padding: '10px clamp(24px, 7vw, 110px) 28px',
+          }}
+        >
+          {VILLAGE_NODES.map((node, index) => (
+            <motion.button
               key={node.id}
-              data-village-node
-              role="button"
-              tabIndex={0}
+              type="button"
+              className="village-map-card"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.7, delay: Math.min(index * 0.06, 0.35), ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ scale: 1.025, boxShadow: `0 24px 70px rgba(0,0,0,0.5), 0 0 46px ${node.accent}24` }}
+              onClick={() => openNode(node)}
               aria-label={`Enter ${node.label}`}
-              onPointerDown={e => e.stopPropagation()}
-              onClick={e => {
-                e.stopPropagation()
-                if (!stageDidDrag.current) openNode(node)
-              }}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openNode(node) } }}
-              onMouseEnter={() => setHoveredNode(node.id)}
-              onMouseLeave={() => setHoveredNode(null)}
               data-cursor-expand
-              animate={{ scale: isActive ? scale * 1.12 : scale }}
-              transition={{ type: 'spring', stiffness: 280, damping: 26 }}
               style={{
-                position: 'absolute',
-                transform: `translate3d(${x}px, ${z * 0.2}px, 0)`,
-                zIndex: Math.round(z + outerR + 10),
-                cursor: 'pointer',
-                filter: isForward ? 'none' : `brightness(${0.3 + depth * 0.3}) saturate(${0.5 + depth * 0.3})`,
-                touchAction: 'none',
-              }}
-            >
-              {/* Focus ring */}
-              {isFocused && (
-                <motion.div
-                  layoutId={`node-focus-${node.id}`}
-                  style={{
-                    position: 'absolute', inset: -8,
-                    borderRadius: 20,
-                    border: `2px solid ${node.accent}55`,
-                    boxShadow: `0 0 40px ${node.accent}30, inset 0 0 20px ${node.accent}10`,
-                    pointerEvents: 'none',
-                  }}
-                />
-              )}
-
-              <div style={{
-                width: cardW, height: cardH,
-                borderRadius: 16,
-                overflow: 'hidden',
-                border: `1px solid ${isActive ? node.accent : node.accent + '22'}`,
-                boxShadow: isForward
-                  ? `0 16px 50px rgba(0,0,0,0.55), 0 0 ${isActive ? '40px' : '16px'} ${node.accent}${isActive ? '35' : '15'}`
-                  : '0 4px 20px rgba(0,0,0,0.3)',
-                background: 'rgba(8,10,7,0.94)',
+                flex: '0 0 clamp(320px, 36vw, 380px)', height: 560,
+                scrollSnapAlign: 'center', textAlign: 'left', padding: 0,
+                borderRadius: 18, overflow: 'hidden', cursor: 'pointer',
+                background: 'rgba(10,12,9,0.88)', border: `1px solid ${node.accent}38`,
+                color: 'var(--cream, #F5F0E8)',
+                boxShadow: `0 16px 50px rgba(0,0,0,0.4), 0 0 24px ${node.accent}12`,
                 transition: 'border-color 0.35s, box-shadow 0.35s',
-                position: 'relative',
-              }}>
-                <div style={{ position: 'relative', height: imgH, overflow: 'hidden' }}>
-                  <img
+                '--node-accent': node.accent,
+              } as React.CSSProperties}
+            >
+              <div style={{ height: '60%', position: 'relative', overflow: 'hidden' }}>
+                <motion.div
+                  whileHover={{ scale: 1.06 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ position: 'absolute', inset: 0 }}
+                >
+                  <Image
                     src={node.image}
                     alt={node.label}
+                    fill
+                    sizes="(max-width: 767px) 90vw, 380px"
                     draggable={false}
-                    style={{
-                      width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-                      opacity: isActive ? 1 : 0.55,
-                      transition: 'opacity 0.35s',
-                    }}
+                    style={{ objectFit: 'cover', display: 'block' }}
                   />
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    background: `linear-gradient(to bottom, transparent 30%, rgba(8,10,7,0.85) 100%)`,
-                  }} />
-                  <div style={{
-                    position: 'absolute', top: 10, right: 10,
-                    fontSize: '1rem', color: node.accent,
-                    opacity: isActive ? 1 : 0.55,
-                    filter: isActive ? `drop-shadow(0 0 8px ${node.accent})` : 'none',
-                  }}>
-                    {node.icon}
-                  </div>
-                  {isFocused && (
-                    <div style={{
-                      position: 'absolute', top: 10, left: 10,
-                      padding: '3px 9px', borderRadius: 20,
-                      background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
-                      border: `1px solid ${node.accent}40`,
-                      fontFamily: 'var(--font-body)', fontSize: FS.micro,
-                      letterSpacing: '0.16em', textTransform: 'uppercase', color: node.accent,
-                    }}>
-                      Active
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ padding: '10px 12px 12px' }}>
-                  <span style={{
-                    display: 'block',
-                    fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-                    letterSpacing: '0.04em',
-                    color: isActive ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.55)',
-                    lineHeight: 1.3, transition: 'color 0.35s',
-                  }}>
-                    {node.label}
-                  </span>
-                  <span style={{
-                    display: 'block',
-                    fontFamily: 'var(--font-body)', fontSize: FS.micro,
-                    letterSpacing: '0.12em', textTransform: 'uppercase',
-                    color: `${node.accent}${isActive ? '' : '70'}`,
-                    marginTop: 3,
-                  }}>
-                    {node.sub}
-                  </span>
-                </div>
-
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-                  background: `linear-gradient(90deg, transparent, ${node.accent}, transparent)`,
-                  opacity: isActive ? 1 : 0.2,
-                  transition: 'opacity 0.35s',
-                }} />
+                </motion.div>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,12,9,0.02) 35%, rgba(10,12,9,0.9) 100%)' }} />
+                <span style={{ position: 'absolute', top: 18, right: 18, fontSize: '1.6rem', color: node.accent, filter: `drop-shadow(0 0 10px ${node.accent}88)` }}>{node.icon}</span>
+                <span style={{ position: 'absolute', top: 18, left: 18, fontFamily: 'var(--font-body)', fontSize: FS.micro, letterSpacing: '0.18em', textTransform: 'uppercase', color: node.accent }}>0{index + 1}</span>
               </div>
-            </motion.div>
-          )
-        })}
+              <div style={{ height: '40%', padding: '18px 20px 20px', display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.2em', textTransform: 'uppercase', color: node.accent, marginBottom: 7 }}>{node.sub}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', fontWeight: 300, lineHeight: 1.1, marginBottom: 8 }}>{node.label}</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.bodySm, color: 'rgba(255,255,255,0.48)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{node.story}</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 'auto', paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.micro, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)' }}>{node.hours}</span>
+                  <span style={{ flexShrink: 0, fontFamily: 'var(--font-body)', fontSize: FS.cta, letterSpacing: '0.14em', textTransform: 'uppercase', color: node.accent, fontWeight: 700 }}>Enter →</span>
+                </div>
+              </div>
+            </motion.button>
+          ))}
+          <div aria-hidden="true" style={{ flex: '0 0 clamp(24px, 7vw, 110px)' }} />
+        </div>
+        <div aria-label="Village map progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(scrollProgress * 100)} style={{ height: 2, margin: '0 clamp(24px, 7vw, 110px)', background: 'rgba(255,255,255,0.08)', position: 'relative' }}>
+          <div style={{ position: 'absolute', inset: 0, transformOrigin: 'left', transform: `scaleX(${Math.max(scrollProgress, 0.08)})`, background: '#D4A853', transition: 'transform 0.2s ease' }} />
+        </div>
       </div>
-
-      {/* Focus HUD — works for touch + mouse */}
-      <motion.div
-        key={focusedNode.id}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          maxWidth: 640, margin: '0 auto',
-          padding: '0 clamp(24px, 5vw, 80px)',
-          position: 'relative', zIndex: 6,
-        }}
-      >
-        <motion.div
-          initial={{ scale: 0.98 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 20,
-            padding: 'clamp(20px, 3vw, 28px) clamp(22px, 3.5vw, 32px)',
-            borderRadius: 18,
-            background: 'rgba(255,255,255,0.035)',
-            border: `1px solid ${focusedNode.accent}30`,
-            backdropFilter: 'blur(14px)',
-            boxShadow: `0 20px 60px rgba(0,0,0,0.35), 0 0 40px ${focusedNode.accent}08`,
-          }}
-          >
-          <span style={{
-            fontSize: '2rem', color: focusedNode.accent,
-            filter: `drop-shadow(0 0 12px ${focusedNode.accent}60)`,
-          }}>
-            {focusedNode.icon}
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <span style={{
-              display: 'block', fontFamily: 'var(--font-body)', fontSize: FS.label,
-              letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: focusedNode.accent, marginBottom: 6, opacity: 0.9,
-            }}>
-              Now facing · {focusedNode.sub}
-            </span>
-            <span style={{
-              display: 'block', fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)', fontWeight: 300,
-              color: 'var(--cream, #F5F0E8)', marginBottom: 6,
-            }}>
-              {focusedNode.label}
-            </span>
-            <span style={{
-              fontFamily: 'var(--font-body)', fontSize: FS.hud,
-              color: 'rgba(255,255,255,0.45)', lineHeight: 1.65,
-            }}>
-              {focusedNode.story}
-            </span>
-          </div>
-          <button
-            onClick={() => openNode(focusedNode)}
-            style={{
-              flexShrink: 0, padding: '14px 28px',
-              background: `${focusedNode.accent}22`,
-              border: `1px solid ${focusedNode.accent}50`,
-              color: focusedNode.accent, borderRadius: 12,
-              fontFamily: 'var(--font-body)', fontSize: FS.cta,
-              letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 700,
-              cursor: 'pointer', whiteSpace: 'nowrap',
-            }}
-          >
-            Enter →
-          </button>
-        </motion.div>
-      </motion.div>
-
-      {/* Quick-jump strip */}
-      <div style={{
-        display: 'flex', justifyContent: 'center', flexWrap: 'wrap',
-        gap: 8, marginTop: 28,
-        padding: '0 clamp(24px, 5vw, 80px)',
-      }}>
-        {VILLAGE_NODES.map(node => (
-          <button
-            key={`jump-${node.id}`}
-            onClick={() => beginSnap(node)}
-            onDoubleClick={() => openNode(node)}
-            style={{
-              padding: '10px 18px', borderRadius: 22,
-              background: node.id === focusedId ? `${node.accent}16` : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${node.id === focusedId ? node.accent + '45' : 'rgba(255,255,255,0.08)'}`,
-              color: node.id === focusedId ? node.accent : 'rgba(255,255,255,0.4)',
-              fontFamily: 'var(--font-body)', fontSize: FS.label,
-              letterSpacing: '0.12em', textTransform: 'uppercase',
-              cursor: 'pointer', transition: 'all 0.3s',
-            }}
-          >
-            {node.icon} {node.label}
-          </button>
-        ))}
-      </div>
+      <style jsx>{`
+        .village-map-arrow {
+          position: absolute; top: 50%; z-index: 3; width: 44px; height: 44px;
+          border: 1px solid rgba(255,255,255,0.14); border-radius: 50%;
+          background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
+          backdrop-filter: blur(14px); cursor: pointer; font-size: 1.25rem;
+          transform: translateY(-50%); transition: background 0.25s, color 0.25s;
+        }
+        .village-map-arrow:hover { background: rgba(255,255,255,0.18); color: #D4A853; }
+        .village-map-arrow-left { left: 24px; }
+        .village-map-arrow-right { right: 24px; }
+        @media (max-width: 767px) { .village-map-arrow { display: none; } }
+        div[aria-label="Village spaces"]::-webkit-scrollbar { display: none; }
+        .village-map-card:focus-visible { outline: 2px solid var(--node-accent); outline-offset: 4px; }
+      `}</style>
     </section>
 
     {/* Portal modal — outside overflow containers */}
@@ -1204,12 +974,242 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
         />
       )}
     </AnimatePresence>
+
+    {/* Phase 1: Photo cluster — Village scenes */}
+    {PHOTOS_BY_CHAPTER?.villageOS && PHOTOS_BY_CHAPTER.villageOS.length > 0 && (
+      <section style={{
+        maxWidth: 1300, margin: '0 auto',
+        padding: '50px clamp(24px, 5vw, 80px)',
+        position: 'relative', zIndex: 10,
+      }}>
+        <PhotoCluster
+          photos={PHOTOS_BY_CHAPTER.villageOS}
+          title="Explore the Living Village"
+          description="Step inside the spaces that make Ubuntu alive. From pottery studios to market halls, each moment captures our creative spirit."
+          maxItems={8}
+          columnCount={4}
+        />
+      </section>
+    )}
     </>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DAY RHYTHM NARRATIVE STRIP (replaces stats ticker)
+// EXPLORE LIFE AT UBUNTU — WOW Gallery Section (Premium Photo Discovery)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ExploreLifeAtUbuntu({ photos }: { photos: GalleryPhoto[] }) {
+  if (!photos || photos.length === 0) return null
+
+  // Create a mixed-layout masonry with strategic hero sizes
+  // Logic: Every ~8 photos, insert a larger card to break monotony
+  const arrangedPhotos = useMemo(() => {
+    const arranged: Array<GalleryPhoto & { heroSize?: boolean }> = []
+    for (let i = 0; i < photos.length; i++) {
+      const photo = photos[i]
+      // Make photos at positions 0, 8, 16, 24, etc. larger
+      if (i === 0 || (i > 0 && i % 7 === 0)) {
+        arranged.push({ ...photo, heroSize: true })
+      } else {
+        arranged.push(photo)
+      }
+    }
+    return arranged
+  }, [photos])
+
+  return (
+    <section
+      style={{
+        maxWidth: 1320, margin: '0 auto',
+        padding: '60px clamp(20px, 4vw, 80px)',
+        position: 'relative', zIndex: 10,
+      }}
+    >
+      {/* Section header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        viewport={{ once: true, margin: '-100px' }}
+        style={{ textAlign: 'center', marginBottom: 50 }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 12 }}>
+          <span style={{
+            fontFamily: 'var(--font-body)', fontSize: FS.label,
+            letterSpacing: '0.38em', textTransform: 'uppercase',
+            color: 'rgba(200,169,110,0.5)',
+          }}>
+            Gallery
+          </span>
+          <div style={{ width: 36, height: 1, background: 'rgba(200,169,110,0.25)' }} />
+          <span style={{
+            fontFamily: 'var(--font-body)', fontSize: FS.label,
+            letterSpacing: '0.3em', textTransform: 'uppercase',
+            color: 'rgba(200,169,110,0.5)',
+          }}>
+            Moments
+          </span>
+        </div>
+        <h2 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(2rem, 5vw, 3.6rem)',
+          fontWeight: 300, color: 'var(--cream, #F5F0E8)',
+          lineHeight: 1.1, marginBottom: 14,
+        }}>
+          Explore Life at Ubuntu
+        </h2>
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: FS.body,
+          color: 'rgba(255,255,255,0.45)',
+          lineHeight: 1.85, maxWidth: 600, margin: '0 auto',
+        }}>
+          A collection of moments from our creative village. Workshops, gatherings, art-making, and the everyday magic
+          that defines our community.
+        </p>
+      </motion.div>
+
+      {/* Premium masonry grid with mixed sizes */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(150px, 20vw, 240px), 1fr))',
+          gap: '12px',
+          gridAutoRows: 'auto',
+        }}
+      >
+        {arrangedPhotos.map((photo, idx) => {
+          const isHero = (photo as any).heroSize
+          const colSpan = isHero ? 2 : 1
+          const rowSpan = isHero ? 2 : 1
+
+          return (
+            <motion.div
+              key={photo.id}
+              initial={{ opacity: 0, scale: 0.92 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.6,
+                delay: Math.min(idx * 0.03, 0.4),
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              viewport={{ once: true, margin: '-50px' }}
+              whileHover={{ scale: 1.02 }}
+              style={{
+                gridColumn: `span ${colSpan}`,
+                gridRow: `span ${rowSpan}`,
+                borderRadius: 12,
+                overflow: 'hidden',
+                position: 'relative',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                // Trigger lightbox (needs parent handler)
+                const evt = new CustomEvent('openLightbox', { detail: { photo, allPhotos: arrangedPhotos } })
+                window.dispatchEvent(evt)
+              }}
+            >
+              {/* Image container */}
+              <div
+                style={{
+                  width: '100%',
+                  height: isHero ? 'clamp(280px, 35vw, 400px)' : 'clamp(140px, 20vw, 240px)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <motion.div
+                  transition={{ duration: 0.8 }}
+                  style={{ position: 'absolute', inset: 0 }}
+                >
+                  <Image
+                    src={photo.image}
+                    alt={photo.title}
+                    fill
+                    sizes={isHero ? '(max-width: 767px) 100vw, 700px' : '(max-width: 767px) 50vw, 300px'}
+                    style={{ objectFit: 'cover', display: 'block' }}
+                  />
+                </motion.div>
+
+                {/* Overlay gradient */}
+                <div
+                  style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(135deg, rgba(10,12,9,0) 0%, rgba(10,12,9,0.3) 50%, rgba(10,12,9,0.6) 100%)',
+                    opacity: 0,
+                    transition: 'opacity 0.5s ease',
+                    pointerEvents: 'none',
+                  }}
+                  className="group-hover:opacity-100"
+                />
+
+                {/* Content overlay */}
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  whileHover={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  style={{
+                    position: 'absolute', inset: 0,
+                    display: 'flex', flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    padding: isHero ? 24 : 14,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)',
+                  }}
+                >
+                  <h4 style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: isHero ? FS.body : FS.bodySm,
+                    fontWeight: 600,
+                    color: 'var(--cream, #F5F0E8)',
+                    marginBottom: isHero ? 6 : 3,
+                    lineHeight: 1.3,
+                  }}>
+                    {photo.title}
+                  </h4>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    opacity: isHero ? 1 : 0.7,
+                  }}>
+                    <span style={{
+                      fontSize: '1.2rem',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      🔍
+                    </span>
+                    <span style={{
+                      fontFamily: 'var(--font-body)', fontSize: FS.micro,
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                      color: 'rgba(200,169,110,0.8)',
+                    }}>
+                      {isHero ? 'View Gallery' : 'View'}
+                    </span>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      {/* Call to action */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        viewport={{ once: true, margin: '-100px' }}
+        style={{ textAlign: 'center', marginTop: 48 }}
+      >
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
+          color: 'rgba(255,255,255,0.35)', marginBottom: 20,
+        }}>
+          Every image tells a story. Tap any photo to enter the gallery and explore deeper.
+        </p>
+      </motion.div>
+    </section>
+  )
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DAY_MOMENTS = [
@@ -1321,11 +1321,11 @@ function LivingStudios({ exhibits, onOpen }: { exhibits: Exhibit[]; onOpen: (e: 
   return (
     <section id="living-studios" style={{
       maxWidth: 1300, margin: '0 auto',
-      padding: '100px clamp(24px, 5vw, 80px) 80px',
+      padding: '65px clamp(24px, 5vw, 80px) 50px',
       position: 'relative', zIndex: 10,
     }}>
       {/* Chapter header */}
-      <div style={{ marginBottom: 64 }}>
+      <div style={{ marginBottom: 40 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
           <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.38em', textTransform: 'uppercase', color: 'rgba(212,168,83,0.4)' }}>03</span>
           <div style={{ width: 44, height: 1, background: 'rgba(212,168,83,0.22)' }} />
@@ -1363,6 +1363,19 @@ function LivingStudios({ exhibits, onOpen }: { exhibits: Exhibit[]; onOpen: (e: 
           />
         ))}
       </div>
+
+      {/* Phase 1: Photo cluster — Studio scenes */}
+      {PHOTOS_BY_CHAPTER?.livingStudios && PHOTOS_BY_CHAPTER.livingStudios.length > 0 && (
+        <div style={{ marginTop: 50 }}>
+          <PhotoCluster
+            photos={PHOTOS_BY_CHAPTER.livingStudios}
+            title="Behind the Scenes at Ubuntu Studios"
+            description="Artists at work, creative processes, and the hands that shape our exhibitions."
+            maxItems={8}
+            columnCount={4}
+          />
+        </div>
+      )}
     </section>
   )
 }
@@ -1382,15 +1395,15 @@ type Moment = {
 }
 
 const MOMENTS: Moment[] = [
-  { type: 'image', src: 'https://images.unsplash.com/photo-1531913764164-f85c52e6e654?w=700&q=80', label: 'Studio · 7am', caption: 'Grace kneads the morning\'s first batch of clay', time: '07:14', accent: '#D4A853' },
+  { type: 'image', src: '/images/Pottery-Workshop.jpeg', label: 'Studio · 7am', caption: 'Grace kneads the morning\'s first batch of clay', time: '07:14', accent: '#D4A853' },
   { type: 'story', label: 'The first throw', caption: '"I learned this from my grandmother. She never used a wheel — all hand. All memory." — Grace Wanjiku, Pottery Studio', accent: '#B8A9F0' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=700&q=80', label: 'Pottery · Dawn', caption: 'Wheel-thrown vessels wait for the kiln', time: '08:30', accent: '#D4A853' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80', label: 'Dye Lab · Morning', caption: 'Turmeric, avocado seed, onion skin — slow colour', time: '09:20', accent: '#E8956D' },
+  { type: 'image', src: '/images/Hands-Clay-&-Heritage.jpeg', label: 'Pottery · Dawn', caption: 'Wheel-thrown vessels wait for the kiln', time: '08:30', accent: '#D4A853' },
+  { type: 'image', src: '/images/hero4.jpeg', label: 'Dye Lab · Morning', caption: 'Turmeric, avocado seed, onion skin — slow colour', time: '09:20', accent: '#E8956D' },
   { type: 'story', label: 'A colour has a name', caption: '"This yellow comes from turmeric we grew twenty metres from this sink. That\'s the only kind of colour I trust." — Ubuntu Artisan', accent: '#F0C870' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1573408301185-9519f94815b4?w=700&q=80', label: 'Bead Workshop · 10am', caption: 'Teaching the language of colour and pattern', time: '10:15', accent: '#B8A9F0' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80', label: 'Farm · Harvest', caption: 'The food that feeds the fire circle tonight', time: '11:00', accent: '#00C851' },
+  { type: 'image', src: '/images/Maasai-Beadwork-Intensive.jpeg', label: 'Bead Workshop · 10am', caption: 'Teaching the language of colour and pattern', time: '10:15', accent: '#B8A9F0' },
+  { type: 'image', src: '/images/Garden-Feast.jpeg', label: 'Farm · Harvest', caption: 'The food that feeds the fire circle tonight', time: '11:00', accent: '#00C851' },
   { type: 'video-hint', label: 'Afternoon · Gallery', caption: 'The gallery in golden afternoon light — a quiet hour before visitors', accent: '#A8D8F0' },
-  { type: 'image', src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80', label: 'Golden Hour', caption: 'The farm dissolves into light at 16:30', time: '16:30', accent: '#F0C870' },
+  { type: 'image', src: '/images/hero6.jpeg', label: 'Golden Hour', caption: 'The farm dissolves into light at 16:30', time: '16:30', accent: '#F0C870' },
 ]
 
 function LivingMomentsRail() {
@@ -1530,11 +1543,13 @@ function LivingMomentsRail() {
                 /* Image card */
                 <>
                   <div style={{ position: 'relative', height: 'clamp(160px, 18vw, 230px)', overflow: 'hidden' }}>
-                    <img
+                    <Image
                       src={m.src}
                       alt={m.label}
+                      fill
+                      sizes="(max-width: 767px) 85vw, 340px"
                       draggable={false}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' }}
+                      style={{ objectFit: 'cover', display: 'block', pointerEvents: 'none' }}
                     />
                     <div style={{
                       position: 'absolute', inset: 0,
@@ -1575,6 +1590,22 @@ function LivingMomentsRail() {
         })}
         <div style={{ flexShrink: 0, width: 'clamp(24px, 5vw, 80px)' }} />
       </div>
+
+      {/* Phase 1: Photo cluster — Evening moments */}
+      {PHOTOS_BY_CHAPTER?.makersAlive && PHOTOS_BY_CHAPTER.makersAlive.length > 0 && (
+        <div style={{
+          maxWidth: 1300, margin: '50px auto 0',
+          padding: '0 clamp(24px, 5vw, 80px)',
+        }}>
+          <PhotoCluster
+            photos={PHOTOS_BY_CHAPTER.makersAlive}
+            title="Evening Memories"
+            description="As daylight fades, the village reveals its evening magic. Community, connection, and candlelight."
+            maxItems={8}
+            columnCount={4}
+          />
+        </div>
+      )}
     </section>
   )
 }
@@ -1583,15 +1614,208 @@ function LivingMomentsRail() {
 // WORKSHOPS — Alive, with urgency, real people
 // ─────────────────────────────────────────────────────────────────────────────
 
-function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
+// ─── Workshop detail modal — same portal/ESC pattern as ImmersiveExhibit ──────
+
+function WorkshopModal({ workshop, onClose }: { workshop: Workshop; onClose: () => void }) {
+  const [mounted, setMounted] = useState(false)
+  const accent = workshop.accent ?? '#A8D8F0'
+  const spots = workshop.spots ?? 10
+  const spotsLeft = workshop.spotsLeft ?? 0
+  const spotsPercent = Math.round((spotsLeft / spots) * 100)
+  const urgent = spotsLeft <= 2
+
+  useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', esc)
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', esc) }
+  }, [onClose])
+
+  if (!mounted) return null
+
+  return createPortal(
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9000,
+        background: 'rgba(4,5,4,0.78)', backdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(16px, 4vw, 40px)',
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 12, scale: 0.98 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 560, maxHeight: '88vh', overflowY: 'auto',
+          borderRadius: 22, background: '#0A0C08',
+          border: `1px solid ${accent}28`,
+          boxShadow: `0 40px 120px rgba(0,0,0,0.6), 0 0 80px ${accent}10`,
+        }}
+      >
+        {/* Header image */}
+        <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
+          <Image
+            src={workshop.image}
+            alt={workshop.title}
+            fill
+            sizes="(max-width: 767px) 100vw, 560px"
+            style={{ objectFit: 'cover', display: 'block' }}
+          />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: `linear-gradient(to bottom, rgba(10,12,8,0.1) 0%, rgba(10,12,8,0.96) 100%)`,
+          }} />
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+            background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+          }} />
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              position: 'absolute', top: 16, right: 16,
+              width: 36, height: 36, borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+              color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+              fontSize: '1.1rem', lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+          <div style={{ position: 'absolute', bottom: 22, left: 26, right: 26 }}>
+            <span style={{
+              fontFamily: 'var(--font-body)', fontSize: FS.label,
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              color: accent, opacity: 0.9, display: 'block', marginBottom: 8,
+            }}>
+              {workshop.date ?? 'TBD'} · {workshop.duration ?? 'Time TBD'}
+            </span>
+            <h3 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.5rem, 4vw, 2.1rem)', fontWeight: 300,
+              color: 'var(--cream, #F5F0E8)', lineHeight: 1.08,
+            }}>
+              {workshop.title}
+            </h3>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '26px clamp(22px, 4vw, 32px) 30px' }}>
+          <p style={{
+            fontFamily: 'var(--font-body)', fontSize: FS.body,
+            color: 'rgba(255,255,255,0.5)', lineHeight: 1.9, marginBottom: 24,
+          }}>
+            {workshop.description}
+          </p>
+
+          {/* Facilitator + price */}
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '16px 18px', borderRadius: 12,
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
+            marginBottom: 18,
+          }}>
+            <div>
+              <span style={{
+                display: 'block', fontFamily: 'var(--font-body)', fontSize: FS.label,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.25)', marginBottom: 4,
+              }}>
+                Facilitator
+              </span>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 300,
+                color: 'var(--cream, #F5F0E8)',
+              }}>
+                {workshop.facilitator ?? 'Guide'}
+              </span>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{
+                display: 'block', fontFamily: 'var(--font-body)', fontSize: FS.label,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.25)', marginBottom: 4,
+              }}>
+                Price
+              </span>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 300,
+                color: accent,
+              }}>
+                {workshop.price ? `KES ${workshop.price.toLocaleString()}` : 'On Request'}
+              </span>
+            </div>
+          </div>
+
+          {/* Availability */}
+          <div style={{ marginBottom: 26 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+                Availability
+              </span>
+              <span style={{
+                fontFamily: 'var(--font-body)', fontSize: FS.label,
+                color: urgent ? '#ff8888' : accent,
+              }}>
+                {spotsLeft} of {spots} spots left
+              </span>
+            </div>
+            <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+              <div style={{
+                width: `${spotsPercent}%`, height: '100%', borderRadius: 2,
+                background: urgent ? '#ff6b6b' : accent,
+              }} />
+            </div>
+          </div>
+
+          {/* CTA */}
+          <Link
+            href="/contact"
+            onClick={onClose}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '15px 0', width: '100%',
+              background: accent, color: '#06080A',
+              fontFamily: 'var(--font-body)', fontSize: FS.cta,
+              letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
+              borderRadius: 10, textDecoration: 'none',
+            }}
+          >
+            Reserve Your Spot →
+          </Link>
+        </div>
+      </motion.div>
+    </motion.div>,
+    document.body,
+  )
+}
+
+function WorkshopsAlive({
+  workshops,
+  onOpenWorkshop,
+}: {
+  workshops: Workshop[]
+  onOpenWorkshop: (w: Workshop) => void
+}) {
   return (
     <section style={{
       maxWidth: 1300, margin: '0 auto',
-      padding: '80px clamp(24px, 5vw, 80px) 100px',
+      padding: '50px clamp(24px, 5vw, 80px) 65px',
       borderTop: '1px solid rgba(255,255,255,0.04)',
       position: 'relative', zIndex: 10,
     }}>
-      <div style={{ marginBottom: 60 }}>
+      <div style={{ marginBottom: 40 }}>
         <h2 style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(1.8rem, 4.5vw, 3.5rem)',
@@ -1615,9 +1839,11 @@ function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
         gap: 22,
       }}>
         {workshops.map((w, idx) => {
-          const spotsPercent = Math.round((w.spotsLeft / w.spots) * 100)
-          const urgent = w.spotsLeft <= 2
-          const almostFull = w.spotsLeft <= 4
+          const spots = w.spots ?? 10
+          const spotsLeft = w.spotsLeft ?? 0
+          const spotsPercent = Math.round((spotsLeft / spots) * 100)
+          const urgent = spotsLeft <= 2
+          const almostFull = spotsLeft <= 4
 
           return (
             <motion.div
@@ -1626,33 +1852,45 @@ function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
               viewport={{ once: true, margin: '-40px' }}
+              onClick={() => onOpenWorkshop(w)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpenWorkshop(w) } }}
+              aria-label={`View details for ${w.title}`}
               style={{
                 borderRadius: 18, overflow: 'hidden',
                 background: 'rgba(10,12,8,0.88)',
                 border: '1px solid rgba(255,255,255,0.05)',
                 display: 'flex', flexDirection: 'column',
+                cursor: 'pointer',
               }}
               whileHover={{
-                borderColor: `${w.accent}30`,
-                boxShadow: `0 20px 60px rgba(0,0,0,0.4), 0 0 50px ${w.accent}08`,
+                borderColor: `${w.accent ?? '#A8D8F0'}30`,
+                boxShadow: `0 20px 60px rgba(0,0,0,0.4), 0 0 50px ${w.accent ?? '#A8D8F0'}08`,
               }}
             >
               {/* Image */}
-              <div style={{ position: 'relative', height: 180, overflow: 'hidden' }}>
-                <motion.img
-                  src={w.image}
-                  alt={w.title}
-                  whileHover={{ scale: 1.04 }}
+              <div style={{ position: 'relative', height: 180, overflow: 'hidden', cursor: 'pointer' }}>
+                <motion.div
+                  whileHover={{ scale: 1.06 }}
                   transition={{ duration: 0.8 }}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
+                  style={{ position: 'absolute', inset: 0 }}
+                >
+                  <Image
+                    src={w.image}
+                    alt={w.title}
+                    fill
+                    sizes="(max-width: 767px) 90vw, 380px"
+                    style={{ objectFit: 'cover', display: 'block' }}
+                  />
+                </motion.div>
                 <div style={{
                   position: 'absolute', inset: 0,
                   background: 'linear-gradient(to bottom, rgba(10,12,8,0.05) 0%, rgba(10,12,8,0.82) 100%)',
                 }} />
                 <div style={{
                   position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-                  background: `linear-gradient(90deg, transparent, ${w.accent}80, transparent)`,
+                  background: `linear-gradient(90deg, transparent, ${w.accent ?? '#A8D8F0'}80, transparent)`,
                 }} />
 
                 {/* Live session indicator */}
@@ -1661,22 +1899,22 @@ function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     padding: '4px 10px', borderRadius: 20,
                     background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)',
-                    border: `1px solid ${urgent ? 'rgba(255,100,100,0.3)' : w.accent + '30'}`,
+                    border: `1px solid ${urgent ? 'rgba(255,100,100,0.3)' : (w.accent ?? '#A8D8F0') + '30'}`,
                   }}>
                     <motion.span
                       animate={{ opacity: [1, 0.3, 1] }}
                       transition={{ duration: 1.8, repeat: Infinity }}
                       style={{
                         width: 4, height: 4, borderRadius: '50%', display: 'block',
-                        background: urgent ? '#ff6b6b' : w.accent,
+                        background: urgent ? '#ff6b6b' : (w.accent ?? '#A8D8F0'),
                       }}
                     />
                     <span style={{
                       fontFamily: 'var(--font-body)', fontSize: FS.micro,
                       letterSpacing: '0.18em', textTransform: 'uppercase',
-                      color: urgent ? '#ff8888' : w.accent,
+                      color: urgent ? '#ff8888' : (w.accent ?? '#A8D8F0'),
                     }}>
-                      {urgent ? `${w.spotsLeft} left` : almostFull ? `${w.spotsLeft} spaces` : 'Open'}
+                      {urgent ? `${spotsLeft} left` : almostFull ? `${spotsLeft} spaces` : 'Open'}
                     </span>
                   </div>
                 </div>
@@ -1687,9 +1925,9 @@ function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
                 <span style={{
                   fontFamily: 'var(--font-body)', fontSize: FS.label,
                   letterSpacing: '0.2em', textTransform: 'uppercase',
-                  color: w.accent, marginBottom: 8, display: 'block', opacity: 0.85,
+                  color: w.accent ?? '#A8D8F0', marginBottom: 8, display: 'block', opacity: 0.85,
                 }}>
-                  {w.date}
+                  {w.date ?? 'TBD'}
                 </span>
 
                 <h3 style={{
@@ -1717,9 +1955,9 @@ function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
                     </span>
                     <span style={{
                       fontFamily: 'var(--font-body)', fontSize: FS.label,
-                      color: urgent ? '#ff8888' : w.accent,
+                      color: urgent ? '#ff8888' : (w.accent ?? '#A8D8F0'),
                     }}>
-                      {w.spotsLeft} of {w.spots}
+                      {spotsLeft} of {spots}
                     </span>
                   </div>
                   <div style={{ height: 2.5, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
@@ -1730,7 +1968,7 @@ function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
                       viewport={{ once: true }}
                       style={{
                         height: '100%', borderRadius: 2,
-                        background: urgent ? '#ff6b6b' : w.accent,
+                        background: urgent ? '#ff6b6b' : (w.accent ?? '#A8D8F0'),
                       }}
                     />
                   </div>
@@ -1747,22 +1985,25 @@ function WorkshopsAlive({ workshops }: { workshops: Workshop[] }) {
                       letterSpacing: '0.12em', textTransform: 'uppercase',
                       color: 'rgba(255,255,255,0.18)', marginBottom: 3,
                     }}>
-                      {w.facilitator} · {w.duration}
+                      {w.facilitator ?? 'Guide'} · {w.duration ?? 'Time TBD'}
                     </span>
                     <span style={{
                       fontFamily: 'var(--font-display)',
                       fontSize: '1.1rem', fontWeight: 300,
                       color: 'var(--cream, #F5F0E8)',
                     }}>
-                      KES {w.price.toLocaleString()}
+                      {w.price ? `KES ${w.price.toLocaleString()}` : 'Price on Request'}
                     </span>
                   </div>
-                  <Link href="/contact" style={{
+                  <Link
+                    href="/contact"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
                     padding: '10px 18px',
                     borderRadius: 8,
-                    border: `1px solid ${w.accent}38`,
-                    background: `${w.accent}0c`,
-                    color: w.accent,
+                    border: `1px solid ${(w.accent ?? '#A8D8F0')}38`,
+                    background: `${(w.accent ?? '#A8D8F0')}0c`,
+                    color: w.accent ?? '#A8D8F0',
                     fontFamily: 'var(--font-body)',
                     fontSize: FS.label, letterSpacing: '0.18em',
                     textTransform: 'uppercase',
@@ -1837,7 +2078,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
         }}>
           {craftMarket.map((cm, idx) => (
             <motion.div
-              key={cm.category}
+              key={cm.id}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75, delay: idx * 0.07, ease: [0.16, 1, 0.3, 1] }}
@@ -1847,8 +2088,8 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
               style={{
                 borderRadius: 16,
                 padding: '24px 18px 22px',
-                background: active === idx ? `${cm.accent}07` : 'rgba(255,255,255,0.018)',
-                border: `1px solid ${active === idx ? cm.accent + '2e' : 'rgba(255,255,255,0.045)'}`,
+                background: active === idx ? `${cm.accent ?? '#D4A853'}07` : 'rgba(255,255,255,0.018)',
+                border: `1px solid ${active === idx ? (cm.accent ?? '#D4A853') + '2e' : 'rgba(255,255,255,0.045)'}`,
                 cursor: 'default',
                 position: 'relative', overflow: 'hidden',
                 transition: 'all 0.35s ease',
@@ -1863,7 +2104,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
                     exit={{ opacity: 0 }}
                     style={{
                       position: 'absolute', inset: 0, pointerEvents: 'none',
-                      background: `radial-gradient(ellipse 80% 55% at 50% -10%, ${cm.accent}10, transparent 65%)`,
+                      background: `radial-gradient(ellipse 80% 55% at 50% -10%, ${cm.accent ?? '#D4A853'}10, transparent 65%)`,
                     }}
                   />
                 )}
@@ -1872,11 +2113,11 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
               {/* Icon */}
               <div style={{
                 fontSize: '1.35rem', marginBottom: 16,
-                color: cm.accent,
-                filter: active === idx ? `drop-shadow(0 0 10px ${cm.accent}80)` : 'none',
+                color: cm.accent ?? '#D4A853',
+                filter: active === idx ? `drop-shadow(0 0 10px ${(cm.accent ?? '#D4A853')}80)` : 'none',
                 transition: 'filter 0.35s',
               }}>
-                {cm.icon}
+                {cm.icon ?? '✨'}
               </div>
 
               <h4 style={{
@@ -1885,7 +2126,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
                 color: 'var(--cream, #F5F0E8)',
                 marginBottom: 8, lineHeight: 1.2,
               }}>
-                {cm.category}
+                {cm.category ?? 'Craft'}
               </h4>
 
               <p style={{
@@ -1893,7 +2134,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
                 color: 'rgba(255,255,255,0.35)', lineHeight: 1.75,
                 marginBottom: 16,
               }}>
-                {cm.description}
+                {cm.description ?? 'Handcrafted artisan work'}
               </p>
 
               <div style={{
@@ -1906,17 +2147,17 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
                   letterSpacing: '0.14em', textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.2)',
                 }}>
-                  {cm.vendors} makers
+                  {cm.vendors ?? 1} maker{(cm.vendors ?? 1) !== 1 ? 's' : ''}
                 </span>
                 <span style={{
                   padding: '3px 10px', borderRadius: 20,
-                  background: `${cm.accent}0e`,
-                  border: `1px solid ${cm.accent}22`,
+                  background: `${(cm.accent ?? '#D4A853')}0e`,
+                  border: `1px solid ${(cm.accent ?? '#D4A853')}22`,
                   fontFamily: 'var(--font-body)', fontSize: FS.micro,
                   letterSpacing: '0.14em', textTransform: 'uppercase',
-                  color: cm.accent,
+                  color: cm.accent ?? '#D4A853',
                 }}>
-                  {cm.days}
+                  {cm.days ?? 'Schedule TBD'}
                 </span>
               </div>
             </motion.div>
@@ -1930,8 +2171,8 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           viewport={{ once: true, margin: '-60px' }}
           style={{
-            marginTop: 80,
-            padding: '52px clamp(28px, 5vw, 72px)',
+            marginTop: 50,
+            padding: '36px clamp(28px, 5vw, 56px)',
             borderRadius: 20,
             background: 'rgba(200,169,110,0.04)',
             border: '1px solid rgba(200,169,110,0.1)',
@@ -1982,6 +2223,21 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
             Plan Your Visit →
           </Link>
         </motion.div>
+
+        {/* Phase 1: Photo cluster — Fire circle marketplace */}
+        {PHOTOS_BY_CHAPTER?.fireCircle && PHOTOS_BY_CHAPTER.fireCircle.length > 0 && (
+          <div style={{
+            marginTop: 50,
+          }}>
+            <PhotoCluster
+              photos={PHOTOS_BY_CHAPTER.fireCircle}
+              title="Around the Fire"
+              description="Stories, song, light, and the warmth of gathering. The magic of Ubuntu at night."
+              maxItems={10}
+              columnCount={4}
+            />
+          </div>
+        )}
       </div>
     </section>
   )
@@ -2038,6 +2294,7 @@ function AmbientSoundToggle() {
   return (
     <motion.button
       onClick={toggle}
+      aria-label={isOn ? 'Mute ambient sound' : 'Play ambient sound'}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       style={{
@@ -2066,6 +2323,7 @@ function AmbientSoundToggle() {
 // ENHANCEMENT · Scroll Progress Thread
 // ─────────────────────────────────────────────────────────────────────────────
 function ScrollProgressThread() {
+  const prefersReducedMotion = useReducedMotion()
   const { scrollYProgress } = useScroll()
   const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1])
 
@@ -2075,7 +2333,7 @@ function ScrollProgressThread() {
         position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 5,
         width: '1px',
         background: 'rgba(255,255,255,0.06)',
-        scaleY,
+        scaleY: prefersReducedMotion ? 1 : scaleY,
         transformOrigin: 'top',
       }}
     >
@@ -2083,114 +2341,11 @@ function ScrollProgressThread() {
         style={{
           position: 'absolute', inset: 0,
           background: 'rgba(200,168,83,0.55)',
-          scaleY,
+          scaleY: prefersReducedMotion ? 1 : scaleY,
           transformOrigin: 'top',
         }}
       />
     </motion.div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ENHANCEMENT · Fire Circle Ember Particles
-// ─────────────────────────────────────────────────────────────────────────────
-function EmberParticles() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    // Set canvas size
-    const updateSize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    updateSize()
-    window.addEventListener('resize', updateSize)
-
-    // Particle system
-    interface Particle {
-      x: number
-      y: number
-      vx: number
-      vy: number
-      alpha: number
-      life: number
-    }
-    const particles: Particle[] = []
-    const colors = ['#C8A855', '#D4A844', '#E8A566', '#F0A366']
-
-    const spawnEmber = () => {
-      // Spawn from bottom edge, particles grow upward to fill hero
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: canvas.height,
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: -2.2 - Math.random() * 1.2,
-        alpha: Math.random() * 0.28 + 0.1,
-        life: 1,
-      })
-    }
-
-    let frameCount = 0
-    let animationId: number
-
-    const animate = () => {
-      // Spawn new particles frequently to fill bottom completely
-      if (frameCount % 4 === 0 && particles.length < 32) spawnEmber()
-      frameCount++
-
-      // Clear canvas
-      ctx.fillStyle = 'rgba(6, 9, 10, 0)'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // Update and draw particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i]
-
-        // Update position
-        p.x += p.vx
-        p.y += p.vy
-        p.life -= 0.01
-        p.alpha = Math.max(0, p.life * 0.45)
-
-        if (p.life <= 0) {
-          particles.splice(i, 1)
-          continue
-        }
-
-        // Draw particle
-        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)]
-        ctx.globalAlpha = p.alpha
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, 2 + Math.random(), 0, Math.PI * 2)
-        ctx.fill()
-      }
-
-      ctx.globalAlpha = 1
-      animationId = requestAnimationFrame(animate)
-    }
-
-    animationId = requestAnimationFrame(animate)
-
-    return () => {
-      cancelAnimationFrame(animationId)
-      window.removeEventListener('resize', updateSize)
-    }
-  }, [])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none',
-        zIndex: 0,
-      }}
-    />
   )
 }
 
@@ -2254,8 +2409,10 @@ function TypewriterParagraph({ text, delay }: { text: string; delay: number }) {
 // ROOT EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function GalleryClient({ exhibits, workshops, craftMarket, stats }: Props) {
+export function GalleryClient({ exhibits, workshops, craftMarket, stats, photos }: Props) {
+  const hasFinePointer = useHasFinePointer()
   const [selectedExhibit, setSelectedExhibit] = useState<Exhibit | null>(null)
+  const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null)
   const [cursorAccent, setCursorAccent] = useState('#C8A96E')
 
   useEffect(() => {
@@ -2273,8 +2430,11 @@ export function GalleryClient({ exhibits, workshops, craftMarket, stats }: Props
 
   const openExhibit  = useCallback((e: Exhibit) => setSelectedExhibit(e), [])
   const closeExhibit = useCallback(() => setSelectedExhibit(null), [])
+  const openWorkshop  = useCallback((w: Workshop) => setSelectedWorkshop(w), [])
+  const closeWorkshop = useCallback(() => setSelectedWorkshop(null), [])
 
   return (
+    <MotionConfig reducedMotion="user">
     <main style={{
       minHeight: '100vh',
       background: '#06090A',
@@ -2284,12 +2444,11 @@ export function GalleryClient({ exhibits, workshops, craftMarket, stats }: Props
     }}>
       {/* Global atmosphere */}
       <LivingBackground accent={cursorAccent} />
-      <MagneticCursor accentColor={cursorAccent} />
+      {hasFinePointer && <MagneticCursor accentColor={cursorAccent} />}
       
       {/* New enhancements */}
       <ScrollProgressThread />
       <AmbientSoundToggle />
-      <EmberParticles />
 
       {/* Optional nav */}
       {NavWrapper && <NavWrapper />}
@@ -2299,11 +2458,19 @@ export function GalleryClient({ exhibits, workshops, craftMarket, stats }: Props
       {/* ── 01 Arrival ── */}
       <ArrivalHero exhibits={exhibits} />
 
+      {/* ── 02 Latest Memories (Phase 1) ── */}
+      {photos && photos.length > 0 && (
+        <LatestMemoriesChapter photos={photos} maxItems={20} />
+      )}
+
       {/* ── Day rhythm ── */}
       <DayRhythm />
 
       {/* ── 02 Village OS ── */}
       <VillageOS exhibits={exhibits} onOpenExhibit={openExhibit} />
+
+      {/* ── Gallery Highlights ── */}
+      {photos && photos.length > 0 && <GalleryHighlights photos={photos} />}
 
       {/* ── 03 Living Studios ── */}
       <LivingStudios exhibits={exhibits} onOpen={openExhibit} />
@@ -2312,7 +2479,7 @@ export function GalleryClient({ exhibits, workshops, craftMarket, stats }: Props
       <LivingMomentsRail />
 
       {/* ── Workshops ── */}
-      <WorkshopsAlive workshops={workshops} />
+      <WorkshopsAlive workshops={workshops} onOpenWorkshop={openWorkshop} />
 
       {/* ── 05 Fire Circle ── */}
       <FireCircle craftMarket={craftMarket} />
@@ -2331,6 +2498,18 @@ export function GalleryClient({ exhibits, workshops, craftMarket, stats }: Props
           />
         )}
       </AnimatePresence>
+
+      {/* Workshop detail modal */}
+      <AnimatePresence mode="wait">
+        {selectedWorkshop && (
+          <WorkshopModal
+            key={selectedWorkshop.id}
+            workshop={selectedWorkshop}
+            onClose={closeWorkshop}
+          />
+        )}
+      </AnimatePresence>
     </main>
+    </MotionConfig>
   )
 }

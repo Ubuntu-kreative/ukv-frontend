@@ -45,7 +45,7 @@ const EXPERIENCES: Experience[] = [
   },
   {
     title:  'Living Farm',
-    sub:    'FarmERP · Live data',
+    sub:    'Live Farm · Real-time data',
     href:   '/farm',
     accent: 'var(--neon)',
     emoji:  '⬡',

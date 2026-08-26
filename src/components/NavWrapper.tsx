@@ -335,6 +335,21 @@ export default function NavWrapper() {
           .u-cart-btn:hover { animation: none; transform: scale(1) !important; }
           .u-mobile-submenu { transition: none; }
         }
+        @media (max-width: 1023px) {
+          .u-nav-header > div { padding-left: 16px !important; padding-right: 16px !important; gap: 12px !important; min-width: 0; }
+          .u-nav-brand { gap: 0 !important; }
+          .u-nav-divider,
+          .u-nav-wordmark { display: none !important; }
+          .u-nav-header > div > nav { display: none !important; }
+          .u-nav-header .md\:hidden { display: flex !important; }
+          .u-nav-actions { gap: 6px !important; }
+          .u-cart-btn { width: 42px !important; height: 42px !important; }
+          .u-reserve { padding: 8px 14px; font-size: 8px; }
+        }
+        @media (max-width: 375px) {
+          .u-nav-header > div { padding-left: 12px !important; padding-right: 12px !important; gap: 8px !important; }
+          .u-reserve { padding-left: 11px; padding-right: 11px; font-size: 7px; }
+        }
       `}</style>
 
       {/* ══ 1. TOP UTILITY BAR ══════════════════════════════════════════════ */}
@@ -419,6 +434,7 @@ export default function NavWrapper() {
 
       {/* ══ 2. MAIN NAV BAR ════════════════════════════════════════════════ */}
       <header
+        className="u-nav-header"
         onMouseLeave={scheduleClose}
         style={{
           position:             'fixed',
@@ -449,7 +465,7 @@ export default function NavWrapper() {
         }}>
 
           {/* LOGO */}
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <Link href="/" className="u-nav-brand" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
             {/* Ubuntu mark — smaller with transparent background */}
             <div style={{
               width:         '32px',
@@ -475,14 +491,14 @@ export default function NavWrapper() {
             </div>
 
             {/* Divider */}
-            <span style={{
+            <span className="u-nav-divider" style={{
               width: '1px',
               height: '40px',
               background: 'rgba(255,255,255,0.15)',
             }} />
 
             {/* Ubuntu logo — larger with zoom on hover */}
-            <div className="u-logo" style={{
+            <div className="u-logo u-nav-wordmark" style={{
               width:         '110px',
               height:        '110px',
               borderRadius:  '4px',
@@ -553,7 +569,7 @@ export default function NavWrapper() {
           </nav>
 
           {/* RIGHT ACTIONS */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <div className="u-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
             {/* Mobile hamburger (visible on small screens only) */}
             <button
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}

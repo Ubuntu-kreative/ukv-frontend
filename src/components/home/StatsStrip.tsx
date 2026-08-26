@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const STATS_TARGETS = [6, 24, 6, 50] as const
+const STATS_TARGETS = [15, 24, 6, 120] as const
 
 const STATS_META = [
   { label: 'Accommodation options', suffix: '',    color: 'var(--neon)' },
   { label: 'Animals tracked live',  suffix: '+',   color: 'var(--gold)' },
   { label: 'Master logs connected', suffix: '',    color: 'var(--neon)' },
-  { label: 'Year audit retention',  suffix: 'yr',  color: 'var(--gold)' },
+  { label: 'Seeds saved & shared',  suffix: '+',   color: 'var(--gold)' },
 ] as const
 
 // FIX-16: typed tuple avoids per-tick heap allocation from .map()

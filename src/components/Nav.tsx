@@ -21,6 +21,7 @@ const NAV_LINKS = [
   { label: 'Spa',          href: '/spa'        },
   { label: 'Farm',         href: '/farm'       },
   { label: 'Events',       href: '/events'     },
+  { label: 'Journal',      href: '/journal'    },
   { label: 'Gallery',      href: '/gallery'    },
 ]
 

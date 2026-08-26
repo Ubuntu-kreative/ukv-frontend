@@ -1,11 +1,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Ubuntu Kreative Village — Gallery Page
-// SERVER COMPONENT — renders static HTML shell + passes serialised data
+// Ubuntu Kreative Village — Gallery Page  (Server Component)
+// Renders the static shell and passes serialised data to GalleryClient.
 // No 'use client', no hooks, no browser APIs here.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Metadata } from 'next'
-import { EXHIBITS, WORKSHOPS, CRAFT_MARKET, GALLERY_STATS } from '@/components/gallery/Gallery.data'
+import {
+  EXHIBITS,
+  WORKSHOPS,
+  CRAFT_MARKET,
+  GALLERY_STATS,
+  PHOTOS,
+  statsToArray,
+} from '@/components/gallery/Gallery.data'
 import { GalleryClient } from '@/components/gallery/GalleryClient'
 
 export const metadata: Metadata = {
@@ -36,14 +43,14 @@ export const metadata: Metadata = {
   },
 }
 
-// Static hero content rendered server-side for instant LCP paint
 export default function GalleryPage() {
   return (
     <GalleryClient
       exhibits={EXHIBITS}
       workshops={WORKSHOPS}
       craftMarket={CRAFT_MARKET}
-      stats={GALLERY_STATS}
+      stats={statsToArray(GALLERY_STATS)}
+      photos={PHOTOS}
     />
   )
 }

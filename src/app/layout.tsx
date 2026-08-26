@@ -8,6 +8,7 @@ import './globals.css'
 
 import { cormorant, dmSans, playfair, dmMono } from '@/lib/fonts'
 import ClientLayout from '@/components/ClientLayout'
+import BackToTopButton from '@/components/BackToTopButton'
 import Cursor from '@/components/Cursor'
 import PageTransition from '@/components/PageTransition'
 
@@ -188,6 +189,8 @@ export default function RootLayout({
           {children}
         </PageTransition>
       </main>
+
+      <BackToTopButton />
 
       {/* SINGLE authoritative cart panel */}
       <CartPanel />

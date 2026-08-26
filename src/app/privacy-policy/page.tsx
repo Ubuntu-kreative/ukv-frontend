@@ -25,7 +25,7 @@ const SECTIONS = [
 - Reservation information (dates, accommodation preference, number of guests)
 - Dietary requirements and allergy information
 - Payment references (Stripe transaction IDs and M-Pesa references — we never store card numbers)
-- AI conversation logs with Moxie (stored in our Audit Log for service improvement)
+- AI conversation logs with Moxie (retained for quality improvement purposes)
 - Cookie consent status and date
 - Technical data (browser type, IP address via Cloudflare)`,
   },
@@ -53,13 +53,13 @@ const SECTIONS = [
     title: '5. Data Retention',
     content: `We retain your personal data as follows:
 
-- Guest Reservation records: 3 years after your last stay, then anonymised
-- Financial records (payment references): 7 years, as required by KRA
-- AI conversation logs (Moxie): 12 months, then permanently deleted
-- Email correspondence: 2 years
-- Cookie consent records: 3 years
+- Reservation records: 3 years after your stay, then anonymised
+- Financial records: 7 years (as required by Kenya Revenue Authority)
+- AI conversation logs: 12 months, then permanently deleted
+- Email and support correspondence: 2 years
+- Cookie records: 3 years
 
-After retention periods expire, your personal identifiable information (name, email, phone) is anonymised — the statistical record is kept but cannot be linked back to you.`,
+After retention periods expire, your personal identifiable information is anonymised — statistical records may remain but cannot be linked back to you.`,
   },
   {
     title: '6. Your Rights Under the Kenya Data Protection Act 2019',
@@ -86,16 +86,15 @@ We do not use advertising cookies. We do not sell your data to advertisers. You 
   },
   {
     title: '8. Third-Party Data Processors',
-    content: `We share your data only with the following processors, each bound by a Data Processing Agreement:
+    content: `We share your data only with carefully selected processors, each bound by strict Data Processing Agreements:
 
-- Stripe Inc. — payment processing (PCI-DSS Level 1 certified)
-- Safaricom PLC (M-Pesa) — mobile payment processing
-- OpenAI Inc. — Moxie AI concierge processing
-- Resend Inc. — transactional email delivery
-- Vercel Inc. — website hosting and infrastructure
-- Sentry Inc. — error monitoring (anonymised technical data only)
-- Amazon Web Services — long-term data backup (S3 Glacier)
-- Cloudflare Inc. — DDoS protection and CDN
+- Payment processors (card and mobile payment processing)
+- Moxie AI concierge service provider
+- Email delivery service
+- Website hosting provider
+- Error monitoring and support systems
+- Data backup and recovery services
+- Security and content delivery services
 
 We do not share your data with any other third parties without your explicit consent.`,
   },
@@ -103,12 +102,11 @@ We do not share your data with any other third parties without your explicit con
     title: '9. Data Security',
     content: `We protect your personal data using the following measures:
 
-- All data is transmitted over HTTPS (TLS 1.3)
-- WordPress admin access is restricted by IP allowlist via Cloudflare
-- Role-based access control (RBAC) limits staff access to only the data they need
-- Daily automated backups to AWS S3 Glacier with 11-nines durability
-- JWT-based Guest Passports for secure session management
-- Sentry monitors all systems for security anomalies in real time`,
+- All data is transmitted over HTTPS encryption
+- Staff access is restricted and monitored for data security
+- Daily backups ensure your data is never lost
+- Secure session management for guest accounts
+- Monitoring systems to detect and prevent security issues`,
   },
   {
     title: '10. Children\'s Privacy',
@@ -167,7 +165,7 @@ export default function PrivacyPolicyPage() {
             Privacy Policy
           </h1>
           <p className="font-body text-[11px] leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Last updated: May 2026 · Version 2.0
+            Last updated: May 2026
           </p>
           <p className="font-body text-[12px] leading-loose max-w-2xl" style={{ color: 'rgba(255,255,255,0.45)' }}>
             Ubuntu Kreative Village is committed to protecting your personal data and
@@ -264,7 +262,7 @@ export default function PrivacyPolicyPage() {
             <p className="font-body text-[10px] leading-loose" style={{ color: 'rgba(255,255,255,0.25)' }}>
               Ubuntu Kreative Village · hello@ubuntuecolodge.com · Kenya<br />
               This policy is governed by the Kenya Data Protection Act 2019 and the regulations thereunder.<br />
-              Version 2.0 · Last updated May 2026
+              Last updated May 2026
             </p>
           </div>
 

@@ -1,14 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Ubuntu BSF Supply Plan — CONFIDENTIAL INTERNAL DATA
+// Ubuntu BSF Supply Plan — Admin Data
 // Source: Ubuntu BSF Supply Plan PDF, May 2026
 //
-// ⚠  This file must ONLY be imported by:
+// ⚠  This file is server-only and must ONLY be imported by:
 //      app/admin/bsf/page.tsx
 //      components/bsf/BsfDashboardClient.tsx
 //
-//    It must NEVER be imported by any public page, layout, or component.
-//    Importing it in a public route will expose confidential data in the
-//    client-side JS bundle.
+//    It is protected by 'server-only' and will throw a build error if
+//    imported from client components or public routes.
 //
 //    Path: src/server/bsf/bsf-admin.data.ts
 //    Alias: @/server/bsf/bsf-admin.data

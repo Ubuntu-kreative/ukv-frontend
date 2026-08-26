@@ -77,14 +77,6 @@ const MARQUEE_COLOURS = MARQUEE_ITEMS.flatMap((_, i) => [
 ])
 const MARQUEE_DOUBLED = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
 
-const ARCHIVE_YEARS = [2024, 2025, 2026, '∞'] as const
-const ARCHIVE_META: Record<string | number, { label: string }> = {
-  2024: { label: 'Foundation Year'     },
-  2025: { label: 'Ecological Record'   },
-  2026: { label: 'Events Ledger'       },
-  '∞':  { label: 'Living Heritage Log' },
-}
-
 // ─── STABLE STYLE CONSTANTS ──────────────────────────────────────────────────
 // All style objects are module-level constants — React sees the same reference
 // every render and skips diffing entirely.
@@ -190,46 +182,6 @@ function Philosophy() {
   )
 }
 
-function DigitalArchive() {
-  return (
-    <section className="border-t border-white/5 py-40 relative overflow-hidden cv-auto">
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-12 gap-8 items-start">
-
-          <div className="col-span-12 lg:col-span-4 lg:pr-8">
-            <div className="flex items-center gap-3 mb-8">
-              <span style={DOT_STYLE} />
-              <span className="font-body text-[9px] tracking-[0.28em] uppercase text-white/25">Heritage System</span>
-            </div>
-            <h2
-              className="font-display mb-7 text-white reveal"
-              style={{ fontSize:'clamp(2.2rem,4.5vw,3.6rem)', fontWeight:300, lineHeight:1.1, textTransform:'uppercase' }}
-            >
-              The 50-Year<br />
-              <em style={{ color:'var(--gold)', fontStyle:'normal' }}>Archive</em>
-            </h2>
-            <p className="font-body reveal" style={{ color:'rgba(255,255,255,0.35)', fontSize:'12px', lineHeight:2, maxWidth:300 }}>
-              A permanent memory of ecological restoration, ritual, and heritage — encoded for generations yet to walk this land.
-            </p>
-          </div>
-
-          <div className="col-span-12 lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {ARCHIVE_YEARS.map((year) => (
-              <div key={year} className="group border border-white/5 p-8 bg-white/[0.01] cursor-pointer relative overflow-hidden">
-                <span className="font-mono text-[11px] text-white/20">{year}</span>
-                <p className="mt-3 font-body text-[9px] uppercase tracking-[0.18em] text-white/40">
-                  {ARCHIVE_META[year].label}
-                </p>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </div>
-    </section>
-  )
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // PAGE — Server Component root
 // ─────────────────────────────────────────────────────────────────────────────
@@ -321,11 +273,6 @@ export default function HomePage() {
 
         <SectionSeparator />
 
-        <section className="reveal">
-          <DigitalArchive />
-        </section>
-
-        <SectionSeparator glow />
         <Footer />
 
       </div>

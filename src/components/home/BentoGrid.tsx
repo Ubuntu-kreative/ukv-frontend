@@ -125,7 +125,7 @@ const CARDS: BentoCardData[] = [
       'Next harvest: Kale — 3 days',
       'Cattle Unit 3: All healthy, grazing',
       'North Apiary: honey extraction due',
-      'Last FarmERP sync: 8 minutes ago',
+      'Last data update: 8 minutes ago',
     ],
   },
   {

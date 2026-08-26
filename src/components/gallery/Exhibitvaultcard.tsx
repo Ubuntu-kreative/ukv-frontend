@@ -98,7 +98,7 @@ export function ExhibitVaultCard({ exhibit, onOpen, delay = 0 }: Props) {
         {/* Image */}
         <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
           <motion.img
-            src={exhibit.image}
+            src={exhibit.heroImage ?? '/images/hero1.jpeg'}
             alt={exhibit.title}
             animate={{ scale: hovered ? 1.06 : 1 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
