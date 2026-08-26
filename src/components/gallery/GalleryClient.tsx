@@ -1544,7 +1544,7 @@ function LivingMomentsRail() {
                 <>
                   <div style={{ position: 'relative', height: 'clamp(160px, 18vw, 230px)', overflow: 'hidden' }}>
                     <Image
-                      src={m.src}
+                      src={m.src || '/images/Garden-Breakfast-Beneath-the-Trees.jpeg'}
                       alt={m.label}
                       fill
                       sizes="(max-width: 767px) 85vw, 340px"

@@ -104,7 +104,9 @@ function resolveJournalHeroImage(article: any) {
     }
   }
 
-  const resolved = bestMatch ? { url: bestMatch.url, alt: bestMatch.alt } : getFallbackHeroImage().asset
+  const resolved = bestMatch
+    ? { url: bestMatch.url, alt: bestMatch.alt }
+    : { url: getFallbackHeroImage().asset.url, alt: getFallbackHeroImage().alt }
   IMAGE_MATCH_CACHE.set(cacheKey, resolved)
   return resolved
 }
