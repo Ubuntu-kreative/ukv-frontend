@@ -15,15 +15,31 @@
 // BUG FIXED — Root cause #2: connect-src was missing accounts.google.com.
 // NextAuth's PKCE/state verification makes fetch() calls back to Google.
 // Without accounts.google.com in connect-src, those calls are CSP-blocked.
+//
+// BUG FIXED — Root cause #3: Turbopack couldn't determine the workspace root.
+// Two lockfiles exist (one in Ubuntu-Kreative-Village/, one in
+// Ubuntu-Kreative-Village/ukv-frontend/), so Turbopack was guessing the parent
+// folder as root and watching/scanning far more of the filesystem than needed —
+// this was contributing to the slow, repeated "Compiling ..." behavior.
+//
+// Fix: explicitly set turbopack.root to this project's own directory.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const isDev = process.env.NODE_ENV === 'development'
 
 const nextConfig = {
+  // ── Turbopack ─────────────────────────────────────────────
+  // FIX #3: pin the workspace root to this project folder so Turbopack
+  // doesn't watch/scan the parent Ubuntu-Kreative-Village directory
+  // (which contains an unrelated lockfile) — fixes slow/repeated compiles.
+  turbopack: {
+    root: __dirname,
+  },
+
   // ── Images ────────────────────────────────────────────────
   images: {
     unoptimized: isDev,
-    qualities: [70, 75, 85],
+    qualities: [70, 75, 85, 95],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 320, 500],
