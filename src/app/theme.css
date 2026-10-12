@@ -1,0 +1,89 @@
+[data-theme="light"] {
+  --earth:     #2C1810;
+  --earth-mid: #4A2E1A;
+
+  --sage:  #6b7d5e;
+  --sage2: #94a886;
+  --rust:  #a34e2e;
+
+  --bg:  #EDE6D8;
+  --bg2: #E5DDD0;
+  --bg3: #DAD2C4;
+  --bg4: #CEC5B5;
+  --bg5: #DDD6C4;
+
+  --cream:  #1C1710;
+  --cream2: #2A2118;
+  --cream3: #3D3020;
+
+  --obsidian:       #FAF7F2;
+  --obsidian-mid:   #F0ECE4;
+  --obsidian-light: #E8E2D8;
+
+  --gold:       #A67C1A;
+  --gold-light: #C49A2A;
+  --gold2:      #C9A040;
+  --gold-muted: rgba(184,146,42,0.55);
+
+  --neon:     #00A832;
+  --neon-dim: #008A28;
+
+  --glass-bg:           rgba(0,0,0,0.05);
+  --glass-border:       rgba(0,0,0,0.08);
+  --glass-border-hover: rgba(0,150,60,0.3);
+
+  --gold-dim:  rgba(184,146,42,0.12);
+  --gold-glow: rgba(184,146,42,0.20);
+
+  --muted:  rgba(28,23,16,0.72);
+  --muted2: rgba(28,23,16,0.48);
+  --muted3: rgba(28,23,16,0.28);
+
+  --border:  rgba(166,124,26,0.28);
+  --border2: rgba(28,23,16,0.18);
+}
+
+[data-theme="dark"] {
+  --earth:     #2C1810;
+  --earth-mid: #4A2E1A;
+
+  --sage:  #6b7d5e;
+  --sage2: #94a886;
+  --rust:  #a34e2e;
+
+  --bg:  #0d0c09;
+  --bg2: #141310;
+  --bg3: #1c1a14;
+  --bg4: #242118;
+  --bg5: #2d2920;
+
+  --cream:  #ede6d3;
+  --cream2: #d9d0bc;
+  --cream3: #c8bea8;
+
+  --obsidian:       #0A0A0A;
+  --obsidian-mid:   #111111;
+  --obsidian-light: #1A1A1A;
+
+  --gold:       #c8a84b;
+  --gold-light: #f0c878;
+  --gold2:      #e2c96b;
+  --gold-muted: rgba(200,168,75,0.55);
+
+  --neon:     #00FF41;
+  --neon-dim: #00C832;
+
+  --glass-bg:           rgba(255,255,255,0.04);
+  --glass-border:       rgba(255,255,255,0.08);
+  --glass-border-hover: rgba(0,255,65,0.3);
+
+  --gold-dim:  rgba(200,168,75,0.12);
+  --gold-glow: rgba(200,168,75,0.25);
+
+  --muted:  rgba(237,230,211,0.40);
+  --muted2: rgba(237,230,211,0.15);
+  --muted3: rgba(237,230,211,0.07);
+
+  --border:  rgba(200,168,75,0.14);
+  --border2: rgba(237,230,211,0.08);
+}

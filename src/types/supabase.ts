@@ -24,6 +24,8 @@ export type Database = {
           rate_per_night: number
           total_amount: number
           currency: string
+          payment_reference: string | null
+          submitted_at: string | null
           special_requests: string | null
           source: string
           cancelled_at: string | null
@@ -57,6 +59,9 @@ export type Database = {
         Row: {
           id: string
           name: string
+          resource_key: string | null
+          description: string | null
+          resource_type: 'cottage' | 'spa' | 'event'
           is_active: boolean
           created_at: string
         }
@@ -170,39 +175,6 @@ export type Database = {
           booking_id: string | null
           metadata: Json
           created_at: string
-        }
-        Insert: Record<string, unknown>
-        Update: Record<string, unknown>
-      }
-      rooms: {
-        Row: {
-          id: string
-          name: string
-          type: string
-          floor: string
-          capacity: number
-          status: string
-          rate_bo: number
-          rate_bb: number
-          rate_hb: number
-          rate_fb: number
-          amenities: string[]
-          notes: string | null
-          last_cleaned: string | null
-          current_booking_id: string | null
-          updated_at: string
-        }
-        Insert: Record<string, unknown>
-        Update: Record<string, unknown>
-      }
-      maintenance_blocks: {
-        Row: {
-          id: string
-          room_id: string
-          room_name: string
-          start_date: string
-          end_date: string
-          note: string | null
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>

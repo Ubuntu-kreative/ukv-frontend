@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 
 export default function BookPage() {
   return (
-    <main className="bg-[var(--obsidian)] min-h-screen text-white">
+    <main className="bg-[var(--bg)] min-h-screen text-[var(--cream)]">
       <NavWrapper />
       <BookingShell />
       <Footer />

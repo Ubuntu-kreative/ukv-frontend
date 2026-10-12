@@ -40,7 +40,7 @@ const EVENT_BADGES: Record<string, string> = {
 
 function Eyebrow({
   children,
-  color = 'rgba(255,255,255,0.28)',
+  color = 'var(--muted2)',
   className = '',
 }: {
   children: React.ReactNode
@@ -87,7 +87,7 @@ function QuickFact({
     <div className="flex items-start gap-2">
       <span className="text-xs mt-0.5 flex-shrink-0" style={{ color: accent }}>{icon}</span>
       <div>
-        <span className="block text-[8px] uppercase tracking-widest font-body mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>
+        <span className="block text-[8px] uppercase tracking-widest font-body mb-0.5" style={{ color: 'var(--muted2)' }}>
           {label}
         </span>
         <span className="block font-body text-[11px] text-cream leading-snug">{value}</span>
@@ -269,7 +269,7 @@ function EventDrawer({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm flex justify-end"
+          className="fixed inset-0 z-[2000] bg-[var(--bg)] backdrop-blur-sm flex justify-end"
           onClick={onClose}
           aria-modal="true"
           role="dialog"
@@ -285,8 +285,8 @@ function EventDrawer({
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
             onClick={e => e.stopPropagation()}
-            className="relative w-full max-w-2xl bg-[#0c0c0e] border-l border-white/8 h-full overflow-y-auto outline-none"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.08) transparent' }}
+            className="relative w-full max-w-2xl bg-[#0c0c0e] border-l border-[var(--border2)] h-full overflow-y-auto outline-none"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--muted3) transparent' }}
           >
             {/* Accent strip */}
             <div
@@ -297,7 +297,7 @@ function EventDrawer({
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 z-10 w-9 h-9 rounded-full border border-white/10 bg-black/50 flex items-center justify-center text-white/50 hover:text-cream hover:border-white/25 transition-colors duration-200"
+              className="absolute top-5 right-5 z-10 w-9 h-9 rounded-full border border-[var(--border2)] bg-[var(--glass-bg)] flex items-center justify-center text-[var(--muted)] hover:text-cream hover:border-[var(--border2)] transition-colors duration-200"
               aria-label="Close"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -336,7 +336,7 @@ function EventDrawer({
                 <>
                   <button
                     onClick={e => { e.stopPropagation(); gallery.prev() }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/55 border border-white/12 flex items-center justify-center text-white/70 hover:text-cream hover:bg-black/80 hover:border-white/30 transition-all duration-200 backdrop-blur-sm"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-[var(--glass-bg)] border border-[var(--border2)] flex items-center justify-center text-[var(--muted)] hover:text-cream hover:bg-[var(--bg)] hover:border-[var(--border2)] transition-all duration-200 backdrop-blur-sm"
                     aria-label="Previous image"
                   >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -345,7 +345,7 @@ function EventDrawer({
                   </button>
                   <button
                     onClick={e => { e.stopPropagation(); gallery.next() }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/55 border border-white/12 flex items-center justify-center text-white/70 hover:text-cream hover:bg-black/80 hover:border-white/30 transition-all duration-200 backdrop-blur-sm"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-[var(--glass-bg)] border border-[var(--border2)] flex items-center justify-center text-[var(--muted)] hover:text-cream hover:bg-[var(--bg)] hover:border-[var(--border2)] transition-all duration-200 backdrop-blur-sm"
                     aria-label="Next image"
                   >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -358,7 +358,7 @@ function EventDrawer({
               {/* Progress bar + dot indicators */}
               {images.length > 1 && (
                 <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-2 pointer-events-none">
-                  <div className="w-28 h-[2px] rounded-full bg-white/15 overflow-hidden">
+                  <div className="w-28 h-[2px] rounded-full bg-[var(--glass-bg)] overflow-hidden">
                     <motion.div
                       key={gallery.index}
                       className="h-full rounded-full"
@@ -378,7 +378,7 @@ function EventDrawer({
                           width: i === gallery.index ? 20 : 6,
                           height: 6,
                           borderRadius: 3,
-                          background: i === gallery.index ? accent : 'rgba(255,255,255,0.25)',
+                          background: i === gallery.index ? accent : 'var(--glass-bg)',
                         }}
                         aria-label={`Go to image ${i + 1}`}
                       />
@@ -389,7 +389,7 @@ function EventDrawer({
 
               {/* Image counter */}
               {images.length > 1 && (
-                <span className="absolute top-4 left-4 text-[10px] font-mono text-white/40 bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                <span className="absolute top-4 left-4 text-[10px] font-mono text-[var(--muted2)] bg-[var(--glass-bg)] px-2 py-0.5 rounded-full backdrop-blur-sm">
                   {gallery.index + 1} / {images.length}
                 </span>
               )}
@@ -403,10 +403,10 @@ function EventDrawer({
               <h2 className="font-display text-4xl md:text-5xl font-light text-cream mt-1 mb-1">
                 {event.title}
               </h2>
-              <p className="font-body text-sm text-white/40 italic mb-6">{event.cinematic}</p>
+              <p className="font-body text-sm text-[var(--muted2)] italic mb-6">{event.cinematic}</p>
 
               {/* Meta grid */}
-              <div className="grid grid-cols-2 gap-3 mb-8 p-5 rounded-xl bg-white/[0.03] border border-white/5">
+              <div className="grid grid-cols-2 gap-3 mb-8 p-5 rounded-xl bg-[var(--glass-bg)] border border-[var(--border2)]">
                 {([
                   ['When', event.date],
                   ['Time', `${event.time} · ${event.duration}`],
@@ -414,14 +414,14 @@ function EventDrawer({
                   ['Availability', event.spotsLeft < 20 ? `${event.spotsLeft} spots remaining` : 'Open'],
                 ] as [string, string][]).map(([label, value]) => (
                   <div key={label}>
-                    <span className="block text-[9px] uppercase tracking-widest text-white/25 font-body mb-0.5">{label}</span>
+                    <span className="block text-[9px] uppercase tracking-widest text-[var(--muted3)] font-body mb-0.5">{label}</span>
                     <span className="font-body text-sm text-cream font-medium">{value}</span>
                   </div>
                 ))}
               </div>
 
               {/* Description */}
-              <p className="font-body text-sm text-white/60 leading-relaxed mb-8">
+              <p className="font-body text-sm text-[var(--muted)] leading-relaxed mb-8">
                 {event.description}
               </p>
 
@@ -429,7 +429,7 @@ function EventDrawer({
               {event.philosophy && (
                 <div className="mb-8 pl-5 border-l-2" style={{ borderColor: accent }}>
                   <Eyebrow color={accent} className="mb-2">The Philosophy</Eyebrow>
-                  <p className="font-body text-sm text-white/50 leading-relaxed italic">
+                  <p className="font-body text-sm text-[var(--muted)] leading-relaxed italic">
                     {event.philosophy}
                   </p>
                 </div>
@@ -438,7 +438,7 @@ function EventDrawer({
               {/* The Journey */}
               {event.journey && event.journey.length > 0 && (
                 <div className="mb-8">
-                  <Eyebrow color="rgba(255,255,255,0.3)" className="mb-4">The Journey</Eyebrow>
+                  <Eyebrow color="var(--muted2)" className="mb-4">The Journey</Eyebrow>
                   <ol className="space-y-3">
                     {event.journey.map((step, i) => (
                       <li key={i} className="flex items-start gap-4">
@@ -448,7 +448,7 @@ function EventDrawer({
                         >
                           {i + 1}
                         </span>
-                        <span className="font-body text-sm text-white/60 leading-relaxed">{step}</span>
+                        <span className="font-body text-sm text-[var(--muted)] leading-relaxed">{step}</span>
                       </li>
                     ))}
                   </ol>
@@ -458,12 +458,12 @@ function EventDrawer({
               {/* Spaces */}
               {event.spaces && event.spaces.length > 0 && (
                 <div className="mb-8">
-                  <Eyebrow color="rgba(255,255,255,0.3)" className="mb-4">The Spaces</Eyebrow>
+                  <Eyebrow color="var(--muted2)" className="mb-4">The Spaces</Eyebrow>
                   <div className="space-y-3">
                     {event.spaces.map(s => (
-                      <div key={s.name} className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                      <div key={s.name} className="p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--border2)]">
                         <p className="font-body text-xs font-semibold text-cream mb-1">{s.name}</p>
-                        <p className="font-body text-xs text-white/40 leading-relaxed">{s.description}</p>
+                        <p className="font-body text-xs text-[var(--muted2)] leading-relaxed">{s.description}</p>
                       </div>
                     ))}
                   </div>
@@ -472,10 +472,10 @@ function EventDrawer({
 
               {/* What's included */}
               <div className="mb-8">
-                <Eyebrow color="rgba(255,255,255,0.3)" className="mb-4">What's Included</Eyebrow>
+                <Eyebrow color="var(--muted2)" className="mb-4">What's Included</Eyebrow>
                 <ul className="space-y-2">
                   {event.includes.map((inc, i) => (
-                    <li key={i} className="flex items-center gap-3 font-body text-sm text-white/55">
+                    <li key={i} className="flex items-center gap-3 font-body text-sm text-[var(--muted)]">
                       <span style={{ color: accent }} className="text-xs">✦</span>
                       {inc}
                     </li>
@@ -485,11 +485,11 @@ function EventDrawer({
 
               {/* Testimonial */}
               {event.testimonial && (
-                <figure className="mb-10 p-5 rounded-2xl bg-white/[0.03] border border-white/5">
+                <figure className="mb-10 p-5 rounded-2xl bg-[var(--glass-bg)] border border-[var(--border2)]">
                   <blockquote className="font-display text-lg font-light text-cream/80 leading-snug mb-3">
                     "{event.testimonial.quote}"
                   </blockquote>
-                  <figcaption className="font-body text-xs text-white/30">
+                  <figcaption className="font-body text-xs text-[var(--muted2)]">
                     — {event.testimonial.author}, {event.testimonial.location}
                   </figcaption>
                 </figure>
@@ -497,16 +497,16 @@ function EventDrawer({
 
               {/* Sticky CTA */}
               <div
-                className="sticky bottom-0 -mx-8 md:-mx-10 px-8 md:px-10 pt-5 pb-6 border-t border-white/8 flex items-center justify-between gap-4"
+                className="sticky bottom-0 -mx-8 md:-mx-10 px-8 md:px-10 pt-5 pb-6 border-t border-[var(--border2)] flex items-center justify-between gap-4"
                 style={{ background: '#0c0c0e' }}
               >
                 <div>
-                  <span className="block text-[9px] uppercase tracking-widest text-white/25 font-body mb-0.5">Investment</span>
+                  <span className="block text-[9px] uppercase tracking-widest text-[var(--muted3)] font-body mb-0.5">Investment</span>
                   <span className="font-mono text-2xl text-cream">
                     {event.price > 0 ? `KES ${event.price.toLocaleString()}` : 'Price on request'}
                   </span>
                   {event.price > 0 && (
-                    <span className="block text-[9px] text-white/30 font-body">per person</span>
+                    <span className="block text-[9px] text-[var(--muted2)] font-body">per person</span>
                   )}
                 </div>
                 <Link
@@ -555,7 +555,7 @@ function EventCard({
   return (
     <motion.div
       layout
-      className="relative flex flex-col bg-black/30 border border-white/5 rounded-2xl overflow-hidden group hover:bg-white/[0.015] transition-colors duration-500"
+      className="relative flex flex-col bg-[var(--glass-bg)] border border-[var(--border2)] rounded-2xl overflow-hidden group hover:bg-[var(--glass-bg)] transition-colors duration-500"
     >
       <AccentLine color={accent} />
 
@@ -581,14 +581,14 @@ function EventCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
         <span
-          className="absolute top-3 left-3 text-[8px] font-body uppercase tracking-widest px-2.5 py-1 rounded-full bg-black/60 border border-white/10"
+          className="absolute top-3 left-3 text-[8px] font-body uppercase tracking-widest px-2.5 py-1 rounded-full bg-[var(--glass-bg)] border border-[var(--border2)]"
           style={{ color: accent }}
         >
           {ev.category}
         </span>
 
         <span
-          className="absolute top-3 right-3 text-[8px] font-mono tracking-widest px-2.5 py-1 rounded-full bg-black/70 border"
+          className="absolute top-3 right-3 text-[8px] font-mono tracking-widest px-2.5 py-1 rounded-full bg-[var(--glass-bg)] border"
           style={{ color: availabilityColor, borderColor: `${availabilityColor}40` }}
         >
           {availabilityLabel}
@@ -609,10 +609,10 @@ function EventCard({
         <h3 className="font-display text-xl font-light text-cream mb-0.5 group-hover:text-gold transition-colors duration-300">
           {ev.title}
         </h3>
-        <p className="font-body text-[10px] text-white/40 italic mb-4 leading-relaxed">{ev.cinematic}</p>
+        <p className="font-body text-[10px] text-[var(--muted2)] italic mb-4 leading-relaxed">{ev.cinematic}</p>
 
         {/* Quick facts — always visible */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4 pb-4 border-b border-white/5">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4 pb-4 border-b border-[var(--border2)]">
           <QuickFact icon="📅" label="Schedule" value={ev.date} accent={accent} />
           <QuickFact icon="⏱" label="Duration" value={ev.duration} accent={accent} />
           <QuickFact icon="👥" label="Capacity" value={`${ev.capacity} guests`} accent={accent} />
@@ -630,18 +630,18 @@ function EventCard({
               className="overflow-hidden"
             >
               <div className="pb-4 space-y-5">
-                <p className="font-body text-xs text-white/55 leading-relaxed">{ev.description}</p>
+                <p className="font-body text-xs text-[var(--muted)] leading-relaxed">{ev.description}</p>
 
                 {ev.philosophy && (
                   <div className="pl-4 border-l-2" style={{ borderColor: accent }}>
                     <Eyebrow color={accent} className="mb-1.5">The Philosophy</Eyebrow>
-                    <p className="font-body text-xs text-white/45 leading-relaxed italic">{ev.philosophy}</p>
+                    <p className="font-body text-xs text-[var(--muted)] leading-relaxed italic">{ev.philosophy}</p>
                   </div>
                 )}
 
                 {ev.journey && ev.journey.length > 0 && (
                   <div>
-                    <Eyebrow color="rgba(255,255,255,0.3)" className="mb-3">The Journey</Eyebrow>
+                    <Eyebrow color="var(--muted2)" className="mb-3">The Journey</Eyebrow>
                     <ol className="space-y-2">
                       {ev.journey.map((step, i) => (
                         <li key={i} className="flex items-start gap-3">
@@ -651,7 +651,7 @@ function EventCard({
                           >
                             {i + 1}
                           </span>
-                          <span className="font-body text-xs text-white/55 leading-relaxed">{step}</span>
+                          <span className="font-body text-xs text-[var(--muted)] leading-relaxed">{step}</span>
                         </li>
                       ))}
                     </ol>
@@ -660,12 +660,12 @@ function EventCard({
 
                 {ev.spaces && ev.spaces.length > 0 && (
                   <div>
-                    <Eyebrow color="rgba(255,255,255,0.3)" className="mb-3">The Spaces</Eyebrow>
+                    <Eyebrow color="var(--muted2)" className="mb-3">The Spaces</Eyebrow>
                     <div className="space-y-2">
                       {ev.spaces.map(s => (
-                        <div key={s.name} className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <div key={s.name} className="p-3 rounded-xl bg-[var(--glass-bg)] border border-[var(--border2)]">
                           <p className="font-body text-[10px] font-semibold text-cream mb-0.5">{s.name}</p>
-                          <p className="font-body text-[10px] text-white/40 leading-relaxed">{s.description}</p>
+                          <p className="font-body text-[10px] text-[var(--muted2)] leading-relaxed">{s.description}</p>
                         </div>
                       ))}
                     </div>
@@ -673,10 +673,10 @@ function EventCard({
                 )}
 
                 <div>
-                  <Eyebrow color="rgba(255,255,255,0.3)" className="mb-3">What's Included</Eyebrow>
+                  <Eyebrow color="var(--muted2)" className="mb-3">What's Included</Eyebrow>
                   <ul className="space-y-1.5">
                     {ev.includes.map((inc, i) => (
-                      <li key={i} className="flex items-center gap-2.5 font-body text-xs text-white/55">
+                      <li key={i} className="flex items-center gap-2.5 font-body text-xs text-[var(--muted)]">
                         <span style={{ color: accent }} className="text-[9px]">✦</span>
                         {inc}
                       </li>
@@ -685,11 +685,11 @@ function EventCard({
                 </div>
 
                 {ev.testimonial && (
-                  <figure className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                  <figure className="p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--border2)]">
                     <blockquote className="font-display text-base font-light text-cream/80 leading-snug mb-2">
                       "{ev.testimonial.quote}"
                     </blockquote>
-                    <figcaption className="font-body text-[10px] text-white/30">
+                    <figcaption className="font-body text-[10px] text-[var(--muted2)]">
                       — {ev.testimonial.author}, {ev.testimonial.location}
                     </figcaption>
                   </figure>
@@ -702,7 +702,7 @@ function EventCard({
         {/* Toggle expand */}
         <button
           onClick={onToggle}
-          className="self-start flex items-center gap-1.5 text-[10px] font-body uppercase tracking-widest text-white/30 hover:text-cream transition-colors duration-200 mt-auto pt-1"
+          className="self-start flex items-center gap-1.5 text-[10px] font-body uppercase tracking-widest text-[var(--muted2)] hover:text-cream transition-colors duration-200 mt-auto pt-1"
           aria-expanded={isExpanded}
         >
           <motion.span
@@ -717,14 +717,14 @@ function EventCard({
       </div>
 
       {/* Card footer */}
-      <div className="px-5 pb-5 pt-3 border-t border-white/5 flex items-center justify-between gap-3">
+      <div className="px-5 pb-5 pt-3 border-t border-[var(--border2)] flex items-center justify-between gap-3">
         <div>
-          <span className="block text-[8px] uppercase tracking-widest text-white/25 font-body mb-0.5">Investment</span>
+          <span className="block text-[8px] uppercase tracking-widest text-[var(--muted3)] font-body mb-0.5">Investment</span>
           <span className="font-mono text-lg text-cream">
             {ev.price > 0 ? `KES ${ev.price.toLocaleString()}` : 'Price on request'}
           </span>
           {ev.price > 0 && (
-            <span className="block text-[8px] text-white/25 font-body">per person</span>
+            <span className="block text-[8px] text-[var(--muted3)] font-body">per person</span>
           )}
         </div>
         <button
@@ -760,8 +760,8 @@ function FeaturedEvent({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="relative rounded-3xl overflow-hidden border border-white/8 mb-7"
-      style={{ background: 'rgba(0,0,0,0.35)' }}
+      className="relative rounded-3xl overflow-hidden border border-[var(--border2)] mb-7"
+      style={{ background: 'var(--glass-bg)' }}
     >
       <AccentLine color={accent} />
 
@@ -804,7 +804,7 @@ function FeaturedEvent({
             <h3 className="font-display text-3xl md:text-4xl font-light text-cream mt-1 mb-1">
               {ev.title}
             </h3>
-            <p className="font-body text-xs text-white/40 italic mb-5">{ev.cinematic}</p>
+            <p className="font-body text-xs text-[var(--muted2)] italic mb-5">{ev.cinematic}</p>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
               <QuickFact icon="📅" label="Schedule" value={ev.date} accent={accent} />
@@ -813,7 +813,7 @@ function FeaturedEvent({
               <div className="flex items-start gap-2">
                 <span className="text-xs mt-0.5 flex-shrink-0" style={{ color: availabilityColor }}>◉</span>
                 <div>
-                  <span className="block text-[8px] uppercase tracking-widest font-body mb-0.5 text-white/28">
+                  <span className="block text-[8px] uppercase tracking-widest font-body mb-0.5 text-[var(--muted3)]">
                     Availability
                   </span>
                   <span className="block font-body text-[11px] leading-snug" style={{ color: availabilityColor }}>
@@ -823,19 +823,19 @@ function FeaturedEvent({
               </div>
             </div>
 
-            <p className="font-body text-xs text-white/50 leading-relaxed line-clamp-3 mb-5">
+            <p className="font-body text-xs text-[var(--muted)] leading-relaxed line-clamp-3 mb-5">
               {ev.description}
             </p>
           </div>
 
-          <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5">
+          <div className="flex items-center justify-between gap-4 pt-4 border-t border-[var(--border2)]">
             <div>
-              <span className="block text-[8px] uppercase tracking-widest text-white/25 font-body mb-0.5">Investment</span>
+              <span className="block text-[8px] uppercase tracking-widest text-[var(--muted3)] font-body mb-0.5">Investment</span>
               <span className="font-mono text-2xl text-cream">
                 {ev.price > 0 ? `KES ${ev.price.toLocaleString()}` : 'Price on request'}
               </span>
               {ev.price > 0 && (
-                <span className="block text-[8px] text-white/25 font-body">per person</span>
+                <span className="block text-[8px] text-[var(--muted3)] font-body">per person</span>
               )}
             </div>
             <button
@@ -876,7 +876,7 @@ function StickyBookingSummary({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.95 }}
           transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-          className="fixed bottom-6 right-6 z-[900] w-72 rounded-2xl border border-white/10 overflow-hidden shadow-2xl"
+          className="fixed bottom-6 right-6 z-[900] w-72 rounded-2xl border border-[var(--border2)] overflow-hidden shadow-2xl"
           style={{ background: '#0e0e10' }}
         >
           <div className="absolute top-0 left-0 right-0 h-[2px]"
@@ -891,7 +891,7 @@ function StickyBookingSummary({
               </div>
               <button
                 onClick={onDismiss}
-                className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-cream transition-colors duration-200 flex-shrink-0 mt-0.5"
+                className="w-7 h-7 rounded-full border border-[var(--border2)] flex items-center justify-center text-[var(--muted2)] hover:text-cream transition-colors duration-200 flex-shrink-0 mt-0.5"
                 aria-label="Dismiss"
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -900,17 +900,17 @@ function StickyBookingSummary({
               </button>
             </div>
 
-            <div className="space-y-1.5 mb-4 pb-4 border-b border-white/5">
+            <div className="space-y-1.5 mb-4 pb-4 border-b border-[var(--border2)]">
               <div className="flex items-center justify-between text-[10px] font-body">
-                <span className="text-white/35">Date / Time</span>
+                <span className="text-[var(--muted)]">Date / Time</span>
                 <span className="text-cream">{event.date} · {event.time}</span>
               </div>
               <div className="flex items-center justify-between text-[10px] font-body">
-                <span className="text-white/35">Capacity</span>
+                <span className="text-[var(--muted)]">Capacity</span>
                 <span className="text-cream">{event.capacity} guests</span>
               </div>
               <div className="flex items-center justify-between text-[10px] font-body">
-                <span className="text-white/35">Availability</span>
+                <span className="text-[var(--muted)]">Availability</span>
                 <span className="text-cream">
                   {event.spotsLeft <= 10 ? `${event.spotsLeft} spots` : 'Open'}
                 </span>
@@ -960,20 +960,20 @@ function ConferencePricingSection({
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-24 relative z-10 border-t border-white/5">
+    <section className="max-w-7xl mx-auto px-6 py-24 relative z-10 border-t border-[var(--border2)]">
       <div className="mb-14">
         <Eyebrow color="var(--gold)" className="mb-2">Conference & Events</Eyebrow>
         <h2 className="font-display text-4xl md:text-5xl font-light text-cream mt-2">
           Rates & Menus
         </h2>
-        <p className="font-body text-xs text-white/30 mt-4 max-w-lg leading-relaxed">
+        <p className="font-body text-xs text-[var(--muted2)] mt-4 max-w-lg leading-relaxed">
           All conference packages include projector, HDMI, flipchart, stationeries and drinking water.
           Minimum 8 persons for buffet service. Prices per person.
         </p>
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 mb-10 p-1 rounded-xl bg-white/[0.04] border border-white/5 w-fit">
+      <div className="flex gap-1 mb-10 p-1 rounded-xl bg-[var(--glass-bg)] border border-[var(--border2)] w-fit">
         {([
           { key: 'packages',     label: 'Day Packages' },
           { key: 'buffet',       label: 'Buffet Comparison' },
@@ -985,7 +985,7 @@ function ConferencePricingSection({
             className={`px-5 py-2.5 rounded-lg text-[11px] font-body tracking-wider transition-all duration-200 ${
               tab === t.key
                 ? 'text-obsidian font-semibold'
-                : 'text-white/35 hover:text-white/60'
+                : 'text-[var(--muted)] hover:text-[var(--muted)]'
             }`}
             style={tab === t.key ? { background: accent } : {}}
           >
@@ -1009,7 +1009,7 @@ function ConferencePricingSection({
             {rates.map(rate => (
               <div
                 key={rate.id}
-                className="relative p-6 rounded-2xl bg-black/25 border border-white/5 hover:border-white/12 transition-colors duration-300 flex flex-col"
+                className="relative p-6 rounded-2xl bg-[var(--glass-bg)] border border-[var(--border2)] hover:border-[var(--border2)] transition-colors duration-300 flex flex-col"
               >
                 <AccentLine color={accent} />
                 {rate.tag && (
@@ -1021,9 +1021,9 @@ function ConferencePricingSection({
                   </span>
                 )}
                 <h3 className="font-display text-xl font-light text-cream mb-2">{rate.label}</h3>
-                <p className="font-body text-xs text-white/40 leading-relaxed flex-1 mb-4">{rate.description}</p>
-                <div className="border-t border-white/5 pt-4 flex items-end justify-between">
-                  <span className="block text-[9px] uppercase tracking-widest text-white/25 font-body">Per person</span>
+                <p className="font-body text-xs text-[var(--muted2)] leading-relaxed flex-1 mb-4">{rate.description}</p>
+                <div className="border-t border-[var(--border2)] pt-4 flex items-end justify-between">
+                  <span className="block text-[9px] uppercase tracking-widest text-[var(--muted3)] font-body">Per person</span>
                   <span className="font-mono text-2xl text-cream">KES {rate.price.toLocaleString()}</span>
                 </div>
               </div>
@@ -1043,8 +1043,8 @@ function ConferencePricingSection({
             <div className="overflow-x-auto mb-8">
               <table className="w-full text-xs font-body border-collapse">
                 <thead>
-                  <tr className="border-b border-white/8">
-                    <th className="text-left py-3 pr-6 text-white/30 uppercase tracking-widest text-[9px] font-normal w-36">Includes</th>
+                  <tr className="border-b border-[var(--border2)]">
+                    <th className="text-left py-3 pr-6 text-[var(--muted2)] uppercase tracking-widest text-[9px] font-normal w-36">Includes</th>
                     {buffetRows.map(b => (
                       <th key={b.id} className="py-3 px-4 text-center">
                         <div className="font-display text-base font-light text-cream mb-0.5">{b.label}</div>
@@ -1057,9 +1057,9 @@ function ConferencePricingSection({
                   {INCLUSIONS.map((inc, i) => (
                     <tr
                       key={inc}
-                      className={`border-b border-white/5 transition-colors duration-150 hover:bg-white/[0.02] ${i % 2 === 0 ? '' : 'bg-white/[0.015]'}`}
+                      className={`border-b border-[var(--border2)] transition-colors duration-150 hover:bg-[var(--glass-bg)] ${i % 2 === 0 ? '' : 'bg-[var(--glass-bg)]'}`}
                     >
-                      <td className="py-2.5 pr-6 text-white/45">{inc}</td>
+                      <td className="py-2.5 pr-6 text-[var(--muted)]">{inc}</td>
                       {buffetRows.map(b => {
                         const val = BUFFET_MAP[b.id]?.[inc] ?? '—'
                         const isCheck = val === '✓'
@@ -1067,7 +1067,7 @@ function ConferencePricingSection({
                         return (
                           <td key={b.id} className="py-2.5 px-4 text-center">
                             <span style={{
-                              color: isCheck ? accent : isDash ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.7)',
+                              color: isCheck ? accent : isDash ? 'var(--muted3)' : 'var(--muted)',
                               fontWeight: isCheck ? 500 : 400,
                             }}>
                               {val}
@@ -1081,15 +1081,15 @@ function ConferencePricingSection({
               </table>
             </div>
 
-            <p className="font-body text-[10px] uppercase tracking-widest text-white/25 mb-5">All menu options</p>
+            <p className="font-body text-[10px] uppercase tracking-widest text-[var(--muted3)] mb-5">All menu options</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {buffets.map(menu => (
                 <div
                   key={menu.id}
                   className={`relative p-5 rounded-2xl border flex flex-col transition-colors duration-300 ${
                     menu.highlight
-                      ? 'bg-white/[0.06] border-white/12'
-                      : 'bg-black/25 border-white/5 hover:border-white/10'
+                      ? 'bg-[var(--glass-bg)] border-[var(--border2)]'
+                      : 'bg-[var(--glass-bg)] border-[var(--border2)] hover:border-[var(--border2)]'
                   }`}
                 >
                   {menu.highlight && <AccentLine color={accent} />}
@@ -1104,9 +1104,9 @@ function ConferencePricingSection({
                       </span>
                     )}
                   </div>
-                  <p className="font-body text-xs text-white/40 leading-relaxed flex-1 mb-3">{menu.courses}</p>
-                  <div className="border-t border-white/5 pt-3 flex items-end justify-between">
-                    <span className="block text-[9px] uppercase tracking-widest text-white/25 font-body">Per person</span>
+                  <p className="font-body text-xs text-[var(--muted2)] leading-relaxed flex-1 mb-3">{menu.courses}</p>
+                  <div className="border-t border-[var(--border2)] pt-3 flex items-end justify-between">
+                    <span className="block text-[9px] uppercase tracking-widest text-[var(--muted3)] font-body">Per person</span>
                     <span className="font-mono text-xl text-cream">KES {menu.price.toLocaleString()}</span>
                   </div>
                 </div>
@@ -1125,7 +1125,7 @@ function ConferencePricingSection({
             transition={{ duration: 0.3 }}
             className="max-w-2xl"
           >
-            <p className="font-body text-sm text-white/45 leading-relaxed mb-8">
+            <p className="font-body text-sm text-[var(--muted)] leading-relaxed mb-8">
               Penalties are calculated on the full reservation value and are subject to management discretion.
               Reservations cancelled within 48 hours of booking incur no penalty.
             </p>
@@ -1133,10 +1133,10 @@ function ConferencePricingSection({
               {policy.map((tier, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-black/20 border border-white/5 hover:border-white/10 transition-colors duration-200"
+                  className="flex items-center gap-4 p-4 rounded-xl bg-[var(--glass-bg)] border border-[var(--border2)] hover:border-[var(--border2)] transition-colors duration-200"
                 >
                   <div className="w-28 flex-shrink-0">
-                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-[var(--glass-bg)] overflow-hidden">
                       <motion.div
                         className="h-full rounded-full"
                         style={{
@@ -1155,7 +1155,7 @@ function ConferencePricingSection({
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="font-body text-xs text-white/45">{tier.weeks}</span>
+                    <span className="font-body text-xs text-[var(--muted)]">{tier.weeks}</span>
                   </div>
                   <span
                     className="font-mono text-sm font-medium shrink-0"
@@ -1168,7 +1168,7 @@ function ConferencePricingSection({
                 </div>
               ))}
             </div>
-            <p className="font-body text-[10px] text-white/20 mt-6 leading-relaxed">
+            <p className="font-body text-[10px] text-[var(--muted3)] mt-6 leading-relaxed">
               All cancellation penalties are subject to the discretion of management. Please contact us directly for special circumstances.
             </p>
           </motion.div>
@@ -1230,7 +1230,7 @@ export function EventsShell({ events, eventTypes, categoryColors, conferenceRate
   const bookingAccent = bookingEvent ? (categoryColors[bookingEvent.category] ?? 'var(--gold)') : 'var(--gold)'
 
   return (
-    <main className="min-h-screen bg-obsidian text-cream relative overflow-x-hidden">
+    <main className="min-h-screen text-cream relative overflow-x-hidden" style={{ background: 'var(--bg)' }}>
       <NavWrapper />
 
       {/* Ambient Background */}
@@ -1263,7 +1263,7 @@ export function EventsShell({ events, eventTypes, categoryColors, conferenceRate
             </span>
           </motion.h1>
 
-          <p className="font-body text-white/45 text-base md:text-lg max-w-lg leading-relaxed">
+          <p className="font-body text-[var(--muted)] text-base md:text-lg max-w-lg leading-relaxed">
             From candlelit harvest communions beneath the Rift Valley sky to high-stakes
             leadership retreats on the living farm — gather here.
           </p>
@@ -1281,11 +1281,11 @@ export function EventsShell({ events, eventTypes, categoryColors, conferenceRate
                 className={`px-4 py-2 rounded-full border text-[11px] font-body tracking-wider transition-all duration-300 ${
                   selectedCategory === cat
                     ? 'bg-cream text-obsidian border-cream font-semibold shadow-md'
-                    : 'bg-transparent text-white/35 border-white/8 hover:border-white/25 hover:text-cream'
+                    : 'bg-transparent text-[var(--muted)] border-[var(--border2)] hover:border-[var(--border2)] hover:text-cream'
                 }`}
               >
                 {cat}
-                <span className={`ml-1.5 text-[9px] font-mono ${selectedCategory === cat ? 'text-obsidian/50' : 'text-white/20'}`}>
+                <span className={`ml-1.5 text-[9px] font-mono ${selectedCategory === cat ? 'text-obsidian/50' : 'text-[var(--muted3)]'}`}>
                   {categoryCounts[cat] ?? 0}
                 </span>
               </motion.button>
@@ -1341,7 +1341,7 @@ export function EventsShell({ events, eventTypes, categoryColors, conferenceRate
       </section>
 
       {/* ── Bespoke Production Packages ── */}
-      <section className="max-w-7xl mx-auto px-6 py-24 relative z-10 border-t border-white/5">
+      <section className="max-w-7xl mx-auto px-6 py-24 relative z-10 border-t border-[var(--border2)]">
         <div className="mb-14">
           <Eyebrow color="var(--gold)" className="mb-2">Tailored Curations</Eyebrow>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream mt-2">
@@ -1353,20 +1353,20 @@ export function EventsShell({ events, eventTypes, categoryColors, conferenceRate
           {eventTypes.map(pkg => (
             <div
               key={pkg.id}
-              className="bg-black/20 border border-white/5 rounded-2xl p-8 backdrop-blur-md flex flex-col md:flex-row gap-7 items-start hover:border-white/10 transition-colors duration-300"
+              className="bg-[var(--glass-bg)] border border-[var(--border2)] rounded-2xl p-8 backdrop-blur-md flex flex-col md:flex-row gap-7 items-start hover:border-[var(--border2)] transition-colors duration-300"
             >
               <img
                 src={pkg.image}
                 alt={pkg.name}
-                className="w-full md:w-36 h-36 object-cover rounded-xl border border-white/8 flex-shrink-0"
+                className="w-full md:w-36 h-36 object-cover rounded-xl border border-[var(--border2)] flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <span className="text-[9px] font-mono tracking-widest uppercase text-gold bg-gold/10 px-2 py-1 rounded">
                   {pkg.tag}
                 </span>
                 <h3 className="font-display text-2xl font-light text-cream mt-3 mb-1">{pkg.name}</h3>
-                <p className="text-xs text-white/35 font-body mb-4">{pkg.sub}</p>
-                <p className="text-sm text-white/55 font-body leading-relaxed mb-6 line-clamp-3">{pkg.philosophy}</p>
+                <p className="text-xs text-[var(--muted)] font-body mb-4">{pkg.sub}</p>
+                <p className="text-sm text-[var(--muted)] font-body leading-relaxed mb-6 line-clamp-3">{pkg.philosophy}</p>
                 <Link
                   href="/contact"
                   className="text-xs font-body tracking-wider uppercase text-cream/70 border-b border-cream/30 pb-0.5 hover:text-gold hover:border-gold transition-colors duration-200"
@@ -1387,13 +1387,13 @@ export function EventsShell({ events, eventTypes, categoryColors, conferenceRate
       />
 
       {/* ── Enquiry CTA ── */}
-      <section className="max-w-7xl mx-auto px-6 py-20 relative z-10 border-t border-white/5">
-        <div className="rounded-3xl border border-white/8 bg-black/25 p-12 text-center">
+      <section className="max-w-7xl mx-auto px-6 py-20 relative z-10 border-t border-[var(--border2)]">
+        <div className="rounded-3xl border border-[var(--border2)] bg-[var(--glass-bg)] p-12 text-center">
           <Eyebrow color="var(--gold)" className="mb-4">Start a Conversation</Eyebrow>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream mt-2 mb-4">
             Ready to Gather?
           </h2>
-          <p className="font-body text-white/40 text-sm max-w-md mx-auto leading-relaxed mb-8">
+          <p className="font-body text-[var(--muted2)] text-sm max-w-md mx-auto leading-relaxed mb-8">
             Every event at Ubuntu begins with a conversation. Tell us what you're dreaming of.
           </p>
           <Link

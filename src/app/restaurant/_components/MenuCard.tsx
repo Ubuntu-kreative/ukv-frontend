@@ -44,7 +44,7 @@ import type { MenuItem }  from '../_data/menu-data'
 
 function DishBadge({ item }: { item: MenuItem }) {
   if (item.signature)  return <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--gold)]/15 border border-[var(--gold)]/40 text-[var(--gold)] text-[7px] uppercase tracking-widest font-mono rounded-full">★ Signature</span>
-  if (item.chefChoice) return <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/5 border border-white/20 text-white/60 text-[7px] uppercase tracking-widest font-mono rounded-full">Chef&apos;s Choice</span>
+  if (item.chefChoice) return <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--glass-bg)] border border-[var(--border2)] text-[var(--muted)] text-[7px] uppercase tracking-widest font-mono rounded-full">Chef&apos;s Choice</span>
   if (item.seasonal)   return <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--neon)]/10 border border-[var(--neon)]/30 text-[var(--neon)] text-[7px] uppercase tracking-widest font-mono rounded-full">Seasonal</span>
   return null
 }
@@ -54,7 +54,7 @@ function AvailabilityBadge({ item }: { item: MenuItem }) {
   const isLow      = typeof item.availabilityCount === 'number' && item.availabilityCount <= 3
   const isTomorrow = item.availability === 'Harvest Tomorrow'
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-[7px] uppercase tracking-widest font-mono border rounded-full ${isLow ? 'bg-red-500/10 border-red-500/30 text-red-400' : isTomorrow ? 'bg-white/5 border-white/10 text-white/30' : 'bg-[var(--neon)]/5 border-[var(--neon)]/20 text-[var(--neon)]/60'}`}>
+    <span className={`inline-flex items-center px-2.5 py-1 text-[7px] uppercase tracking-widest font-mono border rounded-full ${isLow ? 'bg-red-500/10 border-red-500/30 text-red-400' : isTomorrow ? 'bg-[var(--glass-bg)] border-[var(--border2)] text-[var(--muted2)]' : 'bg-[var(--neon)]/5 border-[var(--neon)]/20 text-[var(--neon)]/60'}`}>
       {item.availability}
     </span>
   )
@@ -66,7 +66,7 @@ function TrendBar({ score }: { score?: number }) {
     <div className="flex items-center gap-1.5">
       <div className="flex gap-0.5 items-end">
         {[1,2,3,4,5].map(i => (
-          <div key={i} className="w-0.5 rounded-full" style={{ height: `${5 + i * 2}px`, background: i <= Math.ceil(score / 20) ? 'var(--gold)' : 'rgba(255,255,255,0.08)' }} />
+          <div key={i} className="w-0.5 rounded-full" style={{ height: `${5 + i * 2}px`, background: i <= Math.ceil(score / 20) ? 'var(--gold)' : 'var(--glass-bg)' }} />
         ))}
       </div>
       <span className="font-mono text-[7px] text-[var(--gold)]/50 uppercase tracking-widest">
@@ -92,7 +92,9 @@ const DishImage = memo(function DishImage({
   const [err, setErr] = useState(false)
   return (
     <Image
-      src={err ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800' : src}
+      src={err || !src || src.trim() === ''
+        ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800'
+        : src}
       alt={alt}
       fill
       loading="lazy"
@@ -175,8 +177,8 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
       ref={cardRef}
       className="group flex flex-col h-full overflow-hidden rounded-2xl"
       style={{
-        background: isStaged ? 'rgba(200,168,75,0.04)' : 'rgba(255,255,255,0.02)',
-        border:     isStaged ? '1px solid rgba(200,168,75,0.2)' : '1px solid rgba(255,255,255,0.05)',
+        background: isStaged ? 'rgba(200,168,75,0.04)' : 'var(--glass-bg)',
+        border:     isStaged ? '1px solid rgba(200,168,75,0.2)' : '1px solid var(--border2)',
         transition: 'background 0.35s, border 0.35s, box-shadow 0.35s, transform 0.15s',
         boxShadow:  isStaged ? '0 0 0 1px rgba(200,168,75,0.1), 0 12px 40px rgba(200,168,75,0.06)'
                              : hovered ? '0 20px 48px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.2)',
@@ -199,23 +201,23 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
         {/* Freshness badge */}
-        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 text-[7px] text-[var(--neon)] font-mono uppercase tracking-widest border border-[var(--neon)]/20 rounded-lg">
+        <div className="absolute top-3 right-3 bg-[var(--glass-bg)] backdrop-blur-sm px-2 py-1 text-[7px] text-[var(--neon)] font-mono uppercase tracking-widest border border-[var(--neon)]/20 rounded-lg">
           {item.freshness}% FRESH
         </div>
 
         {/* Favourite button */}
         <button
           onClick={e => { e.stopPropagation(); setFavorited(f => !f) }}
-          className="absolute top-3 left-3 w-7 h-7 bg-black/50 border border-white/10 rounded-lg flex items-center justify-center hover:border-[var(--gold)]/40 transition-all z-10"
+          className="absolute top-3 left-3 w-7 h-7 bg-[var(--glass-bg)] border border-[var(--border2)] rounded-lg flex items-center justify-center hover:border-[var(--gold)]/40 transition-all z-10"
         >
-          <span className={`text-[11px] transition-colors ${favorited ? 'text-[var(--gold)]' : 'text-white/20 hover:text-white/50'}`}>
+          <span className={`text-[11px] transition-colors ${favorited ? 'text-[var(--gold)]' : 'text-[var(--muted3)] hover:text-[var(--muted)]'}`}>
             {favorited ? '♥' : '♡'}
           </span>
         </button>
 
         {/* In-feast overlay */}
         {isStaged && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--glass-bg)] z-10">
             <span className="px-4 py-2 border border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)] font-mono text-[9px] uppercase tracking-widest rounded-full">
               ✓ In Feast ×{stagedQty}
             </span>
@@ -224,7 +226,7 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
 
         {/* Chef's pick badge */}
         {item.featured && item.signature && !isStaged && (
-          <div className="absolute bottom-10 left-3 px-2 py-1 bg-black/70 backdrop-blur-sm border border-[var(--gold)]/20 text-[var(--gold)] font-mono text-[7px] uppercase tracking-widest rounded-lg">
+          <div className="absolute bottom-10 left-3 px-2 py-1 bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--gold)]/20 text-[var(--gold)] font-mono text-[7px] uppercase tracking-widest rounded-lg">
             🔥 Chef&apos;s Pick Tonight
           </div>
         )}
@@ -244,7 +246,7 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
 
         {/* Hover CTA hint */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <span className="bg-black/60 backdrop-blur-sm border border-white/10 px-4 py-2 font-mono text-[8px] text-white/50 uppercase tracking-widest rounded-full">
+          <span className="bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--border2)] px-4 py-2 font-mono text-[8px] text-[var(--muted)] uppercase tracking-widest rounded-full">
             View Full Log →
           </span>
         </div>
@@ -261,7 +263,7 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
           {item.name}
         </h3>
 
-        <p className="font-body text-xs text-white/40 leading-relaxed mb-3 italic line-clamp-2">
+        <p className="font-body text-xs text-[var(--muted2)] leading-relaxed mb-3 italic line-clamp-2">
           &ldquo;{item.storyLine || item.description}&rdquo;
         </p>
 
@@ -275,25 +277,25 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
         </div>
 
         {/* Data grid */}
-        <div className="grid grid-cols-2 border border-white/8 mb-4 bg-black/30 rounded-xl overflow-hidden text-center">
-          <div className="p-2.5 border-r border-white/8">
-            <div className="text-[7px] uppercase text-white/25 mb-0.5">Source</div>
-            <div className="text-[10px] text-white/70 font-mono truncate px-1">{item.field || item.animal}</div>
+        <div className="grid grid-cols-2 border border-[var(--border2)] mb-4 bg-[var(--glass-bg)] rounded-xl overflow-hidden text-center">
+          <div className="p-2.5 border-r border-[var(--border2)]">
+            <div className="text-[7px] uppercase text-[var(--muted3)] mb-0.5">Source</div>
+            <div className="text-[10px] text-[var(--muted)] font-mono truncate px-1">{item.field || item.animal}</div>
           </div>
           <div className="p-2.5">
-            <div className="text-[7px] uppercase text-white/25 mb-0.5">Freshness</div>
+            <div className="text-[7px] uppercase text-[var(--muted3)] mb-0.5">Freshness</div>
             <div className="text-[10px] text-[var(--neon)]">{item.freshness}%</div>
           </div>
           {item.prepTime && (
-            <div className="p-2.5 border-r border-t border-white/8">
-              <div className="text-[7px] uppercase text-white/25 mb-0.5">Prep</div>
-              <div className="text-[10px] text-white/60 font-mono">{item.prepTime}m</div>
+            <div className="p-2.5 border-r border-t border-[var(--border2)]">
+              <div className="text-[7px] uppercase text-[var(--muted3)] mb-0.5">Prep</div>
+              <div className="text-[10px] text-[var(--muted)] font-mono">{item.prepTime}m</div>
             </div>
           )}
           {item.servingSize && (
-            <div className="p-2.5 border-t border-white/8">
-              <div className="text-[7px] uppercase text-white/25 mb-0.5">Serving</div>
-              <div className="text-[10px] text-white/60 font-mono truncate">{item.servingSize}</div>
+            <div className="p-2.5 border-t border-[var(--border2)]">
+              <div className="text-[7px] uppercase text-[var(--muted3)] mb-0.5">Serving</div>
+              <div className="text-[10px] text-[var(--muted)] font-mono truncate">{item.servingSize}</div>
             </div>
           )}
         </div>
@@ -301,15 +303,15 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
         {/* Qty stepper */}
         {!isStaged && (
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-[8px] uppercase tracking-widest text-white/25">Qty</span>
+            <span className="text-[8px] uppercase tracking-widest text-[var(--muted3)]">Qty</span>
             <button
               onClick={e => { e.stopPropagation(); setLocalQty(q => Math.max(1, q - 1)) }}
-              className="w-6 h-6 border border-white/10 text-white/40 hover:text-white hover:border-white/30 transition-all text-xs flex items-center justify-center rounded-md"
+              className="w-6 h-6 border border-[var(--border2)] text-[var(--muted2)] hover:text-[var(--cream)] hover:border-[var(--border2)] transition-all text-xs flex items-center justify-center rounded-md"
             >−</button>
-            <span className="font-mono text-sm text-white/70 w-5 text-center">{localQty}</span>
+            <span className="font-mono text-sm text-[var(--muted)] w-5 text-center">{localQty}</span>
             <button
               onClick={e => { e.stopPropagation(); setLocalQty(q => q + 1) }}
-              className="w-6 h-6 border border-white/10 text-white/40 hover:text-white hover:border-white/30 transition-all text-xs flex items-center justify-center rounded-md"
+              className="w-6 h-6 border border-[var(--border2)] text-[var(--muted2)] hover:text-[var(--cream)] hover:border-[var(--border2)] transition-all text-xs flex items-center justify-center rounded-md"
             >+</button>
           </div>
         )}
@@ -319,7 +321,7 @@ function MenuCardInner({ item, category, onOpenLog }: MenuCardProps) {
           {/* Log button — FIX-A: optional chain */}
           <button
             onClick={() => onOpenLog?.(item)}
-            className="px-4 py-2.5 border border-white/10 text-[9px] uppercase tracking-widest text-white/40 hover:text-white hover:border-white/25 transition-colors rounded-xl flex-shrink-0"
+            className="px-4 py-2.5 border border-[var(--border2)] text-[9px] uppercase tracking-widest text-[var(--muted2)] hover:text-[var(--cream)] hover:border-[var(--border2)] transition-colors rounded-xl flex-shrink-0"
           >
             Log
           </button>

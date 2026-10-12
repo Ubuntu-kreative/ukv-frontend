@@ -41,7 +41,7 @@ const StayModal = dynamic(
 // Penthouse showcase is heavy (image + motion) — defer it
 const PenthouseShowcase = dynamic(
   () => import('./PenthouseShowcase').then((m) => ({ default: m.PenthouseShowcase })),
-  { ssr: false, loading: () => <div className="h-96 bg-[#0a0a0a]" /> }
+  { ssr: false, loading: () => <div className="h-96 bg-[var(--bg2)]" /> }
 )
 
 // Pre-computed counts (never recalculate)
@@ -107,11 +107,11 @@ export function StaysGrid() {
       )}
 
       {/* ── STICKY CONFIG BAR ── */}
-      <div className="sticky-glass sticky top-[64px] sm:top-[72px] z-30 px-4 sm:px-6 md:px-10 py-3 border-y border-white/5">
+      <div className="sticky-glass sticky top-[64px] sm:top-[72px] z-30 px-4 sm:px-6 md:px-10 py-3 border-y border-[var(--border2)]">
         <div className="max-w-8xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
             <div className="flex flex-col">
-              <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.2em] text-white/30">Arrival</span>
+              <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.2em] text-[var(--muted2)]">Arrival</span>
               <input
                 type="date"
                 value={checkIn}
@@ -119,9 +119,9 @@ export function StaysGrid() {
                 className="bg-transparent text-[var(--gold)] font-mono text-xs border-none focus:ring-0 cursor-pointer"
               />
             </div>
-            <div className="w-px h-7 bg-white/10" />
+            <div className="w-px h-7 bg-[var(--glass-bg)]" />
             <div className="flex flex-col">
-              <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.2em] text-white/30">Departure</span>
+              <span className="text-[7px] sm:text-[8px] uppercase tracking-[0.2em] text-[var(--muted2)]">Departure</span>
               <input
                 type="date"
                 value={checkOut}
@@ -129,29 +129,29 @@ export function StaysGrid() {
                 className="bg-transparent text-[var(--gold)] font-mono text-xs border-none focus:ring-0 cursor-pointer"
               />
             </div>
-            <div className="w-px h-7 bg-white/10 hidden sm:block" />
+            <div className="w-px h-7 bg-[var(--glass-bg)] hidden sm:block" />
             <div className="flex-col hidden sm:flex">
-              <span className="text-[8px] uppercase tracking-[0.2em] text-white/30">Meal Plan</span>
+              <span className="text-[8px] uppercase tracking-[0.2em] text-[var(--muted2)]">Meal Plan</span>
               <select
                 value={globalBoard}
                 onChange={(e) => setGlobalBoard(e.target.value as BoardOption)}
                 className="bg-transparent text-[var(--gold)] font-mono text-xs border-none focus:ring-0 cursor-pointer"
               >
                 {BOARD_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-black text-white">{opt.label}</option>
+                  <option key={opt.value} value={opt.value} className="bg-[var(--bg)] text-[var(--cream)]">{opt.label}</option>
                 ))}
               </select>
             </div>
-            <div className="w-px h-7 bg-white/10 hidden sm:block" />
+            <div className="w-px h-7 bg-[var(--glass-bg)] hidden sm:block" />
             <div className="flex-col hidden sm:flex">
-              <span className="text-[8px] uppercase tracking-[0.2em] text-white/30">Guests</span>
+              <span className="text-[8px] uppercase tracking-[0.2em] text-[var(--muted2)]">Guests</span>
               <select
                 value={globalGuests}
                 onChange={(e) => setGlobalGuests(Number(e.target.value))}
                 className="bg-transparent text-[var(--gold)] font-mono text-xs border-none focus:ring-0 cursor-pointer"
               >
                 {[1,2,3,4,5,6,7,8].map((n) => (
-                  <option key={n} value={n} className="bg-black text-white">{n} {n === 1 ? 'Guest' : 'Guests'}</option>
+                  <option key={n} value={n} className="bg-[var(--bg)] text-[var(--cream)]">{n} {n === 1 ? 'Guest' : 'Guests'}</option>
                 ))}
               </select>
             </div>
@@ -173,17 +173,17 @@ export function StaysGrid() {
               <h2 className="font-display text-4xl sm:text-5xl font-light">
                 CHOOSE YOUR <span className="italic">SANCTUARY</span>
               </h2>
-              <p className="font-body text-sm text-white/30 mt-4 leading-relaxed">
+              <p className="font-body text-sm text-[var(--muted2)] mt-4 leading-relaxed">
                 {filteredStays.length} residence{filteredStays.length !== 1 ? 's' : ''} · all solar-powered · farm breakfast available
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[8px] uppercase tracking-widest text-white/25 mr-2">Sort</span>
+              <span className="text-[8px] uppercase tracking-widest text-[var(--muted3)] mr-2">Sort</span>
               {SORT_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setActiveSort(opt.value)}
-                  className={`px-3 sm:px-4 py-2 text-[9px] uppercase tracking-wider border rounded-lg transition-all ${activeSort === opt.value ? 'border-[var(--gold)]/50 text-[var(--gold)] bg-[var(--gold)]/5' : 'border-white/10 text-white/30 hover:border-white/20 hover:text-white/50'}`}
+                  className={`px-3 sm:px-4 py-2 text-[9px] uppercase tracking-wider border rounded-lg transition-all ${activeSort === opt.value ? 'border-[var(--gold)]/50 text-[var(--gold)] bg-[var(--gold)]/5' : 'border-[var(--border2)] text-[var(--muted2)] hover:border-[var(--border2)] hover:text-[var(--muted)]'}`}
                 >
                   {opt.label}
                 </button>
@@ -197,7 +197,7 @@ export function StaysGrid() {
               <button
                 key={tab.value}
                 onClick={() => setActiveFilter(tab.value)}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-[9px] sm:text-[10px] uppercase tracking-[0.2em] border rounded-xl transition-all duration-300 ${activeFilter === tab.value ? 'border-[var(--gold)] text-[var(--gold)] bg-[var(--gold)]/5' : 'border-white/10 text-white/30 hover:border-white/20 hover:text-white/50'}`}
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 text-[9px] sm:text-[10px] uppercase tracking-[0.2em] border rounded-xl transition-all duration-300 ${activeFilter === tab.value ? 'border-[var(--gold)] text-[var(--gold)] bg-[var(--gold)]/5' : 'border-[var(--border2)] text-[var(--muted2)] hover:border-[var(--border2)] hover:text-[var(--muted)]'}`}
               >
                 {tab.label}
                 <span className="ml-1 sm:ml-2 font-mono text-[8px] opacity-50">({FILTER_COUNTS[tab.value]})</span>
@@ -208,39 +208,39 @@ export function StaysGrid() {
           {/* Mobile controls */}
           <div className="flex sm:hidden gap-4 mb-6 flex-wrap">
             <div className="flex flex-col">
-              <span className="text-[8px] uppercase tracking-[0.2em] text-white/30 mb-1">Meal Plan</span>
+              <span className="text-[8px] uppercase tracking-[0.2em] text-[var(--muted2)] mb-1">Meal Plan</span>
               <select
                 value={globalBoard}
                 onChange={(e) => setGlobalBoard(e.target.value as BoardOption)}
-                className="bg-black border border-white/10 rounded-lg text-[var(--gold)] font-mono text-xs px-3 py-2 focus:ring-0"
+                className="bg-[var(--bg)] border border-[var(--border2)] rounded-lg text-[var(--gold)] font-mono text-xs px-3 py-2 focus:ring-0"
               >
                 {BOARD_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-black text-white">{opt.label}</option>
+                  <option key={opt.value} value={opt.value} className="bg-[var(--bg)] text-[var(--cream)]">{opt.label}</option>
                 ))}
               </select>
             </div>
             <div className="flex flex-col">
-              <span className="text-[8px] uppercase tracking-[0.2em] text-white/30 mb-1">Guests</span>
+              <span className="text-[8px] uppercase tracking-[0.2em] text-[var(--muted2)] mb-1">Guests</span>
               <select
                 value={globalGuests}
                 onChange={(e) => setGlobalGuests(Number(e.target.value))}
-                className="bg-black border border-white/10 rounded-lg text-[var(--gold)] font-mono text-xs px-3 py-2 focus:ring-0"
+                className="bg-[var(--bg)] border border-[var(--border2)] rounded-lg text-[var(--gold)] font-mono text-xs px-3 py-2 focus:ring-0"
               >
                 {[1,2,3,4,5,6,7,8].map((n) => (
-                  <option key={n} value={n} className="bg-black text-white">{n} {n === 1 ? 'Guest' : 'Guests'}</option>
+                  <option key={n} value={n} className="bg-[var(--bg)] text-[var(--cream)]">{n} {n === 1 ? 'Guest' : 'Guests'}</option>
                 ))}
               </select>
             </div>
           </div>
 
           {/* Active price context bar */}
-          <div className="mb-8 sm:mb-12 p-3 sm:p-4 border border-white/5 rounded-xl bg-white/[0.01] flex flex-wrap items-center gap-3 sm:gap-6">
-            <p className="text-[9px] uppercase tracking-widest text-white/25">Showing prices for:</p>
+          <div className="mb-8 sm:mb-12 p-3 sm:p-4 border border-[var(--border2)] rounded-xl bg-[var(--glass-bg)] flex flex-wrap items-center gap-3 sm:gap-6">
+            <p className="text-[9px] uppercase tracking-widest text-[var(--muted3)]">Showing prices for:</p>
             <span className="text-[var(--gold)] font-mono text-xs">{BOARD_LABELS[globalBoard]}</span>
-            <span className="text-white/30 text-[10px]">·</span>
-            <span className="text-white/50 text-xs font-mono">{globalGuests} guest{globalGuests > 1 ? 's' : ''}</span>
-            <span className="text-white/30 text-[10px]">·</span>
-            <span className="text-white/30 text-[9px]">per guest · per night</span>
+            <span className="text-[var(--muted2)] text-[10px]">·</span>
+            <span className="text-[var(--muted)] text-xs font-mono">{globalGuests} guest{globalGuests > 1 ? 's' : ''}</span>
+            <span className="text-[var(--muted2)] text-[10px]">·</span>
+            <span className="text-[var(--muted2)] text-[9px]">per guest · per night</span>
           </div>
         </div>
       </section>
@@ -274,7 +274,7 @@ export function StaysGrid() {
 
           {filteredStays.length === 0 && (
             <div className="py-32 text-center">
-              <p className="font-display text-4xl text-white/20 mb-4">No residences found</p>
+              <p className="font-display text-4xl text-[var(--muted3)] mb-4">No residences found</p>
               <button
                 onClick={() => setActiveFilter('All')}
                 className="text-[10px] uppercase tracking-widest text-[var(--gold)]/60 hover:text-[var(--gold)] transition-colors"
@@ -288,8 +288,8 @@ export function StaysGrid() {
           {cottagesInCart > 0 && (
             <div className="mt-16 sm:mt-24 flex flex-col sm:flex-row items-center justify-between gap-6 p-8 sm:p-12 border border-[var(--gold)]/20 bg-[var(--gold)]/5 rounded-2xl">
               <div>
-                <p className="font-display text-2xl sm:text-3xl mb-2 text-white font-light">Ready to confirm your stay?</p>
-                <p className="font-body text-sm text-white/30 leading-relaxed">
+                <p className="font-display text-2xl sm:text-3xl mb-2 text-[var(--cream)] font-light">Ready to confirm your stay?</p>
+                <p className="font-body text-sm text-[var(--muted2)] leading-relaxed">
                   {cottagesInCart} {cottagesInCart === 1 ? 'residence' : 'residences'} selected — complete your reservation and we will be in touch within 2 hours.
                 </p>
               </div>
@@ -311,7 +311,7 @@ export function StaysGrid() {
             onClick={openCart}
             className="cart-float fixed bottom-24 right-4 sm:right-6 z-40 flex items-center gap-2 bg-[var(--gold)] text-black text-[10px] font-medium tracking-[0.12em] uppercase px-4 py-3 hover:bg-[#E0B96A] transition-all"
           >
-            <span className="w-4 h-4 rounded-full bg-black/20 flex items-center justify-center text-[9px] font-bold">{cottagesInCart}</span>
+            <span className="w-4 h-4 rounded-full bg-[var(--glass-bg)] flex items-center justify-center text-[9px] font-bold">{cottagesInCart}</span>
             Reservation
           </motion.button>
         )}

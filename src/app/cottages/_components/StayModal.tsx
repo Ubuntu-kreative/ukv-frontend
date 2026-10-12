@@ -44,7 +44,7 @@ function GalleryImage({ src, alt, index, onClick, style }: {
         className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-      <div className="absolute top-3 left-3 font-mono text-[8px] text-white/40 bg-black/50 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      <div className="absolute top-3 left-3 font-mono text-[8px] text-[var(--muted2)] bg-[var(--glass-bg)] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         {String(index + 1).padStart(2, '0')} / 04
       </div>
     </div>
@@ -98,6 +98,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
     if (inCart) { openCart(); return }
     addItem({
       id: `${c.id}-${selectedBoard}`,
+      resourceId: c.id,
       name: `${c.name} · ${BOARD_LABELS[selectedBoard]}`,
       tag: c.category,
       category: 'cottage',
@@ -119,8 +120,8 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
         <div className="pt-4 space-y-3">
           {Object.entries(c.specs).map(([key, val]) => (
             <div key={key} className="flex justify-between items-start gap-6">
-              <p className="text-xs text-white/30 capitalize w-28 flex-shrink-0">{key}</p>
-              <p className="text-sm text-white/60 text-right leading-snug">{val}</p>
+              <p className="text-xs text-[var(--muted2)] capitalize w-28 flex-shrink-0">{key}</p>
+              <p className="text-sm text-[var(--muted)] text-right leading-snug">{val}</p>
             </div>
           ))}
         </div>
@@ -139,9 +140,9 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
             ['Pricing model',  'Per person, per night'],
             ['Cancellation',    c.bookingDetails.cancellationPolicy],
           ].map(([k, v]) => (
-            <div key={k} className="flex justify-between items-start gap-4 py-3 border-b border-white/[0.04] last:border-0">
-              <p className="text-xs text-white/30">{k}</p>
-              <p className="text-sm text-white/55 text-right leading-snug max-w-[200px]">{v}</p>
+            <div key={k} className="flex justify-between items-start gap-4 py-3 border-b border-[var(--border2)] last:border-0">
+              <p className="text-xs text-[var(--muted2)]">{k}</p>
+              <p className="text-sm text-[var(--muted)] text-right leading-snug max-w-[200px]">{v}</p>
             </div>
           ))}
         </div>
@@ -161,7 +162,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/92 cursor-pointer"
+          className="absolute inset-0 bg-[var(--bg)] cursor-pointer"
           onClick={onClose}
         />
 
@@ -171,7 +172,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.98, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="relative w-full max-w-[1520px] h-full md:h-[92vh] bg-[#060606] flex flex-col lg:flex-row overflow-hidden md:rounded-2xl shadow-2xl"
+          className="relative w-full max-w-[1520px] h-full md:h-[92vh] bg-[var(--bg)] flex flex-col lg:flex-row overflow-hidden md:rounded-2xl shadow-2xl"
           style={{ zIndex: 50 }}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.025),transparent_55%)] pointer-events-none" />
@@ -179,7 +180,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-0 right-0 z-20 px-5 py-3.5 text-[10px] tracking-[0.2em] uppercase text-white/30 hover:text-white/70 border-l border-b border-white/[0.06] hover:border-white/10 bg-transparent hover:bg-white/[0.03] transition-all duration-200 md:rounded-tr-2xl"
+            className="absolute top-0 right-0 z-20 px-5 py-3.5 text-[10px] tracking-[0.2em] uppercase text-[var(--muted2)] hover:text-[var(--muted)] border-l border-b border-[var(--border2)] hover:border-[var(--border2)] bg-transparent hover:bg-[var(--glass-bg)] transition-all duration-200 md:rounded-tr-2xl"
           >
             ✕ close
           </button>
@@ -214,18 +215,18 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                 </span>
               </div>
 
-              <h2 className="font-display text-[clamp(2rem,5vw,4rem)] font-light leading-[0.88] uppercase tracking-tight text-white mb-2">{c.name}</h2>
-              <p className={`text-xs mb-8 ${c.status === 'available' ? 'text-[var(--neon)]' : 'text-white/25'}`}>
+              <h2 className="font-display text-[clamp(2rem,5vw,4rem)] font-light leading-[0.88] uppercase tracking-tight text-[var(--cream)] mb-2">{c.name}</h2>
+              <p className={`text-xs mb-8 ${c.status === 'available' ? 'text-[var(--neon)]' : 'text-[var(--muted3)]'}`}>
                 {c.status === 'available' ? '● Available' : '○ Currently Reserved'}
               </p>
 
               <blockquote className="relative py-6 pl-5 border-l-2 border-[var(--gold)]/35 mb-8">
-                <p className="font-body text-[clamp(1rem,2vw,1.2rem)] font-light italic leading-[1.7] text-white/80 max-w-[640px]">"{c.storyLine}"</p>
+                <p className="font-body text-[clamp(1rem,2vw,1.2rem)] font-light italic leading-[1.7] text-[var(--cream)] max-w-[640px]">"{c.storyLine}"</p>
               </blockquote>
 
-              <p className="font-body text-[15px] text-white/55 leading-[1.85] mb-10 max-w-[640px]">{c.description}</p>
+              <p className="font-body text-[15px] text-[var(--muted)] leading-[1.85] mb-10 max-w-[640px]">{c.description}</p>
 
-              <div className="grid grid-cols-3 gap-3 mb-10 p-5 bg-white/[0.02] border border-white/[0.05] rounded-xl">
+              <div className="grid grid-cols-3 gap-3 mb-10 p-5 bg-[var(--glass-bg)] border border-[var(--border2)] rounded-xl">
                 {[
                   { label: 'Guests',   value: `${c.guests}` },
                   { label: 'Bedrooms', value: `${c.bedrooms}` },
@@ -233,16 +234,16 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                 ].map(({ label, value }) => (
                   <div key={label} className="text-center">
                     <p className="font-display text-3xl font-light text-[var(--gold)]">{value}</p>
-                    <p className="text-[9px] uppercase tracking-wider text-white/25 mt-1.5">{label}</p>
+                    <p className="text-[9px] uppercase tracking-wider text-[var(--muted3)] mt-1.5">{label}</p>
                   </div>
                 ))}
               </div>
 
               <div className="mb-10">
-                <p className="text-[9px] uppercase tracking-[0.3em] text-white/25 mb-4">Amenities & Inclusions</p>
+                <p className="text-[9px] uppercase tracking-[0.3em] text-[var(--muted3)] mb-4">Amenities & Inclusions</p>
                 <div className="flex flex-wrap gap-2">
                   {c.amenities.map((a, i) => (
-                    <span key={i} className="px-3 py-1.5 text-xs text-white/50 bg-white/[0.035] rounded-full border border-white/[0.04] hover:text-white/70 transition-colors">{a}</span>
+                    <span key={i} className="px-3 py-1.5 text-xs text-[var(--muted)] bg-[var(--glass-bg)] rounded-full border border-[var(--border2)] hover:text-[var(--muted)] transition-colors">{a}</span>
                   ))}
                 </div>
               </div>
@@ -252,13 +253,13 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                 {collapsibleSections.map((section) => {
                   const isOpen = activeAccordion === section.id
                   return (
-                    <div key={section.id} className="border border-white/[0.05]">
+                    <div key={section.id} className="border border-[var(--border2)]">
                       <button
                         onClick={() => toggleAccordion(section.id)}
-                        className="w-full flex justify-between items-center px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
+                        className="w-full flex justify-between items-center px-5 py-4 text-left hover:bg-[var(--glass-bg)] transition-colors"
                       >
-                        <span className="text-[13px] text-white/40">{section.label}</span>
-                        <span className="text-white/20 text-base ml-4 flex-shrink-0 font-light">{isOpen ? '−' : '+'}</span>
+                        <span className="text-[13px] text-[var(--muted2)]">{section.label}</span>
+                        <span className="text-[var(--muted3)] text-base ml-4 flex-shrink-0 font-light">{isOpen ? '−' : '+'}</span>
                       </button>
                       {/* CSS grid trick for height animation — no JS overhead */}
                       <div
@@ -278,42 +279,42 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
 
           {/* ── RIGHT COLUMN ────────────────────────────────────────── */}
           <div
-            className="w-full lg:w-[38%] flex-shrink-0 flex flex-col bg-[#080808]/95 border-l border-white/[0.05] overflow-y-auto"
+            className="w-full lg:w-[38%] flex-shrink-0 flex flex-col bg-[var(--bg)]/95 border-l border-[var(--border2)] overflow-y-auto"
             style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(200,168,75,0.18) transparent' }}
           >
             <div className="px-6 sm:px-8 md:px-10 pt-12 pb-8 flex flex-col gap-8 flex-1">
               {/* Price display */}
               <div>
-                <p className="text-[9px] uppercase tracking-[0.35em] text-white/25 mb-1">{BOARD_LABELS[selectedBoard]} · per guest / night</p>
+                <p className="text-[9px] uppercase tracking-[0.35em] text-[var(--muted3)] mb-1">{BOARD_LABELS[selectedBoard]} · per guest / night</p>
                 <p className="font-display text-3xl font-light text-[var(--gold)]">KES {pricePerPerson.toLocaleString()}</p>
-                <p className="text-[10px] text-white/20 mt-1">VAT not included · taxes calculated at checkout</p>
+                <p className="text-[10px] text-[var(--muted3)] mt-1">VAT not included · taxes calculated at checkout</p>
               </div>
 
               {/* Guests selector */}
               <div>
-                <p className="text-[9px] uppercase tracking-[0.3em] text-white/25 mb-4">Guests</p>
+                <p className="text-[9px] uppercase tracking-[0.3em] text-[var(--muted3)] mb-4">Guests</p>
                 <div className="flex items-center gap-5">
                   <button
                     onClick={() => onGuestsChange(Math.max(1, guests - 1))}
-                    className="w-10 h-10 border border-white/[0.08] hover:border-[var(--gold)]/40 text-white/40 hover:text-[var(--gold)] transition-all text-xl leading-none rounded-lg"
+                    className="w-10 h-10 border border-[var(--border2)] hover:border-[var(--gold)]/40 text-[var(--muted2)] hover:text-[var(--gold)] transition-all text-xl leading-none rounded-lg"
                   >−</button>
                   <span className="font-display text-3xl font-light text-[var(--gold)] w-8 text-center tabular-nums">{guests}</span>
                   <button
                     onClick={() => onGuestsChange(Math.min(c.bookingDetails.maxOccupancy, guests + 1))}
-                    className="w-10 h-10 border border-white/[0.08] hover:border-[var(--gold)]/40 text-white/40 hover:text-[var(--gold)] transition-all text-xl leading-none rounded-lg"
+                    className="w-10 h-10 border border-[var(--border2)] hover:border-[var(--gold)]/40 text-[var(--muted2)] hover:text-[var(--gold)] transition-all text-xl leading-none rounded-lg"
                   >+</button>
-                  <span className="text-xs text-white/20">max {c.bookingDetails.maxOccupancy}</span>
+                  <span className="text-xs text-[var(--muted3)]">max {c.bookingDetails.maxOccupancy}</span>
                 </div>
-                <p className="text-[10px] text-white/25 mt-3 leading-relaxed">
+                <p className="text-[10px] text-[var(--muted3)] mt-3 leading-relaxed">
                   KES {pricePerPerson.toLocaleString()} × {guests} guest{guests > 1 ? 's' : ''}
-                  <span className="text-white/15 mx-2">·</span>
-                  <span className="text-white/40">KES {totalPrice.toLocaleString()} / night</span>
+                  <span className="text-[var(--muted3)] mx-2">·</span>
+                  <span className="text-[var(--muted2)]">KES {totalPrice.toLocaleString()} / night</span>
                 </p>
               </div>
 
               {/* Meal plan selector */}
               <div>
-                <p className="text-[9px] uppercase tracking-[0.3em] text-white/25 mb-4">Meal Plan</p>
+                <p className="text-[9px] uppercase tracking-[0.3em] text-[var(--muted3)] mb-4">Meal Plan</p>
                 <div className="space-y-2">
                   {BOARD_OPTIONS.map((opt) => {
                     const isSelected = selectedBoard === opt.value
@@ -321,7 +322,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                       <button
                         key={opt.value}
                         onClick={() => onBoardChange(opt.value)}
-                        className={`w-full flex justify-between items-center px-4 py-3 text-left transition-all duration-200 border rounded-xl ${isSelected ? 'border-[var(--gold)]/30 bg-[var(--gold)]/[0.06] text-[var(--gold)]' : 'border-white/[0.06] bg-white/[0.01] text-white/35 hover:border-white/10 hover:text-white/55 hover:bg-white/[0.025]'}`}
+                        className={`w-full flex justify-between items-center px-4 py-3 text-left transition-all duration-200 border rounded-xl ${isSelected ? 'border-[var(--gold)]/30 bg-[var(--gold)]/[0.06] text-[var(--gold)]' : 'border-[var(--border2)] bg-[var(--glass-bg)] text-[var(--muted)] hover:border-[var(--border2)] hover:text-[var(--muted)] hover:bg-[var(--glass-bg)]'}`}
                       >
                         <div>
                           <span className="text-[13px] font-medium block">{opt.label}</span>
@@ -336,20 +337,20 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
 
               {/* Price summary */}
               <div className="price-summary-card space-y-2.5">
-                <div className="flex justify-between text-xs text-white/35">
+                <div className="flex justify-between text-xs text-[var(--muted)]">
                   <span>KES {pricePerPerson.toLocaleString()} × {guests} guest{guests > 1 ? 's' : ''}</span>
-                  <span className="tabular-nums text-white/50">KES {totalPrice.toLocaleString()}</span>
+                  <span className="tabular-nums text-[var(--muted)]">KES {totalPrice.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-xs text-white/25">
+                <div className="flex justify-between text-xs text-[var(--muted3)]">
                   <span>VAT (16%)</span>
                   <span className="tabular-nums">KES {baseTax.toLocaleString()}</span>
                 </div>
-                <div className="h-px bg-white/[0.06] my-1" />
+                <div className="h-px bg-[var(--glass-bg)] my-1" />
                 <div className="flex justify-between items-baseline">
-                  <span className="text-[9px] uppercase tracking-wider text-white/25">Total / night</span>
+                  <span className="text-[9px] uppercase tracking-wider text-[var(--muted3)]">Total / night</span>
                   <span className="font-display text-lg font-light text-[var(--gold)] tabular-nums">KES {(totalPrice + baseTax).toLocaleString()}</span>
                 </div>
-                <p className="text-[9px] text-white/15 pt-1">Cleaning fee (KES {c.bookingDetails.cleaningFee.toLocaleString()}) added at checkout</p>
+                <p className="text-[9px] text-[var(--muted3)] pt-1">Cleaning fee (KES {c.bookingDetails.cleaningFee.toLocaleString()}) added at checkout</p>
               </div>
 
               {/* CTA buttons */}
@@ -357,14 +358,14 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                 <button
                   onClick={handleAddToCart}
                   disabled={c.status === 'reserved'}
-                  className={`w-full h-12 rounded-xl text-sm font-medium tracking-wide transition-all duration-300 ${inCart ? 'bg-[var(--gold)] text-black' : c.status === 'reserved' ? 'bg-white/[0.04] border border-white/[0.06] text-white/20 pointer-events-none' : 'bg-white text-black hover:bg-[#f0ece4] active:scale-[0.98]'}`}
+                  className={`w-full h-12 rounded-xl text-sm font-medium tracking-wide transition-all duration-300 ${inCart ? 'bg-[var(--gold)] text-black' : c.status === 'reserved' ? 'bg-[var(--glass-bg)] border border-[var(--border2)] text-[var(--muted3)] pointer-events-none' : 'bg-[var(--bg2)] text-[var(--cream)] hover:bg-[var(--bg3)] active:scale-[0.98]'}`}
                 >
                   {c.status === 'reserved' ? 'Currently Reserved' : inCart ? '✓ View Reservation' : 'Reserve Stay'}
                 </button>
 
                 <Link
                   href="/contact"
-                  className="flex items-center justify-center w-full h-12 text-xs border border-white/[0.06] hover:border-white/10 hover:bg-white/[0.025] transition-all text-white/30 hover:text-white/50 rounded-xl"
+                  className="flex items-center justify-center w-full h-12 text-xs border border-[var(--border2)] hover:border-[var(--border2)] hover:bg-[var(--glass-bg)] transition-all text-[var(--muted2)] hover:text-[var(--muted)] rounded-xl"
                 >
                   Speak with our concierge
                 </Link>
@@ -376,7 +377,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
                 )}
               </div>
 
-              <p className="text-[9px] text-white/20 text-center leading-relaxed">
+              <p className="text-[9px] text-[var(--muted3)] text-center leading-relaxed">
                 Minimum {c.bookingDetails.minNights} nights · {c.bookingDetails.cancellationPolicy.includes('Free cancellation') ? 'Free cancellation policy applies' : c.bookingDetails.cancellationPolicy}
               </p>
             </div>
@@ -392,7 +393,7 @@ function StayModalInner({ c, onClose, selectedBoard, onBoardChange, guests, onGu
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setZoomedImg(null)}
-            className="fixed inset-0 z-[99999] bg-black/96 flex items-center justify-center p-6 cursor-zoom-out"
+            className="fixed inset-0 z-[99999] bg-[var(--bg)] flex items-center justify-center p-6 cursor-zoom-out"
             style={{ isolation: 'isolate' }}
           >
             <motion.div

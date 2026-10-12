@@ -74,6 +74,28 @@ export default function Hero() {
     return () => clearTimeout(t)
   }, [])
 
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const loadVideo = () => {
+      video.src = '/videos/Hero-Main01.mp4'
+      video.load()
+      video.play().catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'NotAllowedError') return
+        console.error('Hero video failed to play:', error)
+      })
+    }
+
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(loadVideo, { timeout: 3000 })
+      return () => window.cancelIdleCallback(id)
+    }
+
+    const id = window.setTimeout(loadVideo, 1500)
+    return () => window.clearTimeout(id)
+  }, [])
+
   const mag1 = useMagnetic()
   const mag2 = useMagnetic()
 
@@ -94,19 +116,18 @@ export default function Hero() {
       >
         <video
           ref={videoRef}
-          autoPlay
           muted
           loop
           playsInline
+          preload="none"
+          onError={(event) => console.error('Hero video failed to load:', event.currentTarget.error)}
           onCanPlay={() => setVideoReady(true)}
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             opacity:    videoReady ? 1 : 0,
             transition: 'opacity 1.8s ease',
           }}
-        >
-          <source src="/videos/Hero-Main01.mp4" type="video/mp4" />
-        </video>
+        />
       </motion.div>
 
       {/* ── FALLBACK (while video loads) ─────────────────── */}

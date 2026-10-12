@@ -57,8 +57,7 @@ import CookieConsent from '@/components/CookieConsent'
 // ─── CLIENT LEAF IMPORTS ─────────────────────────────────────────────────────
 // Each is a dedicated 'use client' file — the server component tree is clean.
 import ClientShell         from '@/components/home/ClientShell'
-import StatsStrip          from '@/components/home/StatsStrip'
-import SustainabilityMetrics from '@/components/SustainabilityMetrics'
+import UbuntuStoryGrid     from '@/components/home/UbuntuStoryGrid'
 import CulturalStorytelling from '@/components/CulturalStorytelling'
 import FeaturedExperiences from '@/components/home/FeaturedExperiences'
 import BentoGridClient     from '@/components/home/BentoGridClient'
@@ -72,8 +71,8 @@ const MARQUEE_ITEMS = [
 ]
 // Pre-computed — server never runs a ternary per item at runtime
 const MARQUEE_COLOURS = MARQUEE_ITEMS.flatMap((_, i) => [
-  i % 3 === 0 ? 'var(--neon)' : i % 3 === 1 ? 'var(--gold)' : 'rgba(255,255,255,0.2)',
-  i % 3 === 0 ? 'var(--neon)' : i % 3 === 1 ? 'var(--gold)' : 'rgba(255,255,255,0.2)',
+  i % 3 === 0 ? 'var(--neon)' : i % 3 === 1 ? 'var(--gold)' : 'var(--muted2)',
+  i % 3 === 0 ? 'var(--neon)' : i % 3 === 1 ? 'var(--gold)' : 'var(--muted2)',
 ])
 const MARQUEE_DOUBLED = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
 
@@ -83,7 +82,7 @@ const MARQUEE_DOUBLED = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
 
 const NOISE_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`
 const GRID_BG  = `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(200,179,138,0.6)' stroke-width='0.5'%3E%3Crect x='10' y='10' width='40' height='40'/%3E%3Ccircle cx='30' cy='30' r='14'/%3E%3Cline x1='10' y1='10' x2='50' y2='50'/%3E%3Cline x1='50' y1='10' x2='10' y2='50'/%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/svg%3E")`
-const MESH_BG  = `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3C/svg%3E")`
+const MESH_BG  = `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='rgba(26,22,16,0.10)' stroke-width='0.5'/%3E%3C/svg%3E")`
 
 // FIX-05: translateZ(0) + willChange moves divs to dedicated GPU compositor layer
 const AMBIENT_STYLES: CSSProperties[] = [
@@ -93,11 +92,11 @@ const AMBIENT_STYLES: CSSProperties[] = [
   { position:'fixed', inset:0, zIndex:0, pointerEvents:'none', opacity:0.1, backgroundImage:MESH_BG, backgroundSize:'40px 40px', willChange:'transform', transform:'translateZ(0)' },
 ]
 
-const SEP_PLAIN: CSSProperties = { height:1, width:'100%', background:'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', margin:0 }
+const SEP_PLAIN: CSSProperties = { height:1, width:'100%', background:'linear-gradient(90deg, transparent, var(--border2), transparent)', margin:0 }
 const SEP_GLOW:  CSSProperties = { height:1, width:'100%', background:'linear-gradient(90deg, transparent, rgba(212,168,83,0.18), transparent)', margin:0 }
 
 const MOTTO_WRAP:  CSSProperties = { padding:'56px 24px', textAlign:'center', background:'linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(63,79,60,0.06) 100%)' }
-const MOTTO_TEXT:  CSSProperties = { fontFamily:'var(--font-display)', fontStyle:'italic', fontSize:'clamp(1rem,2vw,1.6rem)', letterSpacing:'0.1em', color:'rgba(255,255,255,0.32)', fontWeight:300, maxWidth:680, margin:'0 auto', lineHeight:1.7 }
+const MOTTO_TEXT:  CSSProperties = { fontFamily:'var(--font-display)', fontStyle:'italic', fontSize:'clamp(1rem,2vw,1.6rem)', letterSpacing:'0.1em', color:'var(--cream3)', fontWeight:300, maxWidth:680, margin:'0 auto', lineHeight:1.7 }
 const MOTTO_LINE:  CSSProperties = { width:48, height:1, background:'var(--neon)', opacity:0.3, margin:'20px auto 0' }
 const DOT_STYLE:   CSSProperties = { width:8, height:8, borderRadius:'50%', background:'var(--gold)', display:'inline-block', opacity:0.6 }
 
@@ -121,14 +120,14 @@ function SectionSeparator({ glow = false }: { glow?: boolean }) {
 
 function Marquee() {
   return (
-    <div className="relative py-5 overflow-hidden border-t border-b border-white/5 bg-black/20">
+    <div className="marquee-bar relative py-5 overflow-hidden border-t border-b border-[var(--border2)] bg-[var(--bg3)]">
       <div className="marquee-track flex whitespace-nowrap">
         {MARQUEE_DOUBLED.map((item, i) => (
           <span key={`m-${i}`} className="flex items-center gap-4 px-8">
             <span className="font-display italic text-lg font-light" style={{ color: MARQUEE_COLOURS[i] }}>
               {item}
             </span>
-            <span className="text-[8px] text-white/10">◆</span>
+            <span className="text-[8px] text-muted-3">◆</span>
           </span>
         ))}
       </div>
@@ -155,11 +154,11 @@ function Philosophy() {
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <div className="flex items-center gap-4 justify-center mb-20 reveal">
           <div className="h-[1px] w-16 bg-[var(--neon)] opacity-30" />
-          <span className="font-body text-[9px] tracking-[0.3em] uppercase text-white/20">Our Philosophy</span>
+          <span className="font-body text-[9px] tracking-[0.3em] uppercase text-muted">Our Philosophy</span>
           <div className="h-[1px] w-16 bg-[var(--neon)] opacity-30" />
         </div>
         <blockquote
-          className="font-display italic leading-tight mb-12 reveal text-white"
+          className="font-display italic leading-tight mb-12 reveal text-[var(--cream)]"
           style={{ fontSize:'clamp(1.8rem,5.5vw,4.5rem)', fontWeight:300 }}
         >
           &ldquo;A living, breathing experience that celebrates{' '}
@@ -169,10 +168,10 @@ function Philosophy() {
         </blockquote>
         <p
           className="font-body text-[15px] leading-[2] reveal max-w-[720px]"
-          style={{ color:'rgba(255,255,255,0.58)', letterSpacing:'0.015em', fontWeight:300 }}
+          style={{ color:'var(--cream3)', letterSpacing:'0.015em', fontWeight:300 }}
         >
           Rooted in the African philosophy of Ubuntu —{' '}
-          <em className="font-display italic" style={{ color:'rgba(255,255,255,0.82)', fontSize:'1.08rem', fontWeight:400 }}>
+          <em className="font-display italic" style={{ color:'var(--cream)', fontSize:'1.08rem', fontWeight:400 }}>
             &ldquo;Refresh your soul, ground your spirit&rdquo;
           </em>{' '}
           — our village is more than a destination. It is a community, a story, and a living system.
@@ -187,7 +186,7 @@ function Philosophy() {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#080808]">
+    <main className="relative min-h-screen overflow-x-hidden">
 
       {/* Decorative fixed layers — pure HTML, zero JS */}
       <AmbientBackground />
@@ -211,17 +210,7 @@ export default function HomePage() {
 
         <section className="reveal cv-auto">
           <Marquee />
-          {/*
-            StatsStrip uses useState/useEffect — it never throws a promise,
-            so no Suspense wrapper needed. Shows zeros on first paint,
-            then animates when scrolled into view.
-          */}
-          <StatsStrip />
-          
-          {/* Sustainability metrics */}
-          <div className="mt-12">
-            <SustainabilityMetrics />
-          </div>
+          <UbuntuStoryGrid />
         </section>
 
         <SectionSeparator glow />
@@ -244,7 +233,7 @@ export default function HomePage() {
         <SectionSeparator glow />
 
         {/* Live telemetry — fully code-split via BentoGridClient (ssr:false) */}
-        <section id="live-farm" className="reveal py-24 border-t border-white/5 cv-auto">
+        <section id="live-farm" className="reveal py-24 border-t border-[var(--border2)] cv-auto">
           <div className="container mx-auto px-6">
             <div className="flex items-center gap-4 mb-12">
               {/* pulse-opacity: compositor-safe, only animates opacity */}

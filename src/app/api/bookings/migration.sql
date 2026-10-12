@@ -11,6 +11,8 @@ create extension if not exists "uuid-ossp";
 
 create type booking_status as enum (
   'pending',
+  'pending_verification',
+  'payment_rejected',
   'confirmed',
   'cancelled',
   'checked_in',
@@ -22,7 +24,10 @@ create type booking_status as enum (
 create table if not exists resources (
   id          uuid primary key default uuid_generate_v4(),
   name        text not null,
+  resource_key text unique,
   description text,
+  resource_type text not null default 'cottage'
+                check (resource_type in ('cottage', 'spa', 'event')),
   is_active   boolean not null default true,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -64,6 +69,8 @@ create table if not exists bookings (
   rate_per_night       numeric(12, 2) not null,
   total_amount         numeric(12, 2) not null,
   currency             char(3) not null default 'USD',
+  payment_reference    text,
+  submitted_at         timestamptz,
 
   special_requests     text,
   source               text not null default 'direct',
@@ -95,11 +102,17 @@ create index if not exists bookings_check_in_idx      on bookings (check_in_date
 create index if not exists bookings_check_out_idx     on bookings (check_out_date);
 create index if not exists bookings_created_at_idx    on bookings (created_at desc);
 
--- Overlap prevention at DB level (belt-and-suspenders alongside API logic)
--- Excludes cancelled/checked_out bookings from the constraint
-create unique index if not exists bookings_no_overlap_idx
-  on bookings (resource_id, check_in_date, check_out_date)
-  where status not in ('cancelled', 'checked_out');
+-- Overlap prevention at DB level. Date ranges use [start, end), so a checkout
+-- on the same day as another check-in is allowed.
+create extension if not exists btree_gist;
+
+alter table bookings
+  add constraint bookings_no_overlap
+  exclude using gist (
+    resource_id with =,
+    daterange(check_in_date, check_out_date, '[)') with &&
+  )
+  where (status in ('confirmed', 'checked_in'));
 
 -- ─── Audit Logs ───────────────────────────────────────────────────────────────
 

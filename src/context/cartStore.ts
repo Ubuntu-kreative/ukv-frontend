@@ -41,6 +41,7 @@ export const BOARD_PLAN_LABELS: Record<string, string> = {
 export interface CartItem {
   // ── Core (required) ────────────────────────────────────────────────────────
   id:        string        // stable product/room/service ID
+  resourceId?: string     // canonical resource key for bookable items
   name:      string
   tag:       string        // e.g. "Spa", "Cottage", "Dining"
   category:  string        // e.g. "spa", "cottage", "restaurant"

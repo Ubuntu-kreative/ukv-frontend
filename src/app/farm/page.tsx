@@ -59,7 +59,7 @@ export default function FarmPage() {
   return (
     <>
       <NavWrapper />
-      <main className="bg-[#0a0a0a] text-white min-h-screen overflow-x-hidden">
+      <main className="text-white min-h-screen overflow-x-hidden" style={{ background: 'var(--bg)' }}>
 
         {/* ── HERO (instant render, no JS) ─────────── */}
         <FarmHero />

@@ -266,7 +266,7 @@ const ST = {
     fontSize:      '8px',
     letterSpacing: '0.35em',
     textTransform: 'uppercase',
-    color:         'rgba(255,255,255,0.2)',
+    color:         'var(--muted)',
   } satisfies CSSProperties,
 
   headerQuote: {
@@ -295,7 +295,7 @@ const ST = {
     fontStyle:     'italic',
     fontSize:      '9px',
     letterSpacing: '0.18em',
-    color:         'rgba(255,255,255,0.12)',
+    color:         'var(--muted2)',
     marginTop:     20,
   } satisfies CSSProperties,
 
@@ -348,14 +348,14 @@ const ST = {
     fontSize:      '7px',
     letterSpacing: '0.3em',
     textTransform: 'uppercase',
-    color:         'rgba(255,255,255,0.2)',
+    color:         'var(--muted)',
   } satisfies CSSProperties,
 
   statusDot: {
     width:        2,
     height:       2,
     borderRadius: '50%',
-    background:   'rgba(255,255,255,0.1)',
+    background:   'var(--border2)',
     flexShrink:   0,
   } satisfies CSSProperties,
 
@@ -379,7 +379,7 @@ const ST = {
     fontSize:      '8px',
     letterSpacing: '0.22em',
     textTransform: 'uppercase',
-    color:         'rgba(255,255,255,0.22)',
+    color:         'var(--muted)',
     marginBottom:  8,
   } satisfies CSSProperties,
 
@@ -387,7 +387,7 @@ const ST = {
     fontFamily:  'var(--font-body)',
     fontSize:    '11px',
     lineHeight:  1.65,
-    color:       'rgba(255,255,255,0.35)',
+    color:       'var(--muted)',
     marginBottom: 20,
   } satisfies CSSProperties,
 
@@ -396,7 +396,7 @@ const ST = {
     fontSize:      '8px',
     letterSpacing: '0.2em',
     textTransform: 'uppercase',
-    color:         'rgba(255,255,255,0.28)',
+    color:         'var(--muted)',
   } satisfies CSSProperties,
 
   cardEventsWrap: {
@@ -407,7 +407,7 @@ const ST = {
   } satisfies CSSProperties,
 
   cardDetailDivider: {
-    borderTop:  '0.5px solid rgba(255,255,255,0.06)',
+    borderTop:  '0.5px solid var(--border2)',
     paddingTop: 14,
   } satisfies CSSProperties,
 
@@ -417,7 +417,7 @@ const ST = {
     gap:        8,
     fontFamily: 'var(--font-body)',
     fontSize:   '11px',
-    color:      'rgba(255,255,255,0.52)',
+    color:      'var(--muted)',
     padding:    '4px 0',
   } satisfies CSSProperties,
 
@@ -456,7 +456,7 @@ const ST = {
     fontSize:      '7px',
     letterSpacing: '0.3em',
     textTransform: 'uppercase',
-    color:         'rgba(255,255,255,0.2)',
+    color:         'var(--muted)',
     marginBottom:  10,
   } satisfies CSSProperties,
 
@@ -486,7 +486,7 @@ const ST = {
   moxieDesc: {
     fontFamily: 'var(--font-body)',
     fontSize:   '12px',
-    color:      'rgba(255,255,255,0.38)',
+    color:      'var(--muted)',
     lineHeight: 1.7,
   } satisfies CSSProperties,
 
@@ -508,7 +508,7 @@ const ST = {
     fontSize:      '7px',
     letterSpacing: '0.2em',
     textTransform: 'uppercase',
-    color:         'rgba(255,255,255,0.2)',
+    color:         'var(--muted)',
     display:       'block',
   } satisfies CSSProperties,
 
@@ -587,15 +587,15 @@ const LIVE_DOT_STYLES: Record<CardStatus, {
     wrap: {
       display: 'inline-flex', alignItems: 'center', gap: 5,
       padding: '2px 9px',
-      background: 'rgba(255,255,255,0.04)',
-      border: '0.5px solid rgba(255,255,255,0.12)',
+      background: 'var(--bg2)',
+      border: '0.5px solid var(--border2)',
       fontFamily: 'var(--font-body)', fontSize: '7px',
       letterSpacing: '0.2em', textTransform: 'uppercase',
-      color: 'rgba(255,255,255,0.3)',
+      color: 'var(--muted)',
     },
     dot: {
       width: 4, height: 4, borderRadius: '50%',
-      background: 'rgba(255,255,255,0.3)', flexShrink: 0,
+      background: 'var(--muted)', flexShrink: 0,
     },
   },
 }
@@ -626,8 +626,8 @@ const BENTO_STYLES = `
   /* FIX-C: CSS hover replaces useState(hovered) on cards */
   .ukv-card {
     position:       relative;
-    background:     rgba(255,255,255,0.02);
-    border:         0.5px solid rgba(255,255,255,0.06);
+    background:     var(--bg2);
+    border:         0.5px solid var(--border2);
     overflow:       hidden;
     cursor:         pointer;
     min-height:     220px;
@@ -639,7 +639,7 @@ const BENTO_STYLES = `
     z-index:        1;
   }
   .ukv-card:hover {
-    background:   rgba(255,255,255,0.035);
+    background:   var(--bg2);
     border-color: color-mix(in srgb, var(--card-accent) 25%, transparent);
     transform:    translateY(-3px) scale(1.005);
     box-shadow:   0 8px 40px rgba(0,0,0,0.5), 0 20px 60px rgba(0,0,0,0.3);
@@ -680,7 +680,7 @@ const BENTO_STYLES = `
     top:            16px; right: 16px;
     font-family:    var(--font-body);
     font-size:      10px;
-    color:          rgba(255,255,255,0.2);
+    color:          var(--muted);
     transition:     transform 0.35s cubic-bezier(0.16,1,0.3,1), color 0.3s;
     pointer-events: none;
     user-select:    none;
@@ -697,7 +697,7 @@ const BENTO_STYLES = `
     font-size:      clamp(1.25rem, 2.2vw, 2rem);
     font-weight:    300;
     line-height:    1.15;
-    color:          rgba(237,230,211,0.9);
+    color:          var(--cream);
     margin-bottom:  6px;
     transition:     color 0.3s;
     letter-spacing: -0.01em;
@@ -708,7 +708,7 @@ const BENTO_STYLES = `
     position:     absolute;
     top:          14px; left: 14px;
     width:        12px; height: 12px;
-    border-color: rgba(255,255,255,0.15);
+    border-color: var(--border2);
     border-style: solid;
     border-width: 1px 0 0 1px;
     pointer-events: none;
@@ -718,7 +718,7 @@ const BENTO_STYLES = `
     position:     absolute;
     bottom:       14px; right: 14px;
     width:        12px; height: 12px;
-    border-color: rgba(255,255,255,0.15);
+    border-color: var(--border2);
     border-style: solid;
     border-width: 0 1px 1px 0;
     pointer-events: none;
@@ -750,7 +750,7 @@ const BENTO_STYLES = `
     gap:        8px;
     font-family: var(--font-body);
     font-size:  11px;
-    color:      rgba(255,255,255,0.52);
+    color:      var(--muted);
     padding:    4px 0;
     opacity:    0;
     transform:  translateX(-6px);
@@ -1063,7 +1063,7 @@ const BentoCard = memo(function BentoCard({
             {card.events.map(ev => (
               <div key={`${card.id}-ev-${ev.label}`} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '5px 0', borderBottom: '0.5px solid rgba(255,255,255,0.04)',
+                padding: '5px 0', borderBottom: '0.5px solid var(--border2)',
               }}>
                 <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                   <span style={{ width:3, height:3, borderRadius:'50%', background:ev.color, flexShrink:0 }} />
@@ -1071,7 +1071,7 @@ const BentoCard = memo(function BentoCard({
                     {ev.label}
                   </span>
                 </div>
-                <span style={{ fontFamily:'var(--font-body)', fontSize:'8px', color:'rgba(255,255,255,0.22)', letterSpacing:'0.06em' }}>
+                <span style={{ fontFamily:'var(--font-body)', fontSize:'8px', color:'var(--muted)', letterSpacing:'0.06em' }}>
                   {ev.date}
                 </span>
               </div>
@@ -1132,7 +1132,7 @@ const MoxieIntelligenceCore = memo(function MoxieIntelligenceCore() {
           </div>
           <p style={ST.moxieDesc}>
             She reads the farm, the menu, your room —{' '}
-            <em style={{ color:'rgba(255,255,255,0.55)', fontStyle:'italic' }}>and she&apos;s proactive.</em>
+            <em style={{ color:'var(--cream)', fontStyle:'italic' }}>and she&apos;s proactive.</em>
           </p>
           <div style={ST.moxieStatusRow}>
             {(['Farm Sync', 'Menu Log', 'Guest Mode', 'Spa Schedule'] as const).map((label, i) => (

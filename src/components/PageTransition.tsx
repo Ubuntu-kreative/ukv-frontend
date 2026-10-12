@@ -10,21 +10,26 @@ interface PageTransitionProps {
 export default function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
+  const previousPathname = useRef(pathname);
 
   useEffect(() => {
-    // Trigger animation when pathname changes
-    if (containerRef.current) {
-      containerRef.current.style.opacity = '0';
-      containerRef.current.style.transform = 'translateY(10px)';
-      
-      // Force reflow
-      void containerRef.current.offsetWidth;
-      
-      // Animate in
-      containerRef.current.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
-      containerRef.current.style.opacity = '1';
-      containerRef.current.style.transform = 'translateY(0)';
-    }
+    if (previousPathname.current === pathname) return
+    previousPathname.current = pathname
+
+    const container = containerRef.current
+    if (!container) return
+
+    container.style.transition = 'none'
+    container.style.opacity = '0'
+    container.style.transform = 'translateY(10px)'
+
+    const frame = window.requestAnimationFrame(() => {
+      container.style.transition = 'opacity 180ms ease-out, transform 180ms ease-out'
+      container.style.opacity = '1'
+      container.style.transform = 'translateY(0)'
+    })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [pathname]);
 
   return (
@@ -33,7 +38,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
       style={{
         opacity: '1',
         transform: 'translateY(0)',
-        transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+        transition: 'opacity 180ms ease-out, transform 180ms ease-out',
       }}
     >
       {children}

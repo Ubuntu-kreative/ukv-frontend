@@ -57,7 +57,7 @@ const TOTAL_COUNT     = stays.length
 
 export default function CottagesPage() {
   return (
-    <main className="bg-[#0a0a0a] min-h-screen text-white overflow-hidden">
+    <main className="min-h-screen text-white overflow-hidden" style={{ background: 'var(--bg)' }}>
       {/* JSON-LD — static string, rendered once on server */}
       <script
         type="application/ld+json"

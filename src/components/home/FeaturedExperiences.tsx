@@ -135,7 +135,7 @@ export default function FeaturedExperiences() {
                 >
                   {exp.sub}
                 </p>
-                <p className="font-body text-[11px] leading-relaxed flex-1 text-white/40">
+                <p className="font-body text-[11px] leading-relaxed flex-1 text-white/40 featured-experience-description">
                   {exp.desc}
                 </p>
                 <div

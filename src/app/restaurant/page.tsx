@@ -55,7 +55,7 @@ export const metadata: Metadata = {
 
 export default function RestaurantPage() {
   return (
-    <main className="bg-black min-h-screen text-white selection:bg-[var(--gold)]/20">
+    <main className="min-h-screen text-white selection:bg-[var(--gold)]/20" style={{ background: 'var(--bg)' }}>
       <NavWrapper />
 
       {/* 1. Cinematic Hero — server rendered, zero JS */}
@@ -78,7 +78,27 @@ export default function RestaurantPage() {
       {/* 4. Interactive menu — single client island, hydrates only this section */}
       <MenuGrid />
 
-      {/* 5. Reservation CTA — server rendered */}
+      {/* 5. Chef profile — follows the About page's initials-based team style */}
+      <section className="mx-auto mb-24 max-w-3xl px-6" aria-labelledby="about-the-chef">
+        <div className="glass relative overflow-hidden p-8 md:p-10">
+          <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-60" />
+          <div className="mb-6 flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10 font-display text-2xl font-light text-[var(--gold)]" aria-label="Chef photo placeholder">
+              M
+            </div>
+            <div>
+              <div className="mb-1 font-body text-[9px] uppercase tracking-wider text-[var(--gold)]">Farm-to-Fork Kitchen</div>
+              <h2 id="about-the-chef" className="font-display text-3xl font-light text-[var(--cream)]">About the Chef</h2>
+              <p className="mt-1 font-body text-[9px] uppercase tracking-wider text-white/35">Chef photo needed</p>
+            </div>
+          </div>
+          <p className="font-body text-sm leading-loose text-white/60">
+            Chef M. Wamalwa has a deep connection to the land, crafting dishes with the freshest ingredients. Each meal reflects a blend of tradition and contemporary flair, offering a warm, inviting dining experience.
+          </p>
+        </div>
+      </section>
+
+      {/* 6. Reservation CTA — server rendered */}
       <ReservationCTA />
 
       <Footer />

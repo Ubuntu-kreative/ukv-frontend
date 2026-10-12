@@ -264,7 +264,7 @@ function BlockedDateInput({ label, value, onChange, min, roomIds, otherDate, isA
           onChange={e => handleChange(e.target.value)}
           style={{ width:'100%', colorScheme:'dark' }} />
         {blocked.size > 0 && (
-          <p style={{ fontSize:'8px', color:'rgba(255,255,255,0.2)', marginTop:3, fontFamily:'var(--font-body)', letterSpacing:'0.06em' }}>
+          <p style={{ fontSize:'8px', color:'var(--muted2)', marginTop:3, fontFamily:'var(--font-body)', letterSpacing:'0.06em' }}>
             {blocked.size} date{blocked.size > 1 ? 's' : ''} unavailable for selected rooms
           </p>
         )}
@@ -280,11 +280,11 @@ function UpsellRow({ suggestion, onAdd }: { suggestion:UpsellSuggestion; onAdd:(
   const already = items.some(i => i.cartKey === suggestion.id || i.id === suggestion.id)
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:hov?'rgba(212,168,83,0.06)':'rgba(255,255,255,0.02)', border:`0.5px solid ${hov?'rgba(212,168,83,0.25)':'rgba(255,255,255,0.06)'}`, borderRadius:8, transition:'all 0.2s', marginBottom:6 }}>
+      style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', background:hov?'rgba(212,168,83,0.06)':'var(--glass-bg)', border:`0.5px solid ${hov?'rgba(212,168,83,0.25)':'var(--border2)'}`, borderRadius:8, transition:'all 0.2s', marginBottom:6 }}>
       <span style={{ fontSize:20, flexShrink:0 }}>{suggestion.emoji}</span>
       <div style={{ flex:1, minWidth:0 }}>
         <p style={{ fontFamily:'var(--font-display)', fontSize:'0.9rem', fontWeight:300, color:'var(--cream)', marginBottom:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{suggestion.name}</p>
-        <p style={{ fontFamily:'var(--font-body)', fontSize:'8px', color:'rgba(255,255,255,0.3)', letterSpacing:'0.06em' }}>{suggestion.reason}</p>
+        <p style={{ fontFamily:'var(--font-body)', fontSize:'8px', color:'var(--muted2)', letterSpacing:'0.06em' }}>{suggestion.reason}</p>
       </div>
       <div style={{ textAlign:'right', flexShrink:0 }}>
         <p style={{ fontFamily:'var(--font-display)', fontSize:'0.85rem', color:'var(--gold)', marginBottom:4 }}>KES {suggestion.price.toLocaleString()}</p>
@@ -411,15 +411,14 @@ export function CartPanel() {
   const [step,      setStep]      = useState<CheckoutStep>('cart')
   const [tab,       setTab]       = useState<CheckoutTab>('pay')
   const [payMethod, setPayMethod] = useState<PayMethod>('mpesa')
-  const [confirmed, setConfirmed] = useState<{ ref:string; type:string } | null>(null)
+  const [confirmed, setConfirmed] = useState<{ ref:string; type:string; pendingVerification?:boolean } | null>(null)
   const [loading,   setLoading]   = useState(false)
 
   // ── Contact fields ────────────────────────────────────────────────────────
   const [name,       setName]       = useState('')
   const [email,      setEmail]      = useState('')
   const [phone,      setPhone]      = useState('')
-  const [mpPhone,    setMpPhone]    = useState('')
-  const [stkPhone,   setStkPhone]   = useState('')
+  const [paymentReference, setPaymentReference] = useState('')
   const [message,    setMessage]    = useState('')
   const [specialReq, setSpecialReq] = useState('')
   const [cardNum,    setCardNum]    = useState('')
@@ -486,7 +485,7 @@ export function CartPanel() {
 
   const resetForm = useCallback(() => {
     setStep('cart'); setTab('pay'); setPayMethod('mpesa'); setConfirmed(null)
-    setName(''); setEmail(''); setPhone(''); setMpPhone(''); setStkPhone('')
+    setName(''); setEmail(''); setPhone(''); setPaymentReference('')
     setMessage(''); setSpecialReq(''); setCardNum(''); setExpiry(''); setCvv('')
     setErrs({}); setLoading(false)
   }, [])
@@ -511,8 +510,7 @@ export function CartPanel() {
   const validatePayment = useCallback((): boolean => {
     const e: Record<string,string> = {}
     if (payMethod === 'mpesa') {
-      if (!mpPhone.trim())             e.mpPhone = 'M-Pesa number is required'
-      else if (!isValidPhone(mpPhone)) e.mpPhone = 'Enter a valid Safaricom number (07xx or 01xx)'
+      if (!paymentReference.trim()) e.paymentReference = 'Enter the confirmation code from your M-Pesa message'
     }
     if (payMethod === 'card') {
       if (!isValidCard(cardNum))  e.cardNum = 'Enter a valid card number'
@@ -521,7 +519,7 @@ export function CartPanel() {
     }
     if (Object.keys(e).length) { setErrs(e); return false }
     setErrs({}); return true
-  }, [payMethod, mpPhone, cardNum, expiry, cvv])
+  }, [payMethod, paymentReference, cardNum, expiry, cvv])
 
   const handleConfirmBooking = useCallback(async (type: 'booking'|'inquiry') => {
     setLoading(true)
@@ -535,64 +533,28 @@ export function CartPanel() {
           checkIn, checkOut, guests,
           specialRequests:specialReq, message,
           payment:
-            payMethod==='mpesa' ? { method:'mpesa', phone:stkPhone||normalisePhone(mpPhone) } :
+            payMethod==='mpesa' ? { method:'mpesa' } :
             payMethod==='card'  ? { method:'card' } :
                                   { method:'room' },
           subtotal:sub, serviceCharge:svc, vat:vatAmt, totalAmount:grand,
+          paymentReference,
         }),
       })
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Could not submit booking')
       const ref  = data.referenceNumber || generateRef(type==='booking'?'UKV':'INQ')
-      setConfirmed({ ref, type }); clearCart()
-    } catch {
-      const ref = generateRef(type==='booking'?'UKV':'INQ')
-      setConfirmed({ ref, type }); clearCart()
+      setConfirmed({ ref, type, pendingVerification: type === 'booking' && payMethod === 'mpesa' }); clearCart()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not submit your request')
     } finally { setLoading(false) }
-  }, [name,email,phone,items,checkIn,checkOut,guests,specialReq,message,payMethod,stkPhone,mpPhone,sub,svc,vatAmt,grand,clearCart])
-
-  const handleStkPush = useCallback(async () => {
-    if (!validatePayment()) return
-    const normalised = normalisePhone(mpPhone)
-    setStkPhone(normalised); setLoading(true)
-    try {
-      const res = await fetch('/api/mpesa/stkpush', {
-        method:'POST', headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({
-          phone:            normalised,
-          amount:           Math.ceil(grand),
-          accountReference: MPESA_ACCOUNT,
-          transactionDesc:  `Ubuntu Booking – ${items.map(i=>i.name).join(', ').slice(0,80)}`,
-          guestName:        name,
-          guestEmail:       email,
-          items:            items.map(i=>({ name:i.name, qty:safeQty(i), price:safePrice(i.price) })),
-          subtotal:         sub,
-          serviceCharge:    svc,
-          vat:              vatAmt,
-          totalAmount:      grand,
-          checkIn, checkOut, guests,
-        }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        toast.error(err.message || 'M-Pesa request failed — please try again')
-        setLoading(false)
-        return
-      }
-    } catch {
-      toast.error('Could not reach payment server — check your connection')
-      setLoading(false)
-      return
-    }
-    setLoading(false)
-    setStep('stk_waiting')
-  }, [validatePayment, mpPhone, grand, items, name, email, sub, svc, vatAmt, checkIn, checkOut, guests])
+  }, [name,email,phone,items,checkIn,checkOut,guests,specialReq,message,payMethod,paymentReference,sub,svc,vatAmt,grand,clearCart])
 
   const handlePayNow = useCallback(async () => {
     if (!validateDetails()) return
     if (!validatePayment()) return
-    if (payMethod === 'mpesa') { await handleStkPush() }
+    if (payMethod === 'mpesa') { await handleConfirmBooking('booking') }
     else { await handleConfirmBooking('booking') }
-  }, [validateDetails, validatePayment, payMethod, handleStkPush, handleConfirmBooking])
+  }, [validateDetails, validatePayment, handleConfirmBooking])
 
   const handleInquiry = useCallback(async () => {
     if (!validateDetails()) return
@@ -620,9 +582,9 @@ export function CartPanel() {
           80%{transform:translateY(1px) scale(0.998);}
         }
         .cart-panel-bounce{animation:none;}.cart-panel-bounce:hover{animation:cartBounce 0.55s ease;}
-        .input-dark{width:100%;padding:9px 12px;background:var(--bg3,rgba(255,255,255,0.04));border:0.5px solid var(--border2,rgba(255,255,255,0.1));color:var(--cream,#f0ece0);font-family:var(--font-body);font-size:12px;outline:none;transition:border-color 0.2s;}
+        .input-dark{width:100%;padding:9px 12px;background:var(--bg3,var(--glass-bg));border:0.5px solid var(--border2,var(--border2));color:var(--cream);font-family:var(--font-body);font-size:12px;outline:none;transition:border-color 0.2s;}
         .input-dark:focus{border-color:rgba(212,168,83,0.4);}
-        .input-dark::placeholder{color:var(--muted,rgba(255,255,255,0.3));}
+        .input-dark::placeholder{color:var(--muted,var(--muted2));}
         .input-dark.err{border-color:rgba(240,168,184,0.5);}
         input[type="date"].input-dark::-webkit-calendar-picker-indicator{filter:invert(0.6);cursor:pointer;}
         .item-action-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;border:none;font-family:var(--font-body);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
@@ -630,12 +592,12 @@ export function CartPanel() {
 
       {/* BACKDROP */}
       <div className="fixed inset-0 z-[200]" onClick={closeCart}
-        style={{ background:'rgba(0,0,0,0.7)', backdropFilter:'blur(8px)' }} />
+        style={{ background:'var(--glass-bg)', backdropFilter:'blur(8px)' }} />
 
       {/* PANEL */}
       <div
         className="cart-panel-bounce fixed top-0 right-0 bottom-0 z-[201] flex flex-col"
-        style={{ width:'min(500px,100vw)', background:'var(--bg2,#0e0e0c)', borderLeft:'0.5px solid var(--border,rgba(255,255,255,0.08))', boxShadow:'-20px 0 80px rgba(0,0,0,0.6)' }}
+        style={{ width:'min(500px,100vw)', background:'var(--bg2)', borderLeft:'0.5px solid var(--border,var(--border2))', boxShadow:'-20px 0 80px rgba(0,0,0,0.6)' }}
         onMouseEnter={() => setPanelHov(true)}
         onMouseLeave={() => setPanelHov(false)}
       >
@@ -651,14 +613,16 @@ export function CartPanel() {
             </h2>
             <p className="text-[13px] leading-[1.8] mb-6" style={{ color:'var(--muted)' }}>
               {confirmed.type==='booking'
-                ? 'Your reservation is secured at Ubuntu Kreative Village. A confirmation will reach you within the hour.'
+                ? confirmed.pendingVerification
+                  ? "Your booking request has been received and is pending payment verification. We'll confirm your reservation shortly."
+                  : 'Your reservation is secured at Ubuntu Kreative Village. A confirmation will reach you within the hour.'
                 : 'Our team will be in touch within 24 hours to curate your experience. Welcome to the village.'}
             </p>
             <div className="text-[10px] tracking-[0.2em] uppercase px-5 py-2.5 mb-8"
               style={{ background:'var(--gold-dim)', border:'0.5px solid rgba(200,168,75,0.3)', color:'var(--gold)', fontFamily:'var(--font-body)' }}>
               Ref # {confirmed.ref}
             </div>
-            {confirmed.type==='booking' && payMethod==='mpesa' && (
+              {confirmed.type==='booking' && payMethod==='mpesa' && !confirmed.pendingVerification && (
               <div className="w-full p-4 mb-6 text-left" style={{ background:'var(--bg3)', border:'0.5px solid rgba(200,168,75,0.2)' }}>
                 <p className="text-[9px] tracking-[0.18em] uppercase mb-3" style={{ color:'var(--gold)', fontFamily:'var(--font-body)' }}>Complete your M-Pesa payment</p>
                 <div className="space-y-1.5">
@@ -672,22 +636,6 @@ export function CartPanel() {
               </div>
             )}
             <button className="btn-gold w-full" onClick={resetAndClose}>Back to the Village</button>
-          </div>
-
-        ) : step === 'stk_waiting' ? (
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <div className="flex items-center px-7 py-5 shrink-0" style={{ borderBottom:'0.5px solid var(--border)' }}>
-              <h2 className="text-[22px] font-light" style={{ fontFamily:'var(--font-display)' }}>M-Pesa Prompt Sent</h2>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <StkWaitingScreen phone={`+${stkPhone}`} amount={grand}
-                onSuccess={async () => {
-                  setStep('processing')
-                  await handleConfirmBooking('booking')
-                }}
-                onTimeout={() => { toast.error('M-Pesa prompt expired — please try again or use Paybill'); setStep('pay') }}
-              />
-            </div>
           </div>
 
         ) : step === 'processing' ? (
@@ -706,7 +654,7 @@ export function CartPanel() {
             <div className="flex items-center px-7 py-5 shrink-0" style={{ borderBottom:'0.5px solid var(--border)', gap:8 }}>
               {(step==='details' || step==='pay') && (
                 <button onClick={handleBack} className="shrink-0 text-[11px] transition-colors"
-                  style={{ color:'var(--muted)', background:'none', border:'0.5px solid rgba(255,255,255,0.08)', cursor:'pointer', padding:'4px 8px', borderRadius:4 }}
+                  style={{ color:'var(--muted)', background:'none', border:'0.5px solid var(--border2)', cursor:'pointer', padding:'4px 8px', borderRadius:4 }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color='var(--cream)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color='var(--muted)' }}>
                   ← Back
@@ -739,7 +687,7 @@ export function CartPanel() {
               {/* ════ STEP 1 — CART REVIEW ════ */}
               {step === 'cart' && items.length > 0 && (
                 <>
-                  <div className="px-7 pt-5 pb-3" style={{ borderBottom:'0.5px solid rgba(255,255,255,0.04)' }}>
+                  <div className="px-7 pt-5 pb-3" style={{ borderBottom:'0.5px solid var(--border2)' }}>
                     <p className="text-[9px] tracking-[0.18em] uppercase mb-3" style={{ color:'var(--muted)', fontFamily:'var(--font-body)' }}>
                       {roomIds.length > 0 ? 'Stay Dates' : 'Your Dates'}
                     </p>
@@ -768,7 +716,7 @@ export function CartPanel() {
                           <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8, paddingBottom:6, borderBottom:`0.5px solid ${meta.accent}22` }}>
                             <span style={{ fontSize:14 }}>{meta.icon}</span>
                             <span style={{ fontFamily:'var(--font-body)', fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:meta.accent }}>{meta.label}</span>
-                            <span style={{ fontFamily:'var(--font-body)', fontSize:'8px', color:'rgba(255,255,255,0.2)', marginLeft:'auto' }}>
+                            <span style={{ fontFamily:'var(--font-body)', fontSize:'8px', color:'var(--muted2)', marginLeft:'auto' }}>
                               {catItems.length} line{catItems.length>1?'s':''}
                             </span>
                           </div>
@@ -780,7 +728,7 @@ export function CartPanel() {
                             const lineAmt  = price * qty
                             const noteVal  = item.note || ''
                             return (
-                              <div key={`${cat}-${key}`} className="py-4" style={{ borderBottom:'0.5px solid rgba(255,255,255,0.04)' }}>
+                              <div key={`${cat}-${key}`} className="py-4" style={{ borderBottom:'0.5px solid var(--border2)' }}>
                                 <div className="flex gap-3 items-start">
                                   <div style={{ flexShrink:0, display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
                                     <div style={{ width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, background:`${meta.accent}15`, border:`0.5px solid ${meta.accent}30` }}>
@@ -800,8 +748,8 @@ export function CartPanel() {
                                     </p>
                                     <p className="text-[11px]" style={{ color:'var(--muted)', fontFamily:'var(--font-body)' }}>
                                       {qty > 1
-                                        ? <>KES {price.toLocaleString()}<span style={{ color:'rgba(255,255,255,0.3)' }}> × {qty}</span>{item.unit && <span style={{ color:'rgba(255,255,255,0.2)' }}> {item.unit}</span>}</>
-                                        : <>KES {price.toLocaleString()}{item.unit && <span style={{ color:'rgba(255,255,255,0.2)' }}> {item.unit}</span>}</>}
+                                        ? <>KES {price.toLocaleString()}<span style={{ color:'var(--muted2)' }}> × {qty}</span>{item.unit && <span style={{ color:'var(--muted2)' }}> {item.unit}</span>}</>
+                                        : <>KES {price.toLocaleString()}{item.unit && <span style={{ color:'var(--muted2)' }}> {item.unit}</span>}</>}
                                     </p>
                                   </div>
                                   <div className="flex flex-col items-end gap-2 shrink-0">
@@ -840,7 +788,7 @@ export function CartPanel() {
                                   ) : (
                                     <button onClick={() => setActiveNoteKey(key)}
                                       className="text-[8px] uppercase tracking-wider font-mono"
-                                      style={{ color:noteVal?'var(--gold)':'rgba(255,255,255,0.22)', background:'none', border:'none', cursor:'pointer' }}>
+                                      style={{ color:noteVal?'var(--gold)':'var(--muted2)', background:'none', border:'none', cursor:'pointer' }}>
                                       {noteVal ? `✎ ${noteVal}` : '+ Add note'}
                                     </button>
                                   )}
@@ -855,13 +803,13 @@ export function CartPanel() {
 
                   {/* UPSELLS */}
                   {showUpsells && upsells.length > 0 && (
-                    <div className="px-7 py-4" style={{ borderTop:'0.5px solid rgba(255,255,255,0.04)', background:'rgba(255,255,255,0.01)' }}>
+                    <div className="px-7 py-4" style={{ borderTop:'0.5px solid var(--border2)', background:'var(--glass-bg)' }}>
                       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
                         <div>
                           <p style={{ fontFamily:'var(--font-body)', fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--gold)', marginBottom:2 }}>◈ You might also enjoy</p>
-                          <p style={{ fontFamily:'var(--font-body)', fontSize:'10px', color:'rgba(255,255,255,0.3)' }}>Curated to complement your booking</p>
+                          <p style={{ fontFamily:'var(--font-body)', fontSize:'10px', color:'var(--muted2)' }}>Curated to complement your booking</p>
                         </div>
-                        <button onClick={() => setShowUpsells(false)} style={{ fontSize:'10px', color:'rgba(255,255,255,0.2)', background:'none', border:'none', cursor:'pointer' }}>Hide</button>
+                        <button onClick={() => setShowUpsells(false)} style={{ fontSize:'10px', color:'var(--muted2)', background:'none', border:'none', cursor:'pointer' }}>Hide</button>
                       </div>
                       {upsells.map(s => <UpsellRow key={s.id} suggestion={s} onAdd={handleAddUpsell} />)}
                     </div>
@@ -910,7 +858,7 @@ export function CartPanel() {
                     <textarea className="input-dark" style={{ minHeight:'90px', resize:'vertical' }} maxLength={500}
                       placeholder="Dietary requirements, accessibility needs, celebration setup, arrival time, allergies…"
                       value={specialReq} onChange={e => setSpecialReq(e.target.value)} />
-                    <p style={{ fontSize:'8px', color:'rgba(255,255,255,0.2)', marginTop:3, fontFamily:'var(--font-body)', textAlign:'right' }}>{specialReq.length}/500</p>
+                    <p style={{ fontSize:'8px', color:'var(--muted2)', marginTop:3, fontFamily:'var(--font-body)', textAlign:'right' }}>{specialReq.length}/500</p>
                   </FormField>
                 </div>
               )}
@@ -950,27 +898,17 @@ export function CartPanel() {
                       {/* ── M-PESA ── */}
                       {payMethod === 'mpesa' && (
                         <div className="p-4 space-y-3" style={{ background:'var(--bg3)', border:'0.5px solid rgba(200,168,75,0.25)' }}>
-                          <p className="text-[9px] tracking-[0.18em] uppercase" style={{ color:'var(--gold)', fontFamily:'var(--font-body)' }}>M-Pesa Express (STK Push)</p>
-                          <p className="text-[11px] leading-[1.6]" style={{ color:'var(--muted)' }}>Enter your Safaricom number. You will receive a PIN prompt on your phone.</p>
-                          <FormField label="Your M-Pesa Number *" error={errs.mpPhone}>
-                            <input className={`input-dark${errs.mpPhone?' err':''}`} type="tel" placeholder="0712 345 678" value={mpPhone}
-                              onChange={e => { setMpPhone(e.target.value); clearErr('mpPhone') }}
-                              onBlur={() => {
-                                if (mpPhone && !isValidPhone(mpPhone)) setErr('mpPhone','Enter a valid Safaricom number (07xx or 01xx)')
-                                else if (mpPhone && isValidPhone(mpPhone)) setMpPhone(`+${normalisePhone(mpPhone)}`)
-                              }} />
+                          <p className="text-[9px] tracking-[0.18em] uppercase" style={{ color:'var(--gold)', fontFamily:'var(--font-body)' }}>Pay via M-Pesa Paybill</p>
+                          <p className="text-[11px] leading-[1.6]" style={{ color:'var(--muted)' }}>Pay the exact amount below, then enter the confirmation code from your M-Pesa message.</p>
+                          <div className="space-y-1.5 pt-1">
+                            {[['Paybill',MPESA_PAYBILL],['Account Number',MPESA_ACCOUNT],['Amount Due',`KES ${grand.toLocaleString()}`]].map(([k,v]) => (
+                              <div key={k} className="flex justify-between"><span className="text-[10px]" style={{ color:'var(--muted)' }}>{k}</span><strong className="text-[12px]" style={{ color:'var(--gold)' }}>{v}</strong></div>
+                            ))}
+                          </div>
+                          <FormField label="M-Pesa Confirmation Code *" error={errs.paymentReference}>
+                            <input className={`input-dark${errs.paymentReference?' err':''}`} placeholder="e.g. QGH7XYZ123" value={paymentReference}
+                              onChange={e => { setPaymentReference(e.target.value.toUpperCase()); clearErr('paymentReference') }} />
                           </FormField>
-                          <details>
-                            <summary className="text-[9px] uppercase tracking-widest cursor-pointer list-none" style={{ color:'var(--muted)', fontFamily:'var(--font-body)' }}>Prefer to pay via Paybill? ▾</summary>
-                            <div className="mt-3 space-y-1.5 pt-3" style={{ borderTop:'0.5px solid var(--border2)' }}>
-                              {[['Go to','M-Pesa → Lipa na M-Pesa → Pay Bill'],['Paybill Number',MPESA_PAYBILL],['Account Number',MPESA_ACCOUNT],['Business Name',MPESA_NAME],['Amount',`KES ${grand.toLocaleString()}`]].map(([k,v]) => (
-                                <div key={k} className="flex justify-between">
-                                  <span className="text-[10px]" style={{ color:'var(--muted)' }}>{k}</span>
-                                  <span className="text-[10px] text-right max-w-[55%]" style={{ color:k==='Paybill Number'||k==='Account Number'?'var(--gold2)':'var(--cream)', fontWeight:k==='Paybill Number'||k==='Account Number'?500:300 }}>{v}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </details>
                         </div>
                       )}
 
@@ -983,7 +921,7 @@ export function CartPanel() {
                           <p className="text-[11px] leading-[1.65] mb-4" style={{ color:'var(--muted)' }}>
                             Card payments are coming soon. Please use M-Pesa or Room Charge in the meantime.
                           </p>
-                          <p style={{ fontSize:'8px', color:'rgba(255,255,255,0.18)', fontFamily:'var(--font-body)', letterSpacing:'0.06em' }}>
+                          <p style={{ fontSize:'8px', color:'var(--muted3)', fontFamily:'var(--font-body)', letterSpacing:'0.06em' }}>
                             🔒 When available: Encrypted · PCI-DSS compliant · Powered by Stripe
                           </p>
                         </div>
@@ -1007,7 +945,7 @@ export function CartPanel() {
                         <textarea className={`input-dark${errs.message?' err':''}`} style={{ minHeight:'90px', resize:'vertical' }} maxLength={500}
                           placeholder="Tell us about your group, any special requirements, or questions…"
                           value={message} onChange={e => { setMessage(e.target.value); clearErr('message') }} />
-                        <p style={{ fontSize:'8px', color:'rgba(255,255,255,0.2)', marginTop:3, fontFamily:'var(--font-body)', textAlign:'right' }}>{message.length}/500</p>
+                        <p style={{ fontSize:'8px', color:'var(--muted2)', marginTop:3, fontFamily:'var(--font-body)', textAlign:'right' }}>{message.length}/500</p>
                       </FormField>
                     </div>
                   )}
@@ -1046,7 +984,7 @@ export function CartPanel() {
                   <button onClick={handlePayNow} disabled={loading} className="btn-gold w-full"
                     style={{ padding:'14px 28px', fontSize:'10px', letterSpacing:'0.22em', opacity:loading?0.6:1 }}>
                     {loading ? 'Processing…'
-                      : payMethod==='mpesa' ? `Send M-Pesa Prompt · KES ${grand.toLocaleString()}`
+                      : payMethod==='mpesa' ? `Submit Payment Code · KES ${grand.toLocaleString()}`
                       :                      `Confirm Room Charge · KES ${grand.toLocaleString()}`}
                   </button>
                 )}

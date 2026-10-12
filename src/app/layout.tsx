@@ -15,6 +15,7 @@ import PageTransition from '@/components/PageTransition'
 
 import { CartProvider } from '@/context/CartContext'
 import { CartPanel } from '@/components/cart/CartPanel'
+import { ThemeProvider } from '@/components/ThemeProvider'
 
 import { Toaster } from 'react-hot-toast'
 import AuthProvider from '@/components/providers/AuthProvider'
@@ -115,7 +116,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#0A0A0A',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FAF7F2' },
+    { media: '(prefers-color-scheme: dark)', color: '#0A0A0A' },
+  ],
   viewportFit: 'cover',
   colorScheme: 'dark',
   userScalable: true,
@@ -153,14 +157,22 @@ export default function RootLayout({
       <body
         suppressHydrationWarning
         className="
-          bg-[#0d0c09]
-          text-[#ede6d3]
           font-body
+          text-sm
+          font-light
+          leading-[var(--lead-relaxed)]
           antialiased
           overflow-x-hidden
+          body-rendering
           selection:bg-[#c8a84b]/30
         "
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var saved=localStorage.getItem('ukv-theme');var theme=saved?saved:'light';document.documentElement.setAttribute('data-theme',theme);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`,
+          }}
+        />
+
         {/* Ambient Grain Overlay */}
         <div
           aria-hidden="true"
@@ -177,26 +189,28 @@ export default function RootLayout({
           }}
         />
 
-        <AuthProvider>
-  <CartProvider>
-    <ClientLayout>
-      {/* Cursor */}
-      <Cursor />
+        <ThemeProvider>
+          <AuthProvider>
+            <CartProvider>
+              <ClientLayout>
+                {/* Cursor */}
+                <Cursor />
 
-      {/* Main App */}
-      <main className="relative z-[2] min-h-screen">
-        <PageTransition>
-          {children}
-        </PageTransition>
-      </main>
+                {/* Main App */}
+                <main className="relative z-[2] min-h-screen">
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
+                </main>
 
-      <BackToTopButton />
+                <BackToTopButton />
 
-      {/* SINGLE authoritative cart panel */}
-      <CartPanel />
-    </ClientLayout>
-  </CartProvider>
-</AuthProvider>
+                {/* SINGLE authoritative cart panel */}
+                <CartPanel />
+              </ClientLayout>
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
 
         {/* Toast System */}
         <Toaster

@@ -89,11 +89,11 @@ function RecoveryMeter({
 }) {
   return (
     <div>
-      <div className="flex justify-between mb-2 text-xs uppercase tracking-[0.2em] text-white/50 font-sans">
+      <div className="flex justify-between mb-2 text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-sans">
         <span>{label}</span>
         <span className="text-gold font-medium">{value}%</span>
       </div>
-      <div className="h-[3px] bg-white/8 overflow-hidden rounded-full">
+      <div className="h-[3px] bg-[var(--glass-bg)] overflow-hidden rounded-full">
         <motion.div
           initial={{ width: 0 }}
           whileInView={{ width: `${value}%` }}
@@ -139,8 +139,8 @@ function MagneticButton({ children, className, onClick }: {
 // ─── STAT PILL ───────────────────────────────────────────────────────────────
 function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-white/8 rounded-2xl p-4 flex flex-col gap-1.5 bg-white/[0.02]">
-      <p className="text-xs uppercase tracking-[0.25em] text-white/30 font-sans">{label}</p>
+    <div className="border border-[var(--border2)] rounded-2xl p-4 flex flex-col gap-1.5 bg-[var(--glass-bg)]">
+      <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted2)] font-sans">{label}</p>
       <p className="text-gold text-sm font-mono font-medium leading-tight">{value}</p>
     </div>
   )
@@ -208,7 +208,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
         aria-label={ritual.name}
       >
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/88 backdrop-blur-2xl" />
+        <div className="absolute inset-0 bg-[var(--bg)] backdrop-blur-2xl" />
 
         {/* ── Panel ── */}
         <motion.div
@@ -217,7 +217,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
           animate="visible"
           exit="exit"
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 w-full max-w-6xl flex flex-col lg:flex-row rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden border border-white/10 bg-[#080808] shadow-[0_40px_120px_rgba(0,0,0,0.9)]"
+          className="relative z-10 w-full max-w-6xl flex flex-col lg:flex-row rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden border border-[var(--border2)] bg-[var(--bg)] shadow-[0_40px_120px_rgba(0,0,0,0.9)]"
           style={{ maxHeight: 'min(calc(100vh - 2rem), 90vh)' }}
         >
 
@@ -253,10 +253,10 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
             </div>
             {/* Badges */}
             <div className="absolute top-5 left-5 flex flex-wrap gap-2 z-10">
-              <span className="px-3.5 py-1.5 text-xs uppercase tracking-[0.22em] border border-gold/30 bg-black/55 backdrop-blur-xl text-gold rounded-full font-medium">
+              <span className="px-3.5 py-1.5 text-xs uppercase tracking-[0.22em] border border-gold/30 bg-[var(--glass-bg)] backdrop-blur-xl text-gold rounded-full font-medium">
                 {ritual.categoryTag}
               </span>
-              <span className="px-3.5 py-1.5 text-xs uppercase tracking-[0.22em] border border-white/12 bg-black/45 backdrop-blur-xl text-white/65 rounded-full">
+              <span className="px-3.5 py-1.5 text-xs uppercase tracking-[0.22em] border border-[var(--border2)] bg-[var(--glass-bg)] backdrop-blur-xl text-[var(--cream)] rounded-full">
                 {ritual.status}
               </span>
             </div>
@@ -281,21 +281,21 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
                 <p className="text-xs uppercase tracking-[0.35em] text-gold mb-2.5 font-sans font-medium">
                   Arohamai Spa
                 </p>
-                <h2 className="font-display text-4xl md:text-5xl leading-[0.9] text-white">
+                <h2 className="font-display text-4xl md:text-5xl leading-[0.9] text-[var(--cream)]">
                   {ritual.name}
                 </h2>
               </div>
               <button
                 onClick={onClose}
                 aria-label="Close modal"
-                className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/35 hover:text-white hover:border-white/30 transition-all flex-shrink-0 mt-1 ml-2 text-sm"
+                className="w-10 h-10 rounded-full border border-[var(--border2)] flex items-center justify-center text-[var(--muted)] hover:text-[var(--cream)] hover:border-[var(--border2)] transition-all flex-shrink-0 mt-1 ml-2 text-sm"
               >
                 ✕
               </button>
             </motion.div>
 
             {/* Description */}
-            <motion.p variants={ITEM_VARIANTS} className="text-white/55 leading-relaxed italic text-[15px] font-light border-l-2 border-gold/20 pl-4">
+            <motion.p variants={ITEM_VARIANTS} className="text-[var(--muted)] leading-relaxed italic text-[15px] font-light border-l-2 border-gold/20 pl-4">
               &ldquo;{ritual.description}&rdquo;
             </motion.p>
 
@@ -308,15 +308,15 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
 
             {/* Mood + Soundscape row */}
             <motion.div variants={ITEM_VARIANTS} className="grid grid-cols-2 gap-3">
-              <div className="border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
-                <p className="text-xs uppercase tracking-[0.25em] text-white/30 mb-1.5 font-sans">Mood</p>
+              <div className="border border-[var(--border2)] rounded-2xl p-4 bg-[var(--glass-bg)]">
+                <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted2)] mb-1.5 font-sans">Mood</p>
                 <p className="text-gold text-sm font-mono">{ritual.mood}</p>
               </div>
-              <div className="border border-white/5 rounded-2xl p-4 bg-white/[0.02] flex items-start gap-3">
+              <div className="border border-[var(--border2)] rounded-2xl p-4 bg-[var(--glass-bg)] flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full border border-gold/20 flex items-center justify-center text-gold text-sm flex-shrink-0 mt-0.5">♪</div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-white/30 mb-1.5 font-sans">Soundscape</p>
-                  <p className="text-white/60 text-sm font-sans leading-snug">{ritual.soundscape}</p>
+                  <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted2)] mb-1.5 font-sans">Soundscape</p>
+                  <p className="text-[var(--muted)] text-sm font-sans leading-snug">{ritual.soundscape}</p>
                 </div>
               </div>
             </motion.div>
@@ -324,7 +324,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
             {/* Aroma profile */}
             {ritual.aromaNotes && ritual.aromaNotes.length > 0 && (
               <motion.div variants={ITEM_VARIANTS}>
-                <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-3 font-sans">Aroma Profile</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[var(--muted2)] mb-3 font-sans">Aroma Profile</p>
                 <div className="flex flex-wrap gap-2">
                   {ritual.aromaNotes.map((note) => (
                     <span key={note} className="px-4 py-1.5 border border-gold/22 text-gold text-xs uppercase tracking-[0.18em] rounded-full font-medium">
@@ -338,7 +338,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
             {/* Ritual timeline */}
             {ritual.timeline && ritual.timeline.length > 0 && (
               <motion.div variants={ITEM_VARIANTS}>
-                <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-4 font-sans">Ritual Timeline</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[var(--muted2)] mb-4 font-sans">Ritual Timeline</p>
                 <div className="space-y-3">
                   {ritual.timeline.map((step, i) => (
                     <div
@@ -347,7 +347,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
                       style={{ animationDelay: `${i * 60}ms` }}
                     >
                       <div className="w-1.5 h-1.5 rounded-full bg-gold/45 mt-[5px] flex-shrink-0" />
-                      <p className="text-white/55 text-sm font-sans leading-relaxed">{step}</p>
+                      <p className="text-[var(--muted)] text-sm font-sans leading-relaxed">{step}</p>
                     </div>
                   ))}
                 </div>
@@ -356,7 +356,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
 
             {/* Recovery intelligence — BUG 3 FIX: scrollRef as viewport root */}
             <motion.div variants={ITEM_VARIANTS}>
-              <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-4 font-sans">Recovery Intelligence</p>
+              <p className="text-xs uppercase tracking-[0.28em] text-[var(--muted2)] mb-4 font-sans">Recovery Intelligence</p>
               <div className="space-y-4">
                 <RecoveryMeter label="Stress Recovery"    value={ritual.recovery.stress}    containerRef={scrollRef} />
                 <RecoveryMeter label="Sleep Quality"      value={ritual.recovery.sleep}     containerRef={scrollRef} />
@@ -368,12 +368,12 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
             {/* Add-ons */}
             {ritual.addOns && ritual.addOns.length > 0 && (
               <motion.div variants={ITEM_VARIANTS}>
-                <p className="text-xs uppercase tracking-[0.28em] text-white/30 mb-3 font-sans">Enhancements</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-[var(--muted2)] mb-3 font-sans">Enhancements</p>
                 <div className="flex flex-wrap gap-2">
                   {ritual.addOns.map((addon) => (
                     <span
                       key={addon}
-                      className="px-4 py-2 border border-white/10 text-white/45 text-xs uppercase tracking-[0.15em] rounded-full hover:border-gold/25 hover:text-gold transition-all duration-300 cursor-pointer font-sans"
+                      className="px-4 py-2 border border-[var(--border2)] text-[var(--muted)] text-xs uppercase tracking-[0.15em] rounded-full hover:border-gold/25 hover:text-gold transition-all duration-300 cursor-pointer font-sans"
                     >
                       + {addon}
                     </span>
@@ -383,18 +383,18 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
             )}
 
             {/* Footer CTA */}
-            <motion.div variants={ITEM_VARIANTS} className="border-t border-white/8 pt-7 mt-auto">
+            <motion.div variants={ITEM_VARIANTS} className="border-t border-[var(--border2)] pt-7 mt-auto">
               <div className="flex items-end justify-between mb-6">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/22 mb-1.5 font-sans">Investment</p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted3)] mb-1.5 font-sans">Investment</p>
                   <p className="font-display text-4xl md:text-5xl text-gold leading-none">
                     KES {ritual.price.toLocaleString()}
                   </p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/22 mt-1.5 font-sans">
+                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted3)] mt-1.5 font-sans">
                     {ritual.duration} · Per Session
                   </p>
                 </div>
-                <span className="text-xs uppercase tracking-[0.2em] text-white/20 font-sans">Arohamai Spa</span>
+                <span className="text-xs uppercase tracking-[0.2em] text-[var(--muted3)] font-sans">Arohamai Spa</span>
               </div>
               <div className="flex gap-3">
                 <MagneticButton
@@ -405,7 +405,7 @@ export default function RitualModal({ ritual, onClose }: RitualModalProps) {
                 </MagneticButton>
                 <Link
                   href="/contact"
-                  className="px-7 py-4 border border-white/12 hover:border-gold/30 text-sm uppercase tracking-[0.2em] transition-all duration-500 rounded-full text-center whitespace-nowrap text-white/55 hover:text-gold"
+                  className="px-7 py-4 border border-[var(--border2)] hover:border-gold/30 text-sm uppercase tracking-[0.2em] transition-all duration-500 rounded-full text-center whitespace-nowrap text-[var(--muted)] hover:text-gold"
                 >
                   BOOK NOW
                 </Link>

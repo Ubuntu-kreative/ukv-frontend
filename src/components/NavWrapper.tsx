@@ -26,6 +26,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useCartStore } from '@/context/cartStore'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { useTheme } from '@/components/ThemeProvider'
 
 // ─── EXACT DROPDOWN DATA (from video) ────────────────────────────────────────
 
@@ -184,6 +186,7 @@ const NAV = [
 
 export default function NavWrapper() {
   const pathname  = usePathname()
+  const { theme } = useTheme()
   const [scrolled, setScrolled]       = useState(false)
   const [openMenu, setOpenMenu]       = useState<string | null>(null)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
@@ -285,7 +288,7 @@ export default function NavWrapper() {
           letter-spacing: .16em;
           text-transform: uppercase;
           text-decoration: none;
-          color: rgba(255,255,255,0.82);
+          color: var(--cream);
           transition: color .18s ease;
           display: block;
           padding: 6px 0;
@@ -361,10 +364,10 @@ export default function NavWrapper() {
         zIndex:       1001,
         height:       scrolled ? '0' : '48px',
         overflow:     'hidden',
-        background:   'rgba(10,10,10,0.08)',
+        background:   'var(--glass-bg)',
         backdropFilter: 'blur(15px)',
         WebkitBackdropFilter: 'blur(15px)',
-        borderBottom: scrolled ? 'none' : '1px solid rgba(255,255,255,0.05)',
+        borderBottom: scrolled ? 'none' : '1px solid var(--border2)',
         transition:   'height .35s ease, background .3s ease',
       }}>
         <div style={{
@@ -393,7 +396,7 @@ export default function NavWrapper() {
                   fontSize:      '11px',
                   letterSpacing: '.3em',
                   textTransform: 'uppercase',
-                  color:         'rgba(255,255,255,0.58)',
+                  color:         'var(--muted)',
                 }}>{s}</span>
               </span>
             ))}
@@ -421,7 +424,7 @@ export default function NavWrapper() {
                   fontSize:      '11px',
                   letterSpacing: '.22em',
                   textTransform: 'uppercase',
-                  color:         'rgba(255,255,255,0.45)',
+                  color:         'var(--muted)',
                   paddingRight:  '60px',
                 }}>
                   TODAY'S HARVEST — SUKUMA WIKI · LEMONGRASS · MANAGU
@@ -446,10 +449,10 @@ export default function NavWrapper() {
           display:              'flex',
           alignItems:           'center',
           // Glassmorphism — ultra-light transparent with maximum blur
-          background:            'rgba(255,255,255,0.02)',
+          background:            'var(--glass-bg)',
           backdropFilter:       'blur(25px)',
           WebkitBackdropFilter: 'blur(25px)',
-          borderBottom:         '1px solid rgba(255,255,255,0.05)',
+          borderBottom:         '1px solid var(--border2)',
           transition:           'top .35s ease, background .3s ease, backdrop-filter .3s ease',
         }}
       >
@@ -494,7 +497,7 @@ export default function NavWrapper() {
             <span className="u-nav-divider" style={{
               width: '1px',
               height: '40px',
-              background: 'rgba(255,255,255,0.15)',
+              background: 'var(--glass-bg)',
             }} />
 
             {/* Ubuntu logo — larger with zoom on hover */}
@@ -513,7 +516,7 @@ export default function NavWrapper() {
               marginRight:   '12px',
             }}>
               <Image
-                src="/branding/ubuntu-logo-primary.png"
+                src={theme === 'light' ? '/branding/ubuntu-logo-primary.png' : '/branding/ubuntu-logo-dark-transparent.png'}
                 alt="Ubuntu Kreative Village Logo"
                 width={110}
                 height={110}
@@ -547,7 +550,7 @@ export default function NavWrapper() {
                       textDecoration:'none',
                       color:          hoveredItem === item.label
                         ? '#D4AF37'
-                        : 'rgba(255,255,255,0.9)',
+                        : 'var(--cream)',
                       padding:        '14px 22px',
                       display:        'flex',
                       alignItems:     'center',
@@ -570,6 +573,7 @@ export default function NavWrapper() {
 
           {/* RIGHT ACTIONS */}
           <div className="u-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+            <ThemeToggle />
             {/* Mobile hamburger (visible on small screens only) */}
             <button
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
@@ -578,8 +582,8 @@ export default function NavWrapper() {
               onClick={() => setMobileOpen(o => !o)}
               className="md:hidden flex items-center justify-center"
               style={{
-                width: '42px', height: '42px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.12)',
-                background: 'transparent', cursor: 'pointer', color: 'rgba(255,255,255,0.85)'
+                width: '42px', height: '42px', borderRadius: '50%', border: '1px solid var(--border2)',
+                background: 'transparent', cursor: 'pointer', color: 'var(--cream)'
               }}
             >
               <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>{mobileOpen ? '✕' : '☰'}</span>
@@ -646,7 +650,7 @@ export default function NavWrapper() {
           <div
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
-            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)' }}
+            style={{ position: 'absolute', inset: 0, background: 'var(--glass-bg)' }}
           />
 
           {/* panel */}
@@ -656,7 +660,7 @@ export default function NavWrapper() {
             aria-label="Main menu"
             style={{
               position: 'relative',
-              background: 'rgba(8,8,8,0.35)',
+              background: 'var(--bg2)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               width: '85%',
@@ -664,7 +668,7 @@ export default function NavWrapper() {
               height: '100%',
               padding: '24px',
               overflowY: 'auto',
-              borderRight: '1px solid rgba(255,255,255,0.1)',
+              borderRight: '1px solid var(--border2)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
@@ -672,12 +676,12 @@ export default function NavWrapper() {
                 <div style={{ width: 40, height: 40, borderRadius: '4px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Image src="/branding/ubuntu-mark2.png" alt="Ubuntu Mark" width={40} height={40} style={{ objectFit: 'contain' }} />
                 </div>
-                <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ width: 1, height: 24, background: 'var(--glass-bg)' }} />
                 <div style={{ width: 48, height: 48, borderRadius: '4px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Image src="/branding/ubuntu-logo-primary.png" alt="Logo" width={48} height={48} style={{ objectFit: 'contain' }} />
                 </div>
               </div>
-              <button aria-label="Close menu" onClick={() => setMobileOpen(false)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.9)', fontSize: 24, cursor: 'pointer' }}>✕</button>
+              <button aria-label="Close menu" onClick={() => setMobileOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--cream)', fontSize: 24, cursor: 'pointer' }}>✕</button>
             </div>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -693,14 +697,14 @@ export default function NavWrapper() {
                           flex: 1,
                           display: 'block',
                           padding: '16px 0',
-                          color: 'rgba(255,255,255,0.9)',
+                          color: 'var(--cream)',
                           textDecoration: 'none',
                           fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
                           fontSize: 16,
                           letterSpacing: '.14em',
                           textTransform: 'uppercase',
                           fontWeight: 500,
-                          borderBottom: '1px solid rgba(255,255,255,0.08)',
+                          borderBottom: '1px solid var(--border2)',
                         }}
                       >
                         {item.label}
@@ -757,14 +761,14 @@ export default function NavWrapper() {
                                     letterSpacing: '.1em',
                                     textTransform: 'uppercase',
                                     textDecoration: 'none',
-                                    color: link.gold ? '#D4AF37' : 'rgba(255,255,255,0.65)',
+                                    color: link.gold ? '#D4AF37' : 'var(--muted)',
                                     display: 'block',
                                     padding: '8px 0',
                                     fontStyle: link.gold ? 'italic' : 'normal',
                                     transition: 'color .2s ease',
                                   }}
                                   onMouseEnter={(e) => e.currentTarget.style.color = '#D4AF37'}
-                                  onMouseLeave={(e) => e.currentTarget.style.color = link.gold ? '#D4AF37' : 'rgba(255,255,255,0.65)'}
+                                  onMouseLeave={(e) => e.currentTarget.style.color = link.gold ? '#D4AF37' : 'var(--muted)'}
                                 >
                                   {link.label}
                                 </Link>
@@ -772,13 +776,13 @@ export default function NavWrapper() {
                             </div>
                           </div>
                         ))}
-                        <div style={{ paddingTop: '16px', paddingLeft: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '12px' }}>
+                        <div style={{ paddingTop: '16px', paddingLeft: '12px', borderTop: '1px solid var(--border2)', marginTop: '12px' }}>
                           <span style={{
                             fontFamily: "'Cormorant Garamond', Georgia, serif",
                             fontSize: '9px',
                             letterSpacing: '.25em',
                             textTransform: 'uppercase',
-                            color: 'rgba(255,255,255,0.35)',
+                            color: 'var(--muted2)',
                             display: 'block',
                             paddingTop: '12px',
                           }}>
@@ -792,7 +796,7 @@ export default function NavWrapper() {
               })}
             </ul>
 
-            <div style={{ marginTop: 32, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24 }}>
+            <div style={{ marginTop: 32, borderTop: '1px solid var(--border2)', paddingTop: 24 }}>
               <Link href="/contact" onClick={() => setMobileOpen(false)} className="u-reserve" style={{ display: 'inline-block' }}>
                 RESERVE
               </Link>
@@ -821,7 +825,7 @@ export default function NavWrapper() {
             background:            'rgba(6,6,6,0.28)',
             backdropFilter:        'blur(18px)',
             WebkitBackdropFilter:  'blur(18px)',
-            borderBottom:          '1px solid rgba(255,255,255,0.06)',
+            borderBottom:          '1px solid var(--border2)',
           }}
         >
           {/* Two-column link area */}
@@ -863,7 +867,7 @@ export default function NavWrapper() {
 
           {/* Bottom ticker strip */}
           <div style={{
-            borderTop:  '1px solid rgba(255,255,255,0.05)',
+            borderTop:  '1px solid var(--border2)',
             padding:    '10px 40px',
             display:    'flex',
             alignItems: 'center',
@@ -878,7 +882,7 @@ export default function NavWrapper() {
               fontSize:      '9px',
               letterSpacing: '.28em',
               textTransform: 'uppercase',
-              color:         'rgba(255,255,255,0.3)',
+              color:         'var(--muted2)',
             }}>
               {activeData.ticker}
             </span>

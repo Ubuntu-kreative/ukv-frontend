@@ -95,22 +95,22 @@ export const MiniCalendar = memo(function MiniCalendar({
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={prevMonth}
-          className="w-7 h-7 flex items-center justify-center rounded transition-colors text-white/40 hover:text-[var(--gold)] hover:bg-white/5"
+          className="w-7 h-7 flex items-center justify-center rounded transition-colors text-muted-1 hover:text-[var(--gold)] hover:bg-[var(--glass-bg)]"
           aria-label="Previous month"
         >
           ‹
         </button>
 
         <div className="text-center">
-          <p className="font-display text-base font-light text-white/90 leading-none">
+          <p className="font-display text-base font-light text-[var(--cream)] leading-none">
             {MONTHS[viewMonth - 1]}
           </p>
-          <p className="font-mono text-[10px] text-white/30 mt-0.5">{viewYear}</p>
+          <p className="font-mono text-[10px] text-muted-2 mt-0.5">{viewYear}</p>
         </div>
 
         <button
           onClick={nextMonth}
-          className="w-7 h-7 flex items-center justify-center rounded transition-colors text-white/40 hover:text-[var(--gold)] hover:bg-white/5"
+          className="w-7 h-7 flex items-center justify-center rounded transition-colors text-muted-1 hover:text-[var(--gold)] hover:bg-[var(--glass-bg)]"
           aria-label="Next month"
         >
           ›
@@ -120,7 +120,7 @@ export const MiniCalendar = memo(function MiniCalendar({
       {/* Day labels */}
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map(d => (
-          <div key={d} className="text-center font-body text-xs uppercase tracking-wider text-white/20 py-1">
+          <div key={d} className="text-center font-body text-xs uppercase tracking-wider text-muted-2 py-1">
             {d[0]}
           </div>
         ))}
@@ -146,7 +146,7 @@ export const MiniCalendar = memo(function MiniCalendar({
               disabled={past}
               className={[
                 'relative flex flex-col items-center justify-start py-1.5 rounded transition-all duration-150 group',
-                past        ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer hover:bg-white/5',
+                past        ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer hover:bg-[var(--glass-bg)]',
                 isSelected  ? 'bg-[var(--gold)]/15 ring-1 ring-[var(--gold)]/50' : '',
                 todayMark   ? 'ring-1 ring-white/20' : '',
               ].filter(Boolean).join(' ')}
@@ -155,8 +155,8 @@ export const MiniCalendar = memo(function MiniCalendar({
               <span className={[
                 'font-mono text-sm leading-none',
                 isSelected  ? 'text-[var(--gold)]' : '',
-                todayMark   ? 'text-white font-bold' : '',
-                !isSelected && !todayMark ? 'text-white/60' : '',
+                todayMark   ? 'text-[var(--cream)] font-bold' : '',
+                !isSelected && !todayMark ? 'text-muted-1' : '',
               ].filter(Boolean).join(' ')}>
                 {day}
               </span>
@@ -179,7 +179,7 @@ export const MiniCalendar = memo(function MiniCalendar({
       </div>
 
       {/* Legend */}
-      <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap gap-3">
+      <div className="mt-4 pt-3 border-t border-[var(--border2)] flex flex-wrap gap-3">
         {[
           { color: 'var(--neon)',  label: 'Public' },
           { color: 'var(--gold)', label: 'Corporate' },
@@ -189,7 +189,7 @@ export const MiniCalendar = memo(function MiniCalendar({
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
-            <span className="font-body text-[10px] text-white/30 uppercase tracking-wider">{label}</span>
+            <span className="font-body text-[10px] text-muted-2 uppercase tracking-wider">{label}</span>
           </div>
         ))}
       </div>
@@ -218,21 +218,21 @@ const UpcomingEvents = memo(function UpcomingEvents({
 
   return (
     <div className="mt-4 space-y-1.5">
-      <p className="font-body text-xs uppercase tracking-[0.2em] text-white/25 mb-2">
+      <p className="font-body text-xs uppercase tracking-[0.2em] text-muted-2 mb-2">
         {MONTHS[month - 1]} Events
       </p>
       {events.map(ev => (
         <button
           key={ev.id}
           onClick={() => onEventClick?.(ev)}
-          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded text-left transition-colors hover:bg-white/5 group"
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded text-left transition-colors hover:bg-[var(--glass-bg)] group"
         >
           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: ev.color }} />
           <div className="flex-1 min-w-0">
-            <p className="font-body text-xs text-white/70 truncate group-hover:text-white/90 transition-colors">
+            <p className="font-body text-xs text-[var(--cream)] truncate group-hover:text-[var(--cream)] transition-colors">
               {ev.name}
             </p>
-            <p className="font-mono text-[10px] text-white/25">
+            <p className="font-mono text-[10px] text-muted-2">
               {ev.day} {MONTHS[ev.month - 1].slice(0, 3)}
               {ev.spotsLeft !== undefined && ev.spotsLeft > 0 && (
                 <span className="ml-2 text-[var(--neon)]/60">{ev.spotsLeft} spots</span>

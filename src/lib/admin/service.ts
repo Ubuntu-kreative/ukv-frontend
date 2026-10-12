@@ -16,67 +16,45 @@ function db() {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type BookingStatus   = 'pending' | 'confirmed' | 'cancelled' | 'checked_in' | 'checked_out' | 'payment_failed' | 'no_show'
-export type PaymentStatus   = 'pending' | 'paid' | 'failed' | 'refunded' | 'partial_refund'
-export type RoomStatus      = 'available' | 'occupied' | 'maintenance' | 'cleaning'
+export type BookingStatus   = 'pending' | 'pending_verification' | 'payment_rejected' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled' | 'no_show' | 'payment_failed'
 export type InquiryStatus   = 'new' | 'in_progress' | 'resolved' | 'spam'
 export type InquiryPriority = 'low' | 'normal' | 'high' | 'urgent'
 
 export interface Booking {
-  id:              string
-  ref:             string
-  guest_name:      string
-  guest_email:     string
-  guest_phone:     string
-  room_id:         string
-  room_name:       string
-  check_in:        string
-  check_out:       string
-  nights:          number
-  guests:          number
-  board_plan:      string
-  total_amount:    number
-  paid_amount:     number
-  status:          BookingStatus
-  source:          string
-  special_requests?: string
+  id:                 string
+  booking_reference:  string
+  resource_id:        string
+  guest_id:           string
+  status:             BookingStatus
+  check_in_date:      string
+  check_out_date:     string
+  nights:             number
+  adults:             number
+  children:           number
+  rate_per_night:     number
+  total_amount:       number
+  currency:           string
+  payment_reference?: string | null
+  submitted_at?:      string | null
+  special_requests?:  string | null
+  source:             string
+  cancellation_reason?: string | null
+  notes?:             string | null
   created_at:      string
   updated_at:      string
 }
 
-export interface Payment {
-  id:              string
-  booking_id:      string
-  booking_ref:     string
-  guest_name:      string
-  guest_email:     string
-  amount:          number
-  currency:        string
-  status:          PaymentStatus
-  method:          string
-  mpesa_receipt?:  string
-  phone_number?:   string
-  transaction_date?: string
-  refund_amount?:  number
-  refund_reason?:  string
-  created_at:      string
-}
-
 export interface Room {
-  id:           string
-  name:         string
-  type:         string
-  floor:        string
-  capacity:     number
-  status:       RoomStatus
-  rate_bo:      number
-  rate_bb:      number
-  rate_hb:      number
-  rate_fb:      number
-  amenities:    string[]
-  notes?:       string
-  last_cleaned?: string
-  current_booking_id?: string
+  id:            string
+  resource_key?: string | null
+  name:          string
+  description?:  string | null
+  resource_type: 'cottage' | 'spa' | 'event'
+  capacity?:     number | null
+  min_stay?:     number
+  is_active:     boolean
+  created_at?:   string
+  updated_at?:   string
 }
 
 export interface Inquiry {
@@ -113,16 +91,7 @@ export interface BookingFilters {
   status?:    BookingStatus | 'all'
   from?:      string
   to?:        string
-  room_id?:   string
-  page?:      number
-  per_page?:  number
-}
-
-export interface PaymentFilters {
-  search?:    string
-  status?:    PaymentStatus | 'all'
-  from?:      string
-  to?:        string
+  resource_id?: string
   page?:      number
   per_page?:  number
 }
@@ -139,7 +108,7 @@ export interface InquiryFilters {
 
 export async function getBookings(filters: BookingFilters = {}) {
   const supabase = db()
-  const { search, status, from, to, page = 1, per_page = 20 } = filters
+  const { search, status, from, to, resource_id, page = 1, per_page = 20 } = filters
   const offset = (page - 1) * per_page
 
   let query = supabase
@@ -148,12 +117,11 @@ export async function getBookings(filters: BookingFilters = {}) {
     .order('created_at', { ascending: false })
     .range(offset, offset + per_page - 1)
 
-  if (search) {
-    query = query.or(`guest_name.ilike.%${search}%,guest_email.ilike.%${search}%,ref.ilike.%${search}%,room_name.ilike.%${search}%`)
-  }
+  if (search) query = query.or(`booking_reference.ilike.%${search}%,payment_reference.ilike.%${search}%`)
   if (status && status !== 'all') query = query.eq('status', status)
-  if (from) query = query.gte('check_in', from)
-  if (to)   query = query.lte('check_in', to)
+  if (resource_id) query = query.eq('resource_id', resource_id)
+  if (from) query = query.gte('check_in_date', from)
+  if (to)   query = query.lte('check_in_date', to)
 
   const { data, count, error } = await query
   if (error) throw error
@@ -183,54 +151,10 @@ export async function updateBooking(id: string, updates: Partial<Booking>) {
   if (error) throw error
 }
 
-// ── Payments ──────────────────────────────────────────────────────────────────
-
-export async function getPayments(filters: PaymentFilters = {}) {
-  const supabase = db()
-  const { search, status, from, to, page = 1, per_page = 20 } = filters
-  const offset = (page - 1) * per_page
-
-  let query = supabase
-    .from('payments')
-    .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range(offset, offset + per_page - 1)
-
-  if (search) {
-    query = query.or(`guest_name.ilike.%${search}%,booking_ref.ilike.%${search}%,mpesa_receipt.ilike.%${search}%`)
-  }
-  if (status && status !== 'all') query = query.eq('status', status)
-  if (from) query = query.gte('created_at', from)
-  if (to)   query = query.lte('created_at', to)
-
-  const { data, count, error } = await query
-  if (error) throw error
-  return { data: (data ?? []) as Payment[], count: count ?? 0 }
-}
-
-export async function processRefund(paymentId: string, amount: number, reason: string) {
-  const supabase = db()
-  const { data: payment } = await supabase
-    .from('payments').select('amount').eq('id', paymentId).single()
-  if (!payment) throw new Error('Payment not found')
-
-  const isPartial = amount < payment.amount
-  const { error } = await supabase
-    .from('payments')
-    .update({
-      status:        isPartial ? 'partial_refund' : 'refunded',
-      refund_amount: amount,
-      refund_reason: reason,
-      updated_at:    new Date().toISOString(),
-    })
-    .eq('id', paymentId)
-  if (error) throw error
-}
-
-// ── Rooms ─────────────────────────────────────────────────────────────────────
+// ── Resources ────────────────────────────────────────────────────────────────
 
 export async function getRooms(search?: string): Promise<Room[]> {
-  let query = db().from('rooms').select('*').order('name')
+  let query = db().from('resources').select('*').eq('resource_type', 'cottage').order('name')
   if (search) query = query.ilike('name', `%${search}%`)
   const { data, error } = await query
   if (error) throw error
@@ -239,27 +163,10 @@ export async function getRooms(search?: string): Promise<Room[]> {
 
 export async function updateRoom(id: string, updates: Partial<Room>) {
   const { error } = await db()
-    .from('rooms')
+    .from('resources')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) throw error
-}
-
-export async function setMaintenanceBlock(
-  roomId: string,
-  startDate: string,
-  endDate: string,
-  note: string,
-) {
-  const supabase = db()
-  const { error: re } = await supabase
-    .from('rooms').update({ status: 'maintenance' }).eq('id', roomId)
-  if (re) throw re
-
-  const { error: me } = await supabase
-    .from('maintenance_blocks')
-    .insert({ room_id: roomId, start_date: startDate, end_date: endDate, note })
-  if (me) throw me
 }
 
 // ── Inquiries ─────────────────────────────────────────────────────────────────
@@ -305,30 +212,29 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const today = new Date().toISOString().split('T')[0]
   const monthStart = today.slice(0, 7) + '-01'
 
-  const [bToday, bMonth, revToday, revMonth, rooms, inquiries, pendingPay, checkedIn] =
+  const [bToday, bMonth, revToday, revMonth, resources, inquiries, pendingPay, checkedIn] =
     await Promise.allSettled([
       supabase.from('bookings').select('id', { count: 'exact' }).gte('created_at', today),
       supabase.from('bookings').select('id', { count: 'exact' }).gte('created_at', monthStart),
-      supabase.from('payments').select('amount').eq('status', 'paid').gte('created_at', today),
-      supabase.from('payments').select('amount').eq('status', 'paid').gte('created_at', monthStart),
-      supabase.from('rooms').select('status'),
+      supabase.from('bookings').select('total_amount').eq('status', 'confirmed').gte('created_at', today),
+      supabase.from('bookings').select('total_amount').eq('status', 'confirmed').gte('created_at', monthStart),
+      supabase.from('resources').select('id').eq('resource_type', 'cottage').eq('is_active', true),
       supabase.from('inquiries').select('id', { count: 'exact' }).eq('status', 'new'),
-      supabase.from('payments').select('id', { count: 'exact' }).eq('status', 'pending'),
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'checked_in').eq('check_in', today),
+      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'pending_verification'),
+      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'checked_in').eq('check_in_date', today),
     ])
 
   const sum = (r: PromiseSettledResult<any>) =>
     r.status === 'fulfilled'
-      ? (r.value.data ?? []).reduce((a: number, p: any) => a + (p.amount ?? 0), 0)
+      ? (r.value.data ?? []).reduce((a: number, p: any) => a + (p.total_amount ?? 0), 0)
       : 0
 
   const cnt = (r: PromiseSettledResult<any>) =>
     r.status === 'fulfilled' ? (r.value.count ?? 0) : 0
 
-  const roomsData  = rooms.status === 'fulfilled' ? (rooms.value.data ?? []) : []
-  const total      = roomsData.length || 1
-  const occupied   = roomsData.filter((r: any) => r.status === 'occupied').length
-  const occupancy  = Math.round((occupied / total) * 100)
+  const resourcesData = resources.status === 'fulfilled' ? (resources.value.data ?? []) : []
+  const total         = resourcesData.length || 1
+  const occupancy     = Math.round((checkedIn.status === 'fulfilled' ? (checkedIn.value.count ?? 0) : 0) / total * 100)
 
   return {
     bookings_today:    cnt(bToday),

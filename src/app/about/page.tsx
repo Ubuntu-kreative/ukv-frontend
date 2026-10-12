@@ -114,7 +114,7 @@ const TIMELINE = [
 
 export default function AboutPage() {
   return (
-    <main style={{ background: 'var(--obsidian)', minHeight: '100dvh' }}>
+    <main style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
       <NavWrapper />
 
       {/* ── Hero ── */}
@@ -154,7 +154,7 @@ export default function AboutPage() {
             &ldquo;A living, breathing experience that celebrates togetherness,
             creativity, and authenticity.&rdquo;
           </blockquote>
-          <p className="font-body max-w-2xl" style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.45)', lineHeight: 2 }}>
+          <p className="font-body max-w-2xl" style={{ fontSize: '0.875rem', color: 'var(--muted)', lineHeight: 2 }}>
             Ubuntu Kreative Village is an eco lodge and living farm in Kenya,
             built on the African philosophy that no individual thrives in
             isolation. Every system here — the farm, the kitchen, the spa,
@@ -194,7 +194,7 @@ export default function AboutPage() {
                 <h3 className="font-display mb-3" style={{ fontSize: '1.6rem', fontWeight: 300, color: 'var(--cream)' }}>
                   {v.english}
                 </h3>
-                <p className="font-body text-[11px] leading-loose" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <p className="font-body text-[11px] leading-loose" style={{ color: 'var(--muted)' }}>
                   {v.description}
                 </p>
               </div>
@@ -217,7 +217,7 @@ export default function AboutPage() {
               borderRadius: '16px',
             }}
           >
-            <p className="font-body text-[12px] leading-loose mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <p className="font-body text-[12px] leading-loose mb-6" style={{ color: 'var(--muted)' }}>
               At Ubuntu Kreative Village, every element of your stay is woven together seamlessly. From the moment you arrive, every experience — your accommodation, meals, spa treatments, farm connection, and cultural immersion — works in harmony to create something genuine and transformative.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
@@ -278,7 +278,7 @@ export default function AboutPage() {
                     </h3>
                   </div>
                 </div>
-                <p className="font-body text-[11px] leading-loose" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <p className="font-body text-[11px] leading-loose" style={{ color: 'var(--muted)' }}>
                   {member.bio}
                 </p>
               </div>
@@ -317,7 +317,7 @@ export default function AboutPage() {
                       marginLeft: 2,
                     }}
                   />
-                  <p className="font-body text-[12px] leading-relaxed pt-px" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <p className="font-body text-[12px] leading-relaxed pt-px" style={{ color: 'var(--muted)' }}>
                     {item.event}
                   </p>
                 </div>

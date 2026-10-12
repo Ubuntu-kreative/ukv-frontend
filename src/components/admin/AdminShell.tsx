@@ -32,6 +32,8 @@ export const T = {
 const STATUS_COLOUR: Record<string, { bg: string; text: string }> = {
   // booking
   pending:        { bg: '#FEF9C3', text: '#854D0E' },
+  pending_verification: { bg: '#FEF3C7', text: '#92400E' },
+  payment_rejected: { bg: '#FEE2E2', text: '#991B1B' },
   confirmed:      { bg: '#DCFCE7', text: '#14532D' },
   cancelled:      { bg: '#FEE2E2', text: '#991B1B' },
   checked_in:     { bg: '#DBEAFE', text: '#1E3A8A' },
@@ -303,6 +305,7 @@ const NAV = [
   { href: '/admin',            label: 'Dashboard',  icon: '⌂'  },
   { href: '/admin/bookings',   label: 'Bookings',   icon: '📋' },
   { href: '/admin/payments',   label: 'Payments',   icon: '💳' },
+  { href: '/admin/payment-verification', label: 'M-Pesa Review', icon: '✓' },
   { href: '/admin/calendar',   label: 'Calendar',   icon: '📅' },
   { href: '/admin/inquiries',  label: 'Inquiries',  icon: '💬' },
   { href: '/admin/rooms',      label: 'Rooms',      icon: '🛏' },

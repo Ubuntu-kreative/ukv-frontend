@@ -1,3 +1,5 @@
+@import './theme.css';
+
 /* =========================================================
    UBUNTU KREATIVE VILLAGE — globals.css
    Production Ready · Next.js 16
@@ -31,56 +33,11 @@
 
 :root {
 
-  /* ── Brand Colors ─────────────────────────────────────── */
-  --neon:     #00FF41;
-  --neon-dim: #00C832;
-
-  --gold:       #c8a84b;
-  --gold-light: #f0c878;
-  --gold2:      #e2c96b;
-  --gold-muted: rgba(200, 168, 75, 0.55);
-
-  --cream:  #ede6d3;
-  --cream2: #d9d0bc;
-  --cream3: #c8bea8;
-
-  --obsidian:       #0A0A0A;
-  --obsidian-mid:   #111111;
-  --obsidian-light: #1A1A1A;
-
   /* ── iOS Safe Area (notch support) ─────────────────────── */
   --safe-top:    env(safe-area-inset-top, 0);
   --safe-right:  env(safe-area-inset-right, 0);
   --safe-bottom: env(safe-area-inset-bottom, 0);
   --safe-left:   env(safe-area-inset-left, 0);
-
-  --bg:  #0d0c09;
-  --bg2: #141310;
-  --bg3: #1c1a14;
-  --bg4: #242118;
-  --bg5: #2d2920;
-
-  --earth:     #2C1810;
-  --earth-mid: #4A2E1A;
-
-  --sage:  #6b7d5e;
-  --sage2: #94a886;
-  --rust:  #a34e2e;
-
-  /* ── Transparency ─────────────────────────────────────── */
-  --glass-bg:           rgba(255, 255, 255, 0.04);
-  --glass-border:       rgba(255, 255, 255, 0.08);
-  --glass-border-hover: rgba(0, 255, 65, 0.3);
-
-  --gold-dim:  rgba(200, 168, 75, 0.12);
-  --gold-glow: rgba(200, 168, 75, 0.25);
-
-  --muted:  rgba(237, 230, 211, 0.40);
-  --muted2: rgba(237, 230, 211, 0.15);
-  --muted3: rgba(237, 230, 211, 0.07);
-
-  --border:  rgba(200, 168, 75, 0.14);
-  --border2: rgba(237, 230, 211, 0.08);
 
   /* ── Typography — runtime CSS vars from Next.js font loader ── */
   /*    Fallbacks below are compile-time only; injected vars take precedence */
@@ -124,6 +81,23 @@
   --cursor-size: 12px;
 }
 
+/* Glass card — theme-aware surface treatment */
+.glass-card {
+  background: var(--glass-bg);
+  border: 0.5px solid var(--border2);
+  backdrop-filter: blur(20px);
+}
+
+/* Theme-aware section divider */
+.section-divider {
+  border-color: var(--border2);
+}
+
+/* Theme-aware muted text */
+.text-muted-1 { color: var(--muted); }
+.text-muted-2 { color: var(--muted2); }
+.text-muted-3 { color: var(--muted3); }
+
 /* =========================================================
    RESET + BASE
 ========================================================= */
@@ -143,19 +117,143 @@ html {
 }
 
 body {
-  background:              var(--bg);
-  color:                   var(--cream);
-  font-family:             var(--font-body);
-  font-size:               14px;
-  font-weight:             300;
-  line-height:             var(--lead-relaxed);
-  overflow-x:              hidden;
-  -webkit-font-smoothing:  antialiased;
+  background-color: var(--bg);
+  color: var(--cream);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="light"] .stay-card,
+[data-theme="light"] [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* "Our Philosophy" marquee bar */
+[data-theme="light"] .marquee-bar,
+[data-theme="light"] [class*="border-t"][class*="border-b"] {
+  background: var(--bg3) !important;
+  border-color: var(--border2) !important;
+}
+
+/* Living Heritage / Stories section */
+[data-theme="light"] [class*="font-display"] {
+  color: var(--cream) !important;
+}
+
+/* Small uppercase tracking labels */
+[data-theme="light"] [class*="tracking-"][class*="uppercase"] {
+  color: var(--muted) !important;
+}
+
+/* Featured Experiences cards */
+[data-theme="light"] [class*="rounded"][class*="border"] {
+  border-color: var(--border2) !important;
+  background: var(--bg2) !important;
+}
+
+[data-theme="light"] .stay-card,
+[data-theme="light"] [class*="rounded"][class*="border"] {
+  box-shadow: 0 2px 12px rgba(28,23,16,0.08);
+}
+
+[data-theme="light"] .featured-experience-description {
+  color: var(--muted);
+}
+
+/* Farm telemetry / log sections */
+[data-theme="light"] [class*="font-mono"] {
+  color: var(--cream2) !important;
+}
+
+[data-theme="light"] * {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* ── Light theme page-level text fixes ── */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5 {
+  color: var(--cream) !important;
+}
+
+[data-theme="light"] p {
+  color: var(--muted);
+}
+
+/* Fix white text utilities in light mode */
+[data-theme="light"] .text-white {
+  color: var(--cream) !important;
+}
+
+[data-theme="light"] .text-white\/90,
+[data-theme="light"] .text-white\/80,
+[data-theme="light"] .text-white\/70 {
+  color: var(--cream) !important;
+}
+
+[data-theme="light"] .text-white\/60,
+[data-theme="light"] .text-white\/50 {
+  color: var(--muted) !important;
+}
+
+[data-theme="light"] .text-white\/40,
+[data-theme="light"] .text-white\/30 {
+  color: var(--muted2) !important;
+}
+
+[data-theme="light"] .text-white\/20,
+[data-theme="light"] .text-white\/10 {
+  color: var(--muted3) !important;
+}
+
+/* Fix white border utilities */
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/5,
+[data-theme="light"] .border-white\/8 {
+  border-color: var(--border2) !important;
+}
+
+/* Fix rgba white backgrounds */
+[data-theme="light"] .bg-white\/5,
+[data-theme="light"] .bg-white\/\[0\.05\],
+[data-theme="light"] .bg-white\/\[0\.04\] {
+  background-color: var(--glass-bg) !important;
+}
+
+/* Keep explicitly marked image-overlay text white in light mode */
+[data-theme="light"] .hero-text,
+[data-theme="light"] .image-overlay-text {
+  color: #ffffff !important;
+}
+
+/* Gold stays gold in light mode */
+[data-theme="light"] .text-gold,
+[data-theme="light"] .text-\[var\(--gold\)\] {
+  color: var(--gold) !important;
+}
+
+/* Section backgrounds */
+[data-theme="light"] section {
+  background-color: var(--bg);
+}
+
+/* Card backgrounds */
+[data-theme="light"] [class*="bg-\[#0"],
+[data-theme="light"] [class*="bg-\[#1"] {
+  background-color: var(--bg2) !important;
+}
+
+.body-rendering {
   -moz-osx-font-smoothing: grayscale;
   text-rendering:          optimizeLegibility;
   font-feature-settings:   'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
   font-optical-sizing:     auto;
-  /* Prevent text inflation on iOS */
   -webkit-text-size-adjust: 100%;
 }
 

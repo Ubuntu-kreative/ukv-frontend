@@ -107,25 +107,15 @@ export function formatWeekRange(start: Date, end: Date): string {
 
 interface ApiBooking {
   id:         string
-  room_id:    string
-  room_name:  string
-  check_in:   string
-  check_out:  string
+  resource_id: string
+  check_in_date: string
+  check_out_date: string
   status:     string
-}
-
-interface ApiMaintenanceBlock {
-  id:        string
-  room_id:   string
-  room_name: string
-  start_date: string
-  end_date:   string
-  note?:     string
 }
 
 interface AvailabilityApiResponse {
   bookings:     ApiBooking[]
-  maintenance:  ApiMaintenanceBlock[]
+  maintenance:  never[]
   totalRooms:   number
 }
 
@@ -179,26 +169,15 @@ export class CalendarService {
 
     // Mark booked dates
     for (const booking of json.bookings ?? []) {
-      const dates = this.expandRange(booking.check_in, booking.check_out)
+      const dates = this.expandRange(booking.check_in_date, booking.check_out_date)
       for (const iso of dates) {
         if (!days[iso]) continue
         const day = days[iso]
         day.bookingIds = [...(day.bookingIds ?? []), booking.id]
-        day.roomIds    = [...(day.roomIds    ?? []), booking.room_id]
+        day.roomIds    = [...(day.roomIds    ?? []), booking.resource_id]
         // Determine partial vs fully occupied
         const bookedCount = new Set(day.roomIds).size
         day.status = bookedCount >= json.totalRooms ? 'occupied' : 'partial'
-      }
-    }
-
-    // Mark maintenance blocks (override occupied if all in maintenance)
-    for (const block of json.maintenance ?? []) {
-      const dates = this.expandRange(block.start_date, block.end_date)
-      for (const iso of dates) {
-        if (!days[iso]) continue
-        days[iso].status = 'maintenance'
-        days[iso].note   = block.note ?? 'Maintenance block'
-        days[iso].roomIds = [...(days[iso].roomIds ?? []), block.room_id]
       }
     }
 

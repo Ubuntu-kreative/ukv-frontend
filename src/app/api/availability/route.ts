@@ -29,10 +29,11 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = getSupabase()
 
-    // Fetch total room count
+    // Fetch total cottage count
     const { data: roomsData, error: roomsError } = await supabase
-      .from('rooms')
+      .from('resources')
       .select('id')
+      .eq('resource_type', 'cottage')
 
     if (roomsError) {
       console.error('[Availability API] rooms count error:', roomsError)
@@ -41,35 +42,24 @@ export async function GET(req: NextRequest) {
 
     const totalRooms = roomsData?.length ?? 0
 
-    // Fetch confirmed bookings overlapping the window
+    // Fetch active cottage bookings overlapping the window
     const { data: bookings, error: bErr } = await supabase
       .from('bookings')
-      .select('id, room_id, room_name, check_in, check_out, status')
-      .in('status', ['confirmed', 'pending'])
-      .lt('check_in',  to)    // starts before window end
-      .gt('check_out', from)  // ends after window start
+      .select('id, resource_id, check_in_date, check_out_date, status')
+      .in('status', ['confirmed', 'checked_in'])
+      .lt('check_in_date', to)
+      .gt('check_out_date', from)
+      .in('resource_id', (roomsData ?? []).map(room => room.id))
 
     if (bErr) {
       console.error('[Availability API] bookings error:', bErr)
       return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 })
     }
 
-    // Fetch maintenance blocks overlapping the window
-    const { data: maintenance, error: mErr } = await supabase
-      .from('maintenance_blocks')
-      .select('id, room_id, room_name, start_date, end_date, note')
-      .lt('start_date', to)
-      .gt('end_date',   from)
-
-    if (mErr) {
-      console.error('[Availability API] maintenance error:', mErr)
-      return NextResponse.json({ error: 'Failed to fetch maintenance blocks' }, { status: 500 })
-    }
-
     return NextResponse.json(
       {
         bookings:    bookings    ?? [],
-        maintenance: maintenance ?? [],
+        maintenance: [],
         totalRooms,
         from,
         to,

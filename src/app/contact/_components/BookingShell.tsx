@@ -33,7 +33,7 @@ import type { CalendarEvent } from '../_data/booking-data'
 // Lazy-load the calendar — saves ~18kB from initial bundle
 const MiniCalendar = dynamic(
   () => import('./MiniCalendar').then(m => ({ default: m.MiniCalendar })),
-  { ssr: false, loading: () => <div className="h-64 w-full max-w-sm animate-pulse bg-white/5 rounded-xl" /> }
+  { ssr: false, loading: () => <div className="h-64 w-full max-w-sm animate-pulse bg-[var(--glass-bg)] rounded-xl" /> }
 )
 
 // ── Inject modal styles once ────────────────────────────────────
@@ -58,7 +58,7 @@ function injectModalStyles() {
       background: transparent;
     }
     .ukv-modal-scroll::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.1);
+      background: var(--glass-bg);
       border-radius: 99px;
     }
     @keyframes grain-shimmer {
@@ -169,7 +169,7 @@ export function BookingShell() {
             <em className="not-italic text-[var(--gold)]">stay at the village</em>
           </h1>
 
-          <p className="font-body text-sm text-white/40 max-w-lg leading-relaxed">
+          <p className="font-body text-sm text-muted-1 max-w-lg leading-relaxed">
             Reserve a Pokomo Cottage, Farmhouse Suite or Penthouse. Book Arohamai Spa,
             farm experiences and private events. Enquiries confirmed within 2–4 hours.
           </p>
@@ -178,7 +178,7 @@ export function BookingShell() {
 
       {/* ── TAB BAR ── */}
       <div
-        className="sticky top-[64px] sm:top-[72px] z-30 border-y border-white/5 px-6 md:px-12 lg:px-20"
+        className="sticky top-[64px] sm:top-[72px] z-30 border-y border-[var(--border2)] px-6 md:px-12 lg:px-20"
         style={{ background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(20px)' }}
       >
         <div className="max-w-[1400px] mx-auto flex items-center relative">
@@ -191,11 +191,11 @@ export function BookingShell() {
               >
                 <span className={[
                   'font-body text-xs uppercase tracking-[0.15em] transition-colors',
-                  activeTab === tab.id ? 'text-[var(--gold)]' : 'text-white/40 hover:text-white/60',
+                  activeTab === tab.id ? 'text-[var(--gold)]' : 'text-muted-1 hover:text-muted-1',
                 ].join(' ')}>
                   {tab.label}
                 </span>
-                <span className="font-body text-[10px] text-white/20 mt-0.5 uppercase tracking-widest">
+                <span className="font-body text-[10px] text-muted-2 mt-0.5 uppercase tracking-widest">
                   {tab.desc}
                 </span>
               </button>
@@ -281,9 +281,9 @@ function BookTab({ onDateClick, onEventClick, onSelectService }: {
       {/* Left: compact calendar (fixed 380px width on lg+) */}
       <div
         className="p-6 rounded-2xl"
-        style={{ background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.07)' }}
+        style={{ background: 'var(--glass-bg)', border: '0.5px solid var(--border2)' }}
       >
-        <p className="font-body text-xs uppercase tracking-[0.3em] text-white/30 mb-4">
+        <p className="font-body text-xs uppercase tracking-[0.3em] text-muted-2 mb-4">
           Village Schedule
         </p>
         <MiniCalendar onDateClick={onDateClick} onEventClick={onEventClick} />
@@ -292,10 +292,10 @@ function BookTab({ onDateClick, onEventClick, onSelectService }: {
       {/* Right: quick book cards */}
       <div>
         <div className="mb-5">
-          <p className="font-body text-xs uppercase tracking-[0.3em] text-white/30">
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-muted-2">
             Quick Reserve
           </p>
-          <p className="font-body text-[10px] text-white/20 mt-1 uppercase tracking-wider">
+          <p className="font-body text-[10px] text-muted-2 mt-1 uppercase tracking-wider">
             Click any card to open the booking modal
           </p>
         </div>
@@ -324,8 +324,8 @@ const QuickBookCard = memo(function QuickBookCard({
       onClick={handleClick}
       className="group w-full text-left p-4 rounded-xl transition-all duration-200"
       style={{
-        background: 'rgba(255,255,255,0.02)',
-        border: '0.5px solid rgba(255,255,255,0.07)',
+        background: 'var(--glass-bg)',
+        border: '0.5px solid var(--border2)',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = `0 0 0 1px ${catColor}40, 0 8px 32px rgba(0,0,0,0.4)`
@@ -349,22 +349,22 @@ const QuickBookCard = memo(function QuickBookCard({
                 {svc.badge}
               </span>
             )}
-            <p className="font-body text-sm text-white/80 group-hover:text-white transition-colors truncate">
+            <p className="font-body text-sm text-[var(--cream)] group-hover:text-[var(--cream)] transition-colors truncate">
               {svc.name}
             </p>
-            <p className="font-body text-xs text-white/35 mt-0.5 truncate">{svc.tagline}</p>
+            <p className="font-body text-xs text-muted-2 mt-0.5 truncate">{svc.tagline}</p>
           </div>
           <div className="text-right flex-shrink-0">
             <p className="font-display text-base" style={{ color: catColor }}>
               {svc.price === 0 ? 'Enquire' : `KES ${svc.price.toLocaleString()}`}
             </p>
-            <p className="font-body text-[9px] text-white/25">{svc.priceNote}</p>
+            <p className="font-body text-[9px] text-muted-2">{svc.priceNote}</p>
           </div>
         </div>
 
         {/* Affordance row — makes clear it opens a booking modal */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
-          <span className="font-body uppercase tracking-widest text-white/30" style={{ color: `${catColor}60` }}>
+        <div className="flex items-center justify-between pt-2 border-t border-[var(--border2)] text-xs">
+          <span className="font-body uppercase tracking-widest text-muted-2" style={{ color: `${catColor}60` }}>
             {svc.tag}
           </span>
           <span className="font-body uppercase tracking-wider font-semibold" style={{ color: catColor }}>
@@ -397,7 +397,7 @@ function ServicesTab({ prefillDate, onSelectService }: {
           style={{ background: 'rgba(200,168,75,0.06)', border: '0.5px solid rgba(200,168,75,0.2)' }}
         >
           <span className="text-[var(--gold)] text-sm">📅</span>
-          <p className="font-body text-xs text-white/50">
+          <p className="font-body text-xs text-muted-1">
             Planning for{' '}
             <span className="text-[var(--gold)]">
               {new Date(prefillDate).toLocaleDateString('en-KE', { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -449,10 +449,10 @@ function CategoryPill({ label, icon, active, color, onClick }: {
         'focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none',
       ].join(' ')}
       style={{
-        background: active ? `${color}15` : 'rgba(255,255,255,0.03)',
-        border: `0.5px solid ${active ? `${color}50` : 'rgba(255,255,255,0.08)'}`,
-        color: active ? color : 'rgba(255,255,255,0.35)',
-        borderBottom: active ? `2px solid ${color}` : `0.5px solid ${active ? `${color}50` : 'rgba(255,255,255,0.08)'}`,
+        background: active ? `${color}15` : 'var(--glass-bg)',
+        border: `0.5px solid ${active ? `${color}50` : 'var(--border2)'}`,
+        color: active ? color : 'var(--muted2)',
+        borderBottom: active ? `2px solid ${color}` : `0.5px solid ${active ? `${color}50` : 'var(--border2)'}`,
       }}
     >
       {icon && <span>{icon}</span>}
@@ -474,7 +474,7 @@ const ServiceCard = memo(function ServiceCard({
     <button
       onClick={handleClick}
       className="group w-full text-left rounded-xl overflow-hidden transition-all duration-300"
-      style={{ background: 'rgba(255,255,255,0.025)', border: '0.5px solid rgba(255,255,255,0.07)' }}
+      style={{ background: 'var(--glass-bg)', border: '0.5px solid var(--border2)' }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = `0 0 0 1px ${catColor}40, 0 8px 32px rgba(0,0,0,0.4)`
         e.currentTarget.style.transform = 'scale(1.005)'
@@ -514,7 +514,7 @@ const ServiceCard = memo(function ServiceCard({
           <p className="font-display text-xl leading-none" style={{ color: catColor }}>
             {svc.price === 0 ? 'Enquire' : `KES ${svc.price.toLocaleString()}`}
           </p>
-          <p className="font-body text-[10px] text-white/40 mt-0.5">{svc.priceNote}</p>
+          <p className="font-body text-[10px] text-muted-1 mt-0.5">{svc.priceNote}</p>
         </div>
       </div>
 
@@ -523,10 +523,10 @@ const ServiceCard = memo(function ServiceCard({
         <p className="font-body text-xs uppercase tracking-widest mb-1" style={{ color: catColor }}>
           {svc.tag}
         </p>
-        <p className="font-body text-base text-white/80 group-hover:text-white transition-colors mb-0.5">
+        <p className="font-body text-base text-[var(--cream)] group-hover:text-[var(--cream)] transition-colors mb-0.5">
           {svc.name}
         </p>
-        <p className="font-body text-xs text-white/35 line-clamp-2 leading-relaxed">
+        <p className="font-body text-xs text-muted-2 line-clamp-2 leading-relaxed">
           {svc.tagline}
         </p>
       </div>
@@ -589,8 +589,8 @@ function ContactTab({ onSelectService }: { onSelectService: (s: UKVService) => v
             rel={contact.href?.startsWith('http') ? 'noopener noreferrer' : undefined}
             className="group p-4 rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
             style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '0.5px solid rgba(255,255,255,0.07)',
+              background: 'var(--glass-bg)',
+              border: '0.5px solid var(--border2)',
               cursor: contact.href ? 'pointer' : 'default',
             }}
             onMouseEnter={(e) => {
@@ -608,7 +608,7 @@ function ContactTab({ onSelectService }: { onSelectService: (s: UKVService) => v
                 <p className="font-body text-xs uppercase tracking-widest mb-1" style={{ color: contact.accent }}>
                   {contact.label}
                 </p>
-                <p className="font-body text-xs text-white/70 group-hover:text-white transition-colors whitespace-pre-line leading-relaxed">
+                <p className="font-body text-xs text-[var(--cream)] group-hover:text-[var(--cream)] transition-colors whitespace-pre-line leading-relaxed">
                   {contact.value}
                 </p>
               </div>
@@ -631,16 +631,16 @@ function ContactTab({ onSelectService }: { onSelectService: (s: UKVService) => v
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 font-body text-xs uppercase tracking-widest focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
             style={{
-              border: '0.5px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.4)',
+              border: '0.5px solid var(--border2)',
+              color: 'var(--muted)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
-              e.currentTarget.style.color = 'rgba(255,255,255,1)'
+              e.currentTarget.style.borderColor = 'var(--border2)'
+              e.currentTarget.style.color = 'var(--cream)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-              e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
+              e.currentTarget.style.borderColor = 'var(--border2)'
+              e.currentTarget.style.color = 'var(--muted)'
             }}
           >
             <span>{social.icon}</span>
@@ -653,33 +653,33 @@ function ContactTab({ onSelectService }: { onSelectService: (s: UKVService) => v
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div
           className="p-6 rounded-xl"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.07)' }}
+          style={{ background: 'var(--glass-bg)', border: '0.5px solid var(--border2)' }}
         >
           <h4 className="font-display text-lg font-light mb-4">Hours of Operation</h4>
-          <div className="space-y-3 font-body text-sm text-white/60">
+          <div className="space-y-3 font-body text-sm text-muted-1">
             <div className="flex justify-between">
               <span>Village & Reservations</span>
-              <span className="text-white/40">Open 24 hours</span>
+              <span className="text-muted-1">Open 24 hours</span>
             </div>
             <div className="flex justify-between">
               <span>Arohamai Spa</span>
-              <span className="text-white/40">8 AM – 8 PM Daily</span>
+              <span className="text-muted-1">8 AM – 8 PM Daily</span>
             </div>
             <div className="flex justify-between">
               <span>Restaurant Breakfast</span>
-              <span className="text-white/40">6:30 – 10 AM</span>
+              <span className="text-muted-1">6:30 – 10 AM</span>
             </div>
             <div className="flex justify-between">
               <span>Restaurant Lunch</span>
-              <span className="text-white/40">12 – 3 PM</span>
+              <span className="text-muted-1">12 – 3 PM</span>
             </div>
             <div className="flex justify-between">
               <span>Restaurant Dinner</span>
-              <span className="text-white/40">6:30 – 10 PM</span>
+              <span className="text-muted-1">6:30 – 10 PM</span>
             </div>
             <div className="flex justify-between">
               <span>Farm Tours</span>
-              <span className="text-white/40">Daily from 6 AM</span>
+              <span className="text-muted-1">Daily from 6 AM</span>
             </div>
           </div>
         </div>
@@ -689,7 +689,7 @@ function ContactTab({ onSelectService }: { onSelectService: (s: UKVService) => v
           style={{ background: 'rgba(0,255,65,0.04)', border: '0.5px solid rgba(0,255,65,0.15)' }}
         >
           <h4 className="font-display text-lg font-light mb-4">Moxie — Chat with Us</h4>
-          <p className="font-body text-sm text-white/50 mb-4 leading-relaxed">
+          <p className="font-body text-sm text-muted-1 mb-4 leading-relaxed">
             Skip the form. Ask Moxie to check availability, describe the cottages, suggest meals, or answer questions about the village. Available 24/7.
           </p>
           <button
@@ -755,11 +755,11 @@ function ContactForm() {
       >
         <div className="text-5xl mb-4 pop-in">✓</div>
         <p className="font-display text-3xl font-light mb-3">Message Received</p>
-        <p className="font-body text-base text-white/50 max-w-sm mb-6">
+        <p className="font-body text-base text-muted-1 max-w-sm mb-6">
           Thank you for reaching out. We respond to all enquiries within 2–4 hours. For urgent matters, WhatsApp us at <strong>0111 541 911</strong>.
         </p>
         <button
-          className="font-body text-xs uppercase tracking-widest text-white/40 hover:text-white/70 transition-colors focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none rounded-sm"
+          className="font-body text-xs uppercase tracking-widest text-muted-1 hover:text-[var(--cream)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none rounded-sm"
           onClick={() => { setSubmitted(false); setForm({ name:'', email:'', phone:'', subject:'', source:'', contactMethod: 'email', message:'' }) }}
         >
           Send another message →
@@ -770,8 +770,8 @@ function ContactForm() {
 
   const inputStyle = {
     width: '100%',
-    background: 'rgba(255,255,255,0.04)',
-    border: '0.5px solid rgba(255,255,255,0.12)',
+    background: 'var(--glass-bg)',
+    border: '0.5px solid var(--border2)',
     padding: '12px 16px',
     color: 'var(--cream, #EDE6D3)',
     fontFamily: 'var(--font-body)',
@@ -785,7 +785,7 @@ function ContactForm() {
     fontSize: '11px',
     textTransform: 'uppercase' as const,
     letterSpacing: '0.25em',
-    color: 'rgba(255,255,255,0.35)',
+    color: 'var(--muted2)',
     marginBottom: '8px',
     fontFamily: 'var(--font-body)',
     fontWeight: '500',
@@ -794,7 +794,7 @@ function ContactForm() {
   return (
     <div
       className="p-8 rounded-xl"
-      style={{ background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.07)' }}
+      style={{ background: 'var(--glass-bg)', border: '0.5px solid var(--border2)' }}
     >
       <h3 className="font-display text-2xl font-light mb-8">Send an Enquiry</h3>
       <div className="space-y-6">
@@ -810,7 +810,7 @@ function ContactForm() {
               placeholder="Full name"
               className="focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
               onFocus={(e) => (e.target.style.borderColor = 'rgba(200,168,75,0.4)')}
-              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--border2)')}
             />
           </div>
           <div>
@@ -823,7 +823,7 @@ function ContactForm() {
               placeholder="your@email.com"
               className="focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
               onFocus={(e) => (e.target.style.borderColor = 'rgba(200,168,75,0.4)')}
-              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--border2)')}
             />
           </div>
         </div>
@@ -839,7 +839,7 @@ function ContactForm() {
               placeholder="0711 123 456 or +254711123456"
               className="focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
               onFocus={(e) => (e.target.style.borderColor = 'rgba(200,168,75,0.4)')}
-              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--border2)')}
             />
           </div>
           <div>
@@ -850,7 +850,7 @@ function ContactForm() {
               onChange={e => update('subject', e.target.value)}
               className="focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
               onFocus={(e) => (e.target.style.borderColor = 'rgba(200,168,75,0.4)')}
-              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--border2)')}
             >
               <option value="">— Select a subject —</option>
               <option value="cottage-booking">Cottage or Room Booking</option>
@@ -874,7 +874,7 @@ function ContactForm() {
               onChange={e => update('source', e.target.value)}
               className="focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
               onFocus={(e) => (e.target.style.borderColor = 'rgba(200,168,75,0.4)')}
-              onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--border2)')}
             >
               <option value="">— Optional —</option>
               <option value="google">Google Search</option>
@@ -898,7 +898,7 @@ function ContactForm() {
                     onChange={e => update('contactMethod', e.target.value)}
                     className="w-4 h-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
                   />
-                  <span className="font-body text-sm text-white/60 group-hover:text-white/80 transition-colors capitalize">
+                  <span className="font-body text-sm text-muted-1 group-hover:text-[var(--cream)] transition-colors capitalize">
                     {method}
                   </span>
                 </label>
@@ -918,7 +918,7 @@ function ContactForm() {
             placeholder="Tell us about your visit — dates, group size, special requests, dietary needs, or any questions..."
             className="focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
             onFocus={(e) => (e.target.style.borderColor = 'rgba(200,168,75,0.4)')}
-            onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+            onBlur={(e) => (e.target.style.borderColor = 'var(--border2)')}
           />
         </div>
 
@@ -1064,7 +1064,7 @@ function ServiceModal({ service, prefillDate, onClose }: {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
-        background: 'rgba(0,0,0,0.75)',
+        background: 'var(--glass-bg)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
       }}
@@ -1130,7 +1130,7 @@ function ServiceModal({ service, prefillDate, onClose }: {
                 <p className="font-display text-3xl" style={{ color: catColor }}>
                   KES {totalPrice.toLocaleString()}
                 </p>
-                <p className="font-body text-xs text-white/40 mt-1">
+                <p className="font-body text-xs text-muted-1 mt-1">
                   {service.priceNote}{service.duration && ` · ${service.duration}`}
                 </p>
               </>
@@ -1142,14 +1142,14 @@ function ServiceModal({ service, prefillDate, onClose }: {
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           <div
             className="flex items-start justify-between px-6 py-5 flex-shrink-0"
-            style={{ borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}
+            style={{ borderBottom: '0.5px solid var(--border2)' }}
           >
             <div>
               <p className="font-body text-xs uppercase tracking-[0.3em] mb-2" style={{ color: catColor }}>
                 {service.tag}
               </p>
-              <h2 id="service-modal-title" className="font-display text-3xl font-light text-white/90">{service.name}</h2>
-              <p className="font-body text-sm text-white/40 mt-1">{service.tagline}</p>
+              <h2 id="service-modal-title" className="font-display text-3xl font-light text-[var(--cream)]">{service.name}</h2>
+              <p className="font-body text-sm text-muted-1 mt-1">{service.tagline}</p>
             </div>
             
             {/* Proper close button — 36x36 circle with SVG */}
@@ -1158,45 +1158,45 @@ function ServiceModal({ service, prefillDate, onClose }: {
               aria-label="Close dialog"
               className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ml-4 mt-1 focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
               style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '0.5px solid rgba(255,255,255,0.15)',
+                background: 'var(--glass-bg)',
+                border: '0.5px solid var(--border2)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.14)'
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
+                e.currentTarget.style.background = 'var(--muted3)'
+                e.currentTarget.style.borderColor = 'var(--border2)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'
+                e.currentTarget.style.background = 'var(--muted3)'
+                e.currentTarget.style.borderColor = 'var(--border2)'
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" color="rgba(255,255,255,0.7)">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" color="var(--cream)">
                 <path d="M1 1l14 14M15 1L1 15" />
               </svg>
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 ukv-modal-scroll min-h-0">
-            <p className="font-body text-base text-white/60 leading-relaxed">{service.description}</p>
+            <p className="font-body text-base text-muted-1 leading-relaxed">{service.description}</p>
 
             {service.requiresGuests && (
               <div>
-                <label className="block font-body text-xs uppercase tracking-[0.25em] text-white/40 mb-3">
+                <label className="block font-body text-xs uppercase tracking-[0.25em] text-muted-1 mb-3">
                   Number of Guests
                 </label>
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setGuests(g => Math.max(1, g - 1))}
-                    className="w-10 h-10 flex items-center justify-center rounded transition-colors text-white/50 hover:text-white text-lg font-semibold focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
-                    style={{ border: '0.5px solid rgba(255,255,255,0.15)' }}
+                    className="w-10 h-10 flex items-center justify-center rounded transition-colors text-muted-1 hover:text-[var(--cream)] text-lg font-semibold focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
+                    style={{ border: '0.5px solid var(--border2)' }}
                   >−</button>
-                  <span className="font-display text-3xl w-12 text-center text-white/90">{guests}</span>
+                  <span className="font-display text-3xl w-12 text-center text-[var(--cream)]">{guests}</span>
                   <button
                     onClick={() => setGuests(g => g + 1)}
-                    className="w-10 h-10 flex items-center justify-center rounded transition-colors text-white/50 hover:text-white text-lg font-semibold focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
-                    style={{ border: '0.5px solid rgba(255,255,255,0.15)' }}
+                    className="w-10 h-10 flex items-center justify-center rounded transition-colors text-muted-1 hover:text-[var(--cream)] text-lg font-semibold focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
+                    style={{ border: '0.5px solid var(--border2)' }}
                   >+</button>
-                  <span className="font-body text-sm text-white/40 ml-2">
+                  <span className="font-body text-sm text-muted-1 ml-2">
                     KES {totalPrice.toLocaleString()} total
                   </span>
                 </div>
@@ -1206,28 +1206,28 @@ function ServiceModal({ service, prefillDate, onClose }: {
             {service.requiresDate && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-body text-xs uppercase tracking-[0.25em] text-white/40 mb-2">
+                  <label className="block font-body text-xs uppercase tracking-[0.25em] text-muted-1 mb-2">
                     {service.category === 'accommodation' ? 'Check-in' : 'Date'}
                   </label>
                   <input
                     type="date"
                     value={checkIn}
                     onChange={e => setCheckIn(e.target.value)}
-                    className="w-full bg-white/5 rounded-lg px-3 py-3 font-body text-sm text-white/70 outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
-                    style={{ border: '0.5px solid rgba(255,255,255,0.12)' }}
+                    className="w-full bg-[var(--glass-bg)] rounded-lg px-3 py-3 font-body text-sm text-[var(--cream)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
+                    style={{ border: '0.5px solid var(--border2)' }}
                   />
                 </div>
                 {service.category === 'accommodation' && (
                   <div>
-                    <label className="block font-body text-xs uppercase tracking-[0.25em] text-white/40 mb-2">
+                    <label className="block font-body text-xs uppercase tracking-[0.25em] text-muted-1 mb-2">
                       Check-out
                     </label>
                     <input
                       type="date"
                       value={checkOut}
                       onChange={e => setCheckOut(e.target.value)}
-                      className="w-full bg-white/5 rounded-lg px-3 py-3 font-body text-sm text-white/70 outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
-                      style={{ border: '0.5px solid rgba(255,255,255,0.12)' }}
+                      className="w-full bg-[var(--glass-bg)] rounded-lg px-3 py-3 font-body text-sm text-[var(--cream)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
+                      style={{ border: '0.5px solid var(--border2)' }}
                     />
                   </div>
                 )}
@@ -1235,7 +1235,7 @@ function ServiceModal({ service, prefillDate, onClose }: {
             )}
 
             <div>
-              <label className="block font-body text-xs uppercase tracking-[0.25em] text-white/40 mb-2">
+              <label className="block font-body text-xs uppercase tracking-[0.25em] text-muted-1 mb-2">
                 Notes / Special Requests
               </label>
               <textarea
@@ -1243,8 +1243,8 @@ function ServiceModal({ service, prefillDate, onClose }: {
                 onChange={e => setNotes(e.target.value)}
                 rows={3}
                 placeholder="Dietary requirements, accessibility needs, celebration, special occasion..."
-                className="w-full bg-white/[0.03] rounded-lg px-3 py-3 font-body text-sm text-white/70 outline-none resize-vertical focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
-                style={{ border: '0.5px solid rgba(255,255,255,0.1)' }}
+                className="w-full bg-[var(--glass-bg)] rounded-lg px-3 py-3 font-body text-sm text-[var(--cream)] outline-none resize-vertical focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60"
+                style={{ border: '0.5px solid var(--border2)' }}
               />
             </div>
           </div>
@@ -1252,7 +1252,7 @@ function ServiceModal({ service, prefillDate, onClose }: {
           {/* CTA row */}
           <div
             className="px-6 py-4 space-y-3 flex-shrink-0"
-            style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)' }}
+            style={{ borderTop: '0.5px solid var(--border2)' }}
           >
             {service.price === 0 ? (
               // Enquire-only services — send inquiry instead of reserve
@@ -1282,8 +1282,8 @@ function ServiceModal({ service, prefillDate, onClose }: {
                 </button>
                 <button
                   onClick={handleAddLater}
-                  className="w-full py-3 rounded-lg font-body text-xs uppercase tracking-widest text-white/40 hover:text-white/60 transition-colors focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.08)' }}
+                  className="w-full py-3 rounded-lg font-body text-xs uppercase tracking-widest text-muted-1 hover:text-muted-1 transition-colors focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 focus-visible:outline-none"
+                  style={{ background: 'var(--glass-bg)', border: '0.5px solid var(--border2)' }}
                 >
                   Add to Cart — Checkout Later
                 </button>

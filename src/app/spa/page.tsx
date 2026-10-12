@@ -121,7 +121,7 @@ export default function SpaPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <main className="bg-[#050505] text-white min-h-screen overflow-x-hidden">
+      <main className="text-white min-h-screen overflow-x-hidden" style={{ background: 'var(--bg)' }}>
         <NavWrapper />
 
         {/* ── ABOVE THE FOLD: server HTML on first byte ───────────────────── */}

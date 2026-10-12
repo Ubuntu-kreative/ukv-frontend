@@ -29,10 +29,14 @@ export async function GET(request: Request) {
     const db = getAdminClient()
     const { searchParams } = new URL(request.url)
     const guestId = searchParams.get('guestId')
+    const status = searchParams.get('status')
 
-    let query = db.from('bookings').select('*')
+    let query = db.from('bookings').select('*, guests(first_name, last_name, email)')
     if (guestId) {
       query = query.eq('guest_id', guestId)
+    }
+    if (status) {
+      query = query.eq('status', status)
     }
 
     const { data: bookings, error } = await query
@@ -46,22 +50,42 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = await requireAdmin()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const input = await request.json()
     const db = getAdminClient()
+    const contact = input.contact
+    const bookingInput = input.booking ?? {}
+    const cottage = (input.items ?? []).find((item: { category?: string }) => item.category === 'cottage')
+    const resourceKey = bookingInput.roomId ?? cottage?.resourceId ?? cottage?.id
+    const checkIn = bookingInput.checkIn ?? input.checkIn
+    const checkOut = bookingInput.checkOut ?? input.checkOut
+    const totalAmount = Number(input.totalAmount)
+    const paymentReference = String(input.paymentReference ?? '').trim().toUpperCase()
+
+    if (!contact?.name?.trim() || !contact?.email?.trim() || !resourceKey || !checkIn || !checkOut || !paymentReference || !Number.isFinite(totalAmount) || totalAmount <= 0) {
+      return NextResponse.json({ error: 'Guest details, booking dates, resource, amount, and M-Pesa confirmation code are required.' }, { status: 400 })
+    }
+
+    const { data: resource, error: resourceError } = await db
+      .from('resources')
+      .select('id')
+      .or(`id.eq.${resourceKey},resource_key.eq.${resourceKey}`)
+      .eq('resource_type', 'cottage')
+      .eq('is_active', true)
+      .maybeSingle()
+
+    if (resourceError || !resource) {
+      return NextResponse.json({ error: 'The selected cottage is not available for booking.' }, { status: 409 })
+    }
+    const resolvedResourceId = (resource as unknown as { id: string }).id
 
     const { data: guestRecord, error: guestError } = await db
       .from('guests')
       .upsert(
         {
-          email: input.guest.email.toLowerCase(),
-          first_name: input.guest.firstName,
-          last_name: input.guest.lastName,
-          phone: input.guest.phone,
+          email: contact.email.toLowerCase(),
+          first_name: contact.name.trim().split(/\s+/)[0],
+          last_name: contact.name.trim().split(/\s+/).slice(1).join(' ') || 'Guest',
+          phone: contact.phone || null,
         } as any,
         { onConflict: 'email', ignoreDuplicates: false }
       )
@@ -70,13 +94,22 @@ export async function POST(request: Request) {
 
     if (guestError) throw guestError
 
+    const bookingReference = `UKV-${Date.now()}`
     const bookingPayload = {
+      booking_reference: bookingReference,
       guest_id: (guestRecord as any)?.id,
-      room_id: input.booking.roomId,
-      check_in: input.booking.checkIn,
-      check_out: input.booking.checkOut,
-      status: 'confirmed',
-      total_price: input.booking.totalPrice,
+      resource_id: resolvedResourceId,
+      check_in_date: checkIn,
+      check_out_date: checkOut,
+      adults: input.guests ?? 1,
+      children: 0,
+      rate_per_night: totalAmount,
+      total_amount: totalAmount,
+      currency: 'KES',
+      payment_reference: paymentReference,
+      submitted_at: new Date().toISOString(),
+      notes: input.specialRequests || null,
+      status: 'pending_verification',
     }
 
     const { data: booking, error: bookingError } = await db
@@ -87,7 +120,12 @@ export async function POST(request: Request) {
 
     if (bookingError) throw bookingError
 
-    return NextResponse.json({ success: true, data: booking })
+    return NextResponse.json({
+      success: true,
+      data: booking,
+      referenceNumber: bookingReference,
+      message: 'Your booking request has been received and is pending payment verification. We\'ll confirm your reservation shortly.',
+    }, { status: 201 })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -120,6 +158,22 @@ export async function PATCH(request: Request) {
 
       if (cancelError) throw cancelError
       return NextResponse.json({ success: true, data: cancelledBooking })
+    }
+
+    if (action === 'confirm_payment' || action === 'reject_payment') {
+      const updatePayload = action === 'confirm_payment'
+        ? { status: 'confirmed' }
+        : { status: 'payment_rejected', cancellation_reason: 'M-Pesa payment could not be verified.' }
+      const { data: reviewedBooking, error: reviewError } = await (db as any)
+        .from('bookings')
+        .update({ ...updatePayload, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('status', 'pending_verification')
+        .select()
+        .single()
+
+      if (reviewError) throw reviewError
+      return NextResponse.json({ success: true, data: reviewedBooking })
     }
 
     const { data: updatedBooking, error: updateError } = await (db as any)

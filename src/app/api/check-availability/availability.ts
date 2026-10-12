@@ -17,7 +17,6 @@ export interface AvailabilityRequest {
   checkIn:    string      // YYYY-MM-DD
   checkOut:   string      // YYYY-MM-DD
   guestCount: number
-  category?:  string      // optional category filter
   mealPlan?:  MealPlan    // defaults to 'bed_only'
 }
 

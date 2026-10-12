@@ -392,9 +392,9 @@ function ArrivalHero({ exhibits }: { exhibits: Exhibit[] }) {
             </Link>
             <Link href="/contact" style={{
               padding: '14px 32px',
-              border: '1px solid rgba(255,255,255,0.12)',
+              border: '1px solid var(--border2)',
               background: 'transparent',
-              color: 'rgba(255,255,255,0.55)',
+              color: 'var(--muted)',
               fontFamily: 'var(--font-body)',
               fontSize: FS.cta, letterSpacing: '0.22em',
               textTransform: 'uppercase',
@@ -444,7 +444,7 @@ function ArrivalHero({ exhibits }: { exhibits: Exhibit[] }) {
               </span>
               <span style={{
                 fontFamily: 'var(--font-body)', fontSize: FS.label,
-                color: 'rgba(255,255,255,0.28)', letterSpacing: '0.06em',
+                color: 'var(--muted2)', letterSpacing: '0.06em',
               }}>
                 {current.artist}
               </span>
@@ -465,7 +465,7 @@ function ArrivalHero({ exhibits }: { exhibits: Exhibit[] }) {
         <span style={{
           fontFamily: 'var(--font-body)', fontSize: FS.micro,
           letterSpacing: '0.34em', textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.18)',
+          color: 'var(--muted2)',
         }}>Step inside</span>
         <motion.div
           animate={{ y: [0, 10, 0] }}
@@ -497,7 +497,7 @@ function ArrivalHero({ exhibits }: { exhibits: Exhibit[] }) {
               style={{
                 width: activeSlide === i ? 20 : 6, height: 6, borderRadius: 3,
                 border: 'none', padding: 0, cursor: 'pointer',
-                background: activeSlide === i ? '#C8A96E' : 'rgba(255,255,255,0.25)',
+                background: activeSlide === i ? '#C8A96E' : 'var(--glass-bg)',
                 transition: 'all 0.35s ease',
               }}
             />
@@ -595,9 +595,9 @@ function VillageNodeModal({
             style={{
               position: 'absolute', top: 16, right: 16,
               width: 36, height: 36, borderRadius: '50%',
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
-              color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+              border: '1px solid var(--border2)',
+              background: 'var(--glass-bg)', backdropFilter: 'blur(10px)',
+              color: 'var(--muted)', cursor: 'pointer',
               fontSize: '1.1rem', lineHeight: 1,
             }}
           >
@@ -632,7 +632,7 @@ function VillageNodeModal({
         <div style={{ padding: '28px clamp(24px, 4vw, 36px) 32px' }}>
           <p style={{
             fontFamily: 'var(--font-body)', fontSize: FS.body,
-            color: 'rgba(255,255,255,0.55)', lineHeight: 1.95, marginBottom: 22,
+            color: 'var(--muted)', lineHeight: 1.95, marginBottom: 22,
           }}>
             {node.story}
           </p>
@@ -651,9 +651,9 @@ function VillageNodeModal({
             {node.highlights.map(h => (
               <span key={h} style={{
                 padding: '6px 14px', borderRadius: 20,
-                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                background: 'var(--glass-bg)', border: '1px solid var(--border2)',
                 fontFamily: 'var(--font-body)', fontSize: FS.micro,
-                letterSpacing: '0.1em', color: 'rgba(255,255,255,0.45)',
+                letterSpacing: '0.1em', color: 'var(--muted)',
               }}>
                 {h}
               </span>
@@ -693,7 +693,7 @@ function VillageNodeModal({
               padding: '14px 28px',
               border: `1px solid ${node.accent}30`,
               background: 'transparent',
-              color: 'rgba(255,255,255,0.4)',
+              color: 'var(--muted)',
               fontFamily: 'var(--font-body)', fontSize: FS.cta,
               letterSpacing: '0.18em', textTransform: 'uppercase',
               borderRadius: 10, cursor: 'pointer',
@@ -739,7 +739,7 @@ function GalleryChapterNav() {
         zIndex: 8000, display: 'flex', flexDirection: 'column', gap: 10,
         padding: '14px 10px', borderRadius: 20,
         background: 'rgba(6,9,6,0.55)', backdropFilter: 'blur(14px)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid var(--border2)',
       }}
     >
       {CHAPTERS.map(ch => {
@@ -759,14 +759,14 @@ function GalleryChapterNav() {
             <span style={{
               width: isActive ? 10 : 6, height: isActive ? 10 : 6,
               borderRadius: '50%', flexShrink: 0,
-              background: isActive ? '#C8A96E' : 'rgba(255,255,255,0.2)',
+              background: isActive ? '#C8A96E' : 'var(--glass-bg)',
               boxShadow: isActive ? '0 0 12px rgba(200,169,110,0.5)' : 'none',
               transition: 'all 0.3s',
             }} />
             <span style={{
               fontFamily: 'var(--font-body)', fontSize: FS.micro,
               letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: isActive ? '#C8A96E' : 'rgba(255,255,255,0.3)',
+              color: isActive ? '#C8A96E' : 'var(--muted2)',
               whiteSpace: 'nowrap',
             }}>
               {ch.label}
@@ -838,7 +838,7 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
         </h2>
         <p style={{
           fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-          color: 'rgba(255,255,255,0.45)',
+          color: 'var(--muted)',
           letterSpacing: '0.04em', maxWidth: 520, margin: '0 auto',
           lineHeight: 1.85,
         }}>
@@ -932,9 +932,9 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
               <div style={{ height: '40%', padding: '18px 20px 20px', display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.2em', textTransform: 'uppercase', color: node.accent, marginBottom: 7 }}>{node.sub}</span>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', fontWeight: 300, lineHeight: 1.1, marginBottom: 8 }}>{node.label}</span>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.bodySm, color: 'rgba(255,255,255,0.48)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{node.story}</span>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 'auto', paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.micro, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)' }}>{node.hours}</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.bodySm, color: 'var(--muted)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{node.story}</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 'auto', paddingTop: 14, borderTop: '1px solid var(--border2)' }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.micro, letterSpacing: '0.08em', color: 'var(--muted2)' }}>{node.hours}</span>
                   <span style={{ flexShrink: 0, fontFamily: 'var(--font-body)', fontSize: FS.cta, letterSpacing: '0.14em', textTransform: 'uppercase', color: node.accent, fontWeight: 700 }}>Enter →</span>
                 </div>
               </div>
@@ -942,19 +942,19 @@ function VillageOS({ exhibits, onOpenExhibit }: { exhibits: Exhibit[]; onOpenExh
           ))}
           <div aria-hidden="true" style={{ flex: '0 0 clamp(24px, 7vw, 110px)' }} />
         </div>
-        <div aria-label="Village map progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(scrollProgress * 100)} style={{ height: 2, margin: '0 clamp(24px, 7vw, 110px)', background: 'rgba(255,255,255,0.08)', position: 'relative' }}>
+        <div aria-label="Village map progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(scrollProgress * 100)} style={{ height: 2, margin: '0 clamp(24px, 7vw, 110px)', background: 'var(--glass-bg)', position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0, transformOrigin: 'left', transform: `scaleX(${Math.max(scrollProgress, 0.08)})`, background: '#D4A853', transition: 'transform 0.2s ease' }} />
         </div>
       </div>
       <style jsx>{`
         .village-map-arrow {
           position: absolute; top: 50%; z-index: 3; width: 44px; height: 44px;
-          border: 1px solid rgba(255,255,255,0.14); border-radius: 50%;
-          background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
+          border: 1px solid var(--border2); border-radius: 50%;
+          background: var(--glass-bg); color: var(--cream);
           backdrop-filter: blur(14px); cursor: pointer; font-size: 1.25rem;
           transform: translateY(-50%); transition: background 0.25s, color 0.25s;
         }
-        .village-map-arrow:hover { background: rgba(255,255,255,0.18); color: #D4A853; }
+        .village-map-arrow:hover { background: var(--glass-bg); color: #D4A853; }
         .village-map-arrow-left { left: 24px; }
         .village-map-arrow-right { right: 24px; }
         @media (max-width: 767px) { .village-map-arrow { display: none; } }
@@ -1061,7 +1061,7 @@ function ExploreLifeAtUbuntu({ photos }: { photos: GalleryPhoto[] }) {
         </h2>
         <p style={{
           fontFamily: 'var(--font-body)', fontSize: FS.body,
-          color: 'rgba(255,255,255,0.45)',
+          color: 'var(--muted)',
           lineHeight: 1.85, maxWidth: 600, margin: '0 auto',
         }}>
           A collection of moments from our creative village. Workshops, gatherings, art-making, and the everyday magic
@@ -1201,7 +1201,7 @@ function ExploreLifeAtUbuntu({ photos }: { photos: GalleryPhoto[] }) {
       >
         <p style={{
           fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-          color: 'rgba(255,255,255,0.35)', marginBottom: 20,
+          color: 'var(--muted2)', marginBottom: 20,
         }}>
           Every image tells a story. Tap any photo to enter the gallery and explore deeper.
         </p>
@@ -1226,9 +1226,9 @@ function DayRhythm() {
 
   return (
     <div style={{
-      borderTop: '1px solid rgba(255,255,255,0.04)',
-      borderBottom: '1px solid rgba(255,255,255,0.04)',
-      background: 'rgba(255,255,255,0.015)',
+      borderTop: '1px solid var(--border2)',
+      borderBottom: '1px solid var(--border2)',
+      background: 'var(--glass-bg)',
       position: 'relative', zIndex: 10,
       overflowX: 'auto',
       scrollbarWidth: 'none',
@@ -1246,7 +1246,7 @@ function DayRhythm() {
               padding: '28px 28px',
               background: 'none',
               border: 'none',
-              borderRight: '1px solid rgba(255,255,255,0.04)',
+              borderRight: '1px solid var(--border2)',
               cursor: 'pointer',
               position: 'relative',
               textAlign: 'left',
@@ -1269,7 +1269,7 @@ function DayRhythm() {
                 fontFamily: 'var(--font-display)',
                 fontSize: active === i ? '1.5rem' : '1.2rem',
                 fontWeight: 300,
-                color: active === i ? m.accent : 'rgba(255,255,255,0.2)',
+                color: active === i ? m.accent : 'var(--muted2)',
                 transition: 'all 0.4s',
                 letterSpacing: '-0.01em',
               }}>
@@ -1278,14 +1278,14 @@ function DayRhythm() {
               <span style={{
                 fontFamily: 'var(--font-body)', fontSize: FS.micro,
                 letterSpacing: '0.12em', textTransform: 'uppercase',
-                color: active === i ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
+                color: active === i ? 'var(--muted2)' : 'var(--muted3)',
                 transition: 'color 0.4s',
               }}>AM</span>
             </div>
             <div style={{
               fontFamily: 'var(--font-body)', fontSize: FS.cta,
               letterSpacing: '0.16em', textTransform: 'uppercase',
-              color: active === i ? m.accent : 'rgba(255,255,255,0.22)',
+              color: active === i ? m.accent : 'var(--muted2)',
               marginBottom: 4,
               transition: 'color 0.4s',
               whiteSpace: 'nowrap',
@@ -1298,7 +1298,7 @@ function DayRhythm() {
                 animate={{ opacity: 1, y: 0 }}
                 style={{
                   fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-                  color: 'rgba(255,255,255,0.3)',
+                  color: 'var(--muted2)',
                   lineHeight: 1.6, maxWidth: 180,
                   whiteSpace: 'normal',
                 }}
@@ -1341,7 +1341,7 @@ function LivingStudios({ exhibits, onOpen }: { exhibits: Exhibit[]; onOpen: (e: 
         </h2>
         <p style={{
           fontFamily: 'var(--font-body)', fontSize: FS.body,
-          color: 'rgba(255,255,255,0.32)', lineHeight: 1.9,
+          color: 'var(--muted2)', lineHeight: 1.9,
           maxWidth: 480, letterSpacing: '0.01em',
         }}>
           Every exhibition at Ubuntu Kreative Village is commissioned for these walls,
@@ -1436,7 +1436,7 @@ function LivingMomentsRail() {
         <span style={{
           fontFamily: 'var(--font-body)', fontSize: FS.label,
           letterSpacing: '0.2em', textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.18)',
+          color: 'var(--muted2)',
         }}>
           ← Drag to follow the day →
         </span>
@@ -1477,7 +1477,7 @@ function LivingMomentsRail() {
                 borderRadius: 16,
                 overflow: 'hidden',
                 position: 'relative',
-                border: `1px solid ${isStory ? m.accent + '22' : 'rgba(255,255,255,0.05)'}`,
+                border: `1px solid ${isStory ? m.accent + '22' : 'var(--border2)'}`,
                 background: isStory ? `${m.accent}06` : 'rgba(10,12,9,0.9)',
                 alignSelf: i % 2 === 0 ? 'flex-start' : 'flex-end',
                 marginTop: i % 2 === 0 ? 0 : 24,
@@ -1496,7 +1496,7 @@ function LivingMomentsRail() {
                   <p style={{
                     fontFamily: 'var(--font-body)',
                     fontSize: '11.5px',
-                    color: 'rgba(255,255,255,0.55)',
+                    color: 'var(--muted)',
                     lineHeight: 1.85,
                     letterSpacing: '0.01em',
                     marginBottom: 20,
@@ -1536,7 +1536,7 @@ function LivingMomentsRail() {
                   }}>{m.label}</span>
                   <span style={{
                     fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-                    color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.6,
+                    color: 'var(--muted2)', textAlign: 'center', lineHeight: 1.6,
                   }}>{m.caption}</span>
                 </div>
               ) : (
@@ -1560,7 +1560,7 @@ function LivingMomentsRail() {
                         position: 'absolute', top: 12, left: 14,
                         fontFamily: 'var(--font-body)', fontSize: FS.label,
                         letterSpacing: '0.12em', color: m.accent,
-                        background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
+                        background: 'var(--glass-bg)', backdropFilter: 'blur(8px)',
                         padding: '3px 9px', borderRadius: 20,
                         border: `1px solid ${m.accent}30`,
                       }}>
@@ -1578,7 +1578,7 @@ function LivingMomentsRail() {
                     </span>
                     <span style={{
                       fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-                      color: 'rgba(255,255,255,0.35)', lineHeight: 1.65,
+                      color: 'var(--muted2)', lineHeight: 1.65,
                     }}>
                       {m.caption}
                     </span>
@@ -1684,9 +1684,9 @@ function WorkshopModal({ workshop, onClose }: { workshop: Workshop; onClose: () 
             style={{
               position: 'absolute', top: 16, right: 16,
               width: 36, height: 36, borderRadius: '50%',
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
-              color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+              border: '1px solid var(--border2)',
+              background: 'var(--glass-bg)', backdropFilter: 'blur(10px)',
+              color: 'var(--muted)', cursor: 'pointer',
               fontSize: '1.1rem', lineHeight: 1,
             }}
           >
@@ -1714,7 +1714,7 @@ function WorkshopModal({ workshop, onClose }: { workshop: Workshop; onClose: () 
         <div style={{ padding: '26px clamp(22px, 4vw, 32px) 30px' }}>
           <p style={{
             fontFamily: 'var(--font-body)', fontSize: FS.body,
-            color: 'rgba(255,255,255,0.5)', lineHeight: 1.9, marginBottom: 24,
+            color: 'var(--muted)', lineHeight: 1.9, marginBottom: 24,
           }}>
             {workshop.description}
           </p>
@@ -1723,14 +1723,14 @@ function WorkshopModal({ workshop, onClose }: { workshop: Workshop; onClose: () 
           <div style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '16px 18px', borderRadius: 12,
-            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
+            background: 'var(--glass-bg)', border: '1px solid var(--border2)',
             marginBottom: 18,
           }}>
             <div>
               <span style={{
                 display: 'block', fontFamily: 'var(--font-body)', fontSize: FS.label,
                 letterSpacing: '0.14em', textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.25)', marginBottom: 4,
+                color: 'var(--muted2)', marginBottom: 4,
               }}>
                 Facilitator
               </span>
@@ -1745,7 +1745,7 @@ function WorkshopModal({ workshop, onClose }: { workshop: Workshop; onClose: () 
               <span style={{
                 display: 'block', fontFamily: 'var(--font-body)', fontSize: FS.label,
                 letterSpacing: '0.14em', textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.25)', marginBottom: 4,
+                color: 'var(--muted2)', marginBottom: 4,
               }}>
                 Price
               </span>
@@ -1761,7 +1761,7 @@ function WorkshopModal({ workshop, onClose }: { workshop: Workshop; onClose: () 
           {/* Availability */}
           <div style={{ marginBottom: 26 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
-              <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted2)' }}>
                 Availability
               </span>
               <span style={{
@@ -1771,7 +1771,7 @@ function WorkshopModal({ workshop, onClose }: { workshop: Workshop; onClose: () 
                 {spotsLeft} of {spots} spots left
               </span>
             </div>
-            <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+            <div style={{ height: 3, background: 'var(--glass-bg)', borderRadius: 2 }}>
               <div style={{
                 width: `${spotsPercent}%`, height: '100%', borderRadius: 2,
                 background: urgent ? '#ff6b6b' : accent,
@@ -1812,7 +1812,7 @@ function WorkshopsAlive({
     <section style={{
       maxWidth: 1300, margin: '0 auto',
       padding: '50px clamp(24px, 5vw, 80px) 65px',
-      borderTop: '1px solid rgba(255,255,255,0.04)',
+      borderTop: '1px solid var(--border2)',
       position: 'relative', zIndex: 10,
     }}>
       <div style={{ marginBottom: 40 }}>
@@ -1826,7 +1826,7 @@ function WorkshopsAlive({
         </h2>
         <p style={{
           fontFamily: 'var(--font-body)', fontSize: FS.body,
-          color: 'rgba(255,255,255,0.32)', lineHeight: 1.9, maxWidth: 460,
+          color: 'var(--muted2)', lineHeight: 1.9, maxWidth: 460,
         }}>
           These are not classes. They are shared sessions between a master and a guest.
           No experience required — only willingness.
@@ -1860,7 +1860,7 @@ function WorkshopsAlive({
               style={{
                 borderRadius: 18, overflow: 'hidden',
                 background: 'rgba(10,12,8,0.88)',
-                border: '1px solid rgba(255,255,255,0.05)',
+                border: '1px solid var(--border2)',
                 display: 'flex', flexDirection: 'column',
                 cursor: 'pointer',
               }}
@@ -1898,7 +1898,7 @@ function WorkshopsAlive({
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     padding: '4px 10px', borderRadius: 20,
-                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)',
+                    background: 'var(--glass-bg)', backdropFilter: 'blur(10px)',
                     border: `1px solid ${urgent ? 'rgba(255,100,100,0.3)' : (w.accent ?? '#A8D8F0') + '30'}`,
                   }}>
                     <motion.span
@@ -1941,7 +1941,7 @@ function WorkshopsAlive({
 
                 <p style={{
                   fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-                  color: 'rgba(255,255,255,0.38)',
+                  color: 'var(--muted2)',
                   lineHeight: 1.85, flex: 1, marginBottom: 18,
                 }}>
                   {w.description}
@@ -1950,7 +1950,7 @@ function WorkshopsAlive({
                 {/* Availability bar */}
                 <div style={{ marginBottom: 18 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: FS.label, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted2)' }}>
                       Availability
                     </span>
                     <span style={{
@@ -1960,7 +1960,7 @@ function WorkshopsAlive({
                       {spotsLeft} of {spots}
                     </span>
                   </div>
-                  <div style={{ height: 2.5, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                  <div style={{ height: 2.5, background: 'var(--glass-bg)', borderRadius: 2 }}>
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${spotsPercent}%` }}
@@ -1977,13 +1977,13 @@ function WorkshopsAlive({
                 {/* Footer */}
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.04)',
+                  paddingTop: 14, borderTop: '1px solid var(--border2)',
                 }}>
                   <div>
                     <span style={{
                       display: 'block', fontFamily: 'var(--font-body)', fontSize: FS.label,
                       letterSpacing: '0.12em', textTransform: 'uppercase',
-                      color: 'rgba(255,255,255,0.18)', marginBottom: 3,
+                      color: 'var(--muted2)', marginBottom: 3,
                     }}>
                       {w.facilitator ?? 'Guide'} · {w.duration ?? 'Time TBD'}
                     </span>
@@ -2033,7 +2033,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
   return (
     <section id="fire-circle" style={{
       position: 'relative', zIndex: 10,
-      borderTop: '1px solid rgba(255,255,255,0.04)',
+      borderTop: '1px solid var(--border2)',
       padding: '100px 0 120px',
       overflow: 'hidden',
     }}>
@@ -2063,7 +2063,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
         </h2>
           <p style={{
             fontFamily: 'var(--font-body)', fontSize: FS.body,
-            color: 'rgba(255,255,255,0.32)', lineHeight: 1.9,
+            color: 'var(--muted2)', lineHeight: 1.9,
           }}>
             At the heart of Ubuntu Village is an economy of human craft. Virtuoso Kreative artisans
             who eat at the same table, share the same land, and sell by hand.
@@ -2088,8 +2088,8 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
               style={{
                 borderRadius: 16,
                 padding: '24px 18px 22px',
-                background: active === idx ? `${cm.accent ?? '#D4A853'}07` : 'rgba(255,255,255,0.018)',
-                border: `1px solid ${active === idx ? (cm.accent ?? '#D4A853') + '2e' : 'rgba(255,255,255,0.045)'}`,
+                background: active === idx ? `${cm.accent ?? '#D4A853'}07` : 'var(--glass-bg)',
+                border: `1px solid ${active === idx ? (cm.accent ?? '#D4A853') + '2e' : 'var(--border2)'}`,
                 cursor: 'default',
                 position: 'relative', overflow: 'hidden',
                 transition: 'all 0.35s ease',
@@ -2131,7 +2131,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
 
               <p style={{
                 fontFamily: 'var(--font-body)', fontSize: FS.bodySm,
-                color: 'rgba(255,255,255,0.35)', lineHeight: 1.75,
+                color: 'var(--muted2)', lineHeight: 1.75,
                 marginBottom: 16,
               }}>
                 {cm.description ?? 'Handcrafted artisan work'}
@@ -2140,12 +2140,12 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 paddingTop: 12,
-                borderTop: '1px solid rgba(255,255,255,0.04)',
+                borderTop: '1px solid var(--border2)',
               }}>
                 <span style={{
                   fontFamily: 'var(--font-body)', fontSize: FS.label,
                   letterSpacing: '0.14em', textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.2)',
+                  color: 'var(--muted2)',
                 }}>
                   {cm.vendors ?? 1} maker{(cm.vendors ?? 1) !== 1 ? 's' : ''}
                 </span>
@@ -2203,7 +2203,7 @@ function FireCircle({ craftMarket }: { craftMarket: CraftMarketItem[] }) {
           </h3>
           <p style={{
             fontFamily: 'var(--font-body)', fontSize: FS.body,
-            color: 'rgba(255,255,255,0.32)', lineHeight: 1.9,
+            color: 'var(--muted2)', lineHeight: 1.9,
             maxWidth: 460, margin: '0 auto 36px',
           }}>
             Guests, artists, villagers, and strangers gather at dusk.
@@ -2301,9 +2301,9 @@ function AmbientSoundToggle() {
         position: 'fixed', bottom: 40, left: 24, zIndex: 8100,
         padding: '12px 18px',
         borderRadius: 12,
-        background: isOn ? 'rgba(200,168,83,0.12)' : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${isOn ? 'rgba(200,168,83,0.4)' : 'rgba(255,255,255,0.08)'}`,
-        color: isOn ? '#C8A96E' : 'rgba(255,255,255,0.4)',
+        background: isOn ? 'rgba(200,168,83,0.12)' : 'var(--glass-bg)',
+        border: `1px solid ${isOn ? 'rgba(200,168,83,0.4)' : 'var(--border2)'}`,
+        color: isOn ? '#C8A96E' : 'var(--muted)',
         fontFamily: 'var(--font-body)',
         fontSize: '11px', letterSpacing: '0.15em',
         textTransform: 'uppercase',
@@ -2332,7 +2332,7 @@ function ScrollProgressThread() {
       style={{
         position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 5,
         width: '1px',
-        background: 'rgba(255,255,255,0.06)',
+        background: 'var(--glass-bg)',
         scaleY: prefersReducedMotion ? 1 : scaleY,
         transformOrigin: 'top',
       }}
@@ -2383,7 +2383,7 @@ function TypewriterParagraph({ text, delay }: { text: string; delay: number }) {
       style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(18px, 2.1vw, 24px)',
-        color: 'rgba(255,255,255,0.75)',
+        color: 'var(--cream)',
         lineHeight: 2.1,
         maxWidth: 700,
         margin: '32px 0 48px',
@@ -2437,7 +2437,7 @@ export function GalleryClient({ exhibits, workshops, craftMarket, stats, photos 
     <MotionConfig reducedMotion="user">
     <main style={{
       minHeight: '100vh',
-      background: '#06090A',
+      background: 'var(--bg)',
       color: 'var(--cream, #F5F0E8)',
       position: 'relative',
       overflowX: 'hidden',

@@ -47,9 +47,9 @@ export default function CulturalStorytelling() {
       <style>{`
         .cultural-storytelling {
           padding: 80px 24px;
-          background: linear-gradient(180deg, rgba(16,21,17,0.4) 0%, rgba(23,32,24,0.6) 50%, rgba(16,21,17,0.4) 100%);
-          border-top: 1px solid rgba(196,164,90,0.1);
-          border-bottom: 1px solid rgba(196,164,90,0.1);
+          background: var(--bg3);
+          border-top: 1px solid var(--border2);
+          border-bottom: 1px solid var(--border2);
         }
         .cultural-header {
           text-align: center;
@@ -59,7 +59,7 @@ export default function CulturalStorytelling() {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(2rem, 4vw, 3.5rem);
           font-weight: 300;
-          color: #F5F0E8;
+          color: var(--cream);
           letter-spacing: 0.08em;
           margin-bottom: 12px;
           line-height: 1.2;
@@ -68,7 +68,7 @@ export default function CulturalStorytelling() {
           font-size: 10px;
           letter-spacing: 0.3em;
           text-transform: uppercase;
-          color: rgba(196,164,90,0.6);
+          color: #715A1B;
           font-weight: 500;
         }
         .cultural-stories-grid {
@@ -79,8 +79,8 @@ export default function CulturalStorytelling() {
           margin: 0 auto;
         }
         .cultural-story-card {
-          background: rgba(196,164,90,0.03);
-          border: 1px solid rgba(196,164,90,0.15);
+          background: var(--bg2);
+          border: 1px solid var(--border2);
           border-radius: 12px;
           padding: 32px;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -116,7 +116,7 @@ export default function CulturalStorytelling() {
           font-family: 'Cormorant Garamond', serif;
           font-size: 24px;
           font-weight: 400;
-          color: #F5F0E8;
+          color: var(--cream);
           letter-spacing: 0.05em;
           margin-bottom: 8px;
           line-height: 1.3;
@@ -134,14 +134,14 @@ export default function CulturalStorytelling() {
         .cultural-story-description {
           font-size: 13px;
           line-height: 1.8;
-          color: rgba(245,240,232,0.6);
+          color: var(--muted);
           margin-bottom: 20px;
         }
         .cultural-origin {
           font-size: 9px;
           letter-spacing: 0.25em;
           text-transform: uppercase;
-          color: rgba(245,240,232,0.3);
+          color: var(--muted2);
           font-weight: 500;
         }
         @media (max-width: 768px) {
