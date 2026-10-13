@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   ArrowRight,
   Bot,
@@ -17,6 +17,7 @@ import {
   Waves,
 } from 'lucide-react'
 import MoxieChat from '@/components/moxie/MoxieChat'
+import { useDeferredVideo } from '@/hooks/useDeferredVideo'
 
 const retreatTypes = [
   {
@@ -82,34 +83,13 @@ const suggestions = [
 export default function MoxiePage() {
   const [selectedRetreat, setSelectedRetreat] = useState('Creative Retreat')
   const videoRef = useRef<HTMLVideoElement>(null)
+  useDeferredVideo(videoRef, '/videos/cottages-hero.mp4')
 
   const selectedRecommendation = useMemo(() => {
     return retreatTypes.find(
       (r) => r.title === selectedRetreat
     )
   }, [selectedRetreat])
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    const loadVideo = () => {
-      video.src = '/videos/cottages-hero.mp4'
-      video.load()
-      video.play().catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === 'NotAllowedError') return
-        console.error('Moxie hero video failed to play:', error)
-      })
-    }
-
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(loadVideo, { timeout: 3000 })
-      return () => window.cancelIdleCallback(id)
-    }
-
-    const id = window.setTimeout(loadVideo, 1500)
-    return () => window.clearTimeout(id)
-  }, [])
 
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--cream)] overflow-hidden">
@@ -118,7 +98,7 @@ export default function MoxiePage() {
         <div className="absolute inset-0">
           <video
             ref={videoRef}
-            muted={false}
+            muted
             loop
             playsInline
             preload="none"

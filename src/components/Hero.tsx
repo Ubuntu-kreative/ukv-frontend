@@ -26,6 +26,7 @@ import {
   useSpring,
   AnimatePresence,
 } from 'framer-motion'
+import { useDeferredVideo } from '@/hooks/useDeferredVideo'
 
 // ── Ease curve used across all cinematic reveals ──────────────
 const CINEMA_EASE = [0.22, 1, 0.36, 1] as const
@@ -74,27 +75,7 @@ export default function Hero() {
     return () => clearTimeout(t)
   }, [])
 
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    const loadVideo = () => {
-      video.src = '/videos/Hero-Main01.mp4'
-      video.load()
-      video.play().catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === 'NotAllowedError') return
-        console.error('Hero video failed to play:', error)
-      })
-    }
-
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(loadVideo, { timeout: 3000 })
-      return () => window.cancelIdleCallback(id)
-    }
-
-    const id = window.setTimeout(loadVideo, 1500)
-    return () => window.clearTimeout(id)
-  }, [])
+  useDeferredVideo(videoRef, '/videos/Hero-Main01.mp4')
 
   const mag1 = useMagnetic()
   const mag2 = useMagnetic()

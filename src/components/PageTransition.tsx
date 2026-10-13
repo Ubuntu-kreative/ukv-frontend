@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 interface PageTransitionProps {
@@ -12,34 +12,31 @@ export default function PageTransition({ children }: PageTransitionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const previousPathname = useRef(pathname);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (previousPathname.current === pathname) return
     previousPathname.current = pathname
 
     const container = containerRef.current
     if (!container) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    container.style.transition = 'none'
-    container.style.opacity = '0'
-    container.style.transform = 'translateY(10px)'
+    const animation = container.animate(
+      [
+        { opacity: 0, transform: 'translateY(10px)' },
+        { opacity: 1, transform: 'translateY(0)' },
+      ],
+      { duration: 180, easing: 'ease-out' },
+    )
+    animation.onfinish = () => {
+      animation.cancel()
+    }
 
-    const frame = window.requestAnimationFrame(() => {
-      container.style.transition = 'opacity 180ms ease-out, transform 180ms ease-out'
-      container.style.opacity = '1'
-      container.style.transform = 'translateY(0)'
-    })
-
-    return () => window.cancelAnimationFrame(frame)
+    return () => animation.cancel()
   }, [pathname]);
 
   return (
     <div
       ref={containerRef}
-      style={{
-        opacity: '1',
-        transform: 'translateY(0)',
-        transition: 'opacity 180ms ease-out, transform 180ms ease-out',
-      }}
     >
       {children}
     </div>
