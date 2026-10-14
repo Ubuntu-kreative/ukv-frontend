@@ -86,9 +86,14 @@ export default function FeaturedExperiences() {
       <div className="max-w-8xl mx-auto">
         <div className="flex items-center gap-4 mb-20">
           <div className="h-[1px] flex-1 bg-white/5" />
-          <span className="font-body text-[9px] tracking-[0.3em] uppercase text-white/25">
+          <div
+            role="heading"
+            aria-level={2}
+            className="section-title"
+            style={{ color: 'var(--cream)' }}
+          >
             Featured Experiences
-          </span>
+          </div>
           <div className="h-[1px] flex-1 bg-white/5" />
         </div>
 

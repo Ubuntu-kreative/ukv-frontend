@@ -150,16 +150,43 @@ function MottoStrip() {
 
 function Philosophy() {
   return (
-    <section className="relative py-40 px-6 md:px-10 overflow-hidden cv-auto">
+    <section className="relative px-6 py-40 md:px-10 overflow-hidden cv-auto">
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <div className="flex items-center gap-4 justify-center mb-20 reveal">
           <div className="h-[1px] w-16 bg-[var(--neon)] opacity-30" />
-          <span className="font-body text-[9px] tracking-[0.3em] uppercase text-muted">Our Philosophy</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div
+              role="heading"
+              aria-level={2}
+              className="section-title"
+              style={{ color: 'var(--gold)' }}
+            >
+              Our Philosophy
+            </div>
+            <div
+              aria-hidden="true"
+              style={{
+                width: '48px',
+                height: '1px',
+                background: 'var(--gold)',
+                opacity: 0.6,
+                marginTop: '14px',
+              }}
+            />
+          </div>
           <div className="h-[1px] w-16 bg-[var(--neon)] opacity-30" />
         </div>
         <blockquote
           className="font-display italic leading-tight mb-12 reveal text-[var(--cream)]"
-          style={{ fontSize:'clamp(1.8rem,5.5vw,4.5rem)', fontWeight:300 }}
+          style={{
+            fontSize: 'clamp(1.8rem,5.5vw,4.5rem)',
+            fontWeight: 300,
+            lineHeight: 1.1,
+            maxWidth: '100%',
+            overflowWrap: 'break-word',
+            wordBreak: 'normal',
+            hyphens: 'none',
+          }}
         >
           &ldquo;A living, breathing experience that celebrates{' '}
           <span className="text-grow">togetherness,</span>{' '}

@@ -278,6 +278,22 @@ body {
   font-feature-settings: 'onum' 1, 'kern' 1, 'liga' 1;
 }
 
+.section-title {
+  font-family: var(--font-display), serif;
+  text-transform: uppercase;
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.16em;
+  padding-left: 0.16em;
+  text-align: center;
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
 /* h1–h3 inherit display by default so page sections get it automatically */
 h1, h2, h3 {
   font-family:         var(--font-display);

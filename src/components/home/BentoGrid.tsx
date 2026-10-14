@@ -262,11 +262,7 @@ const ST = {
   } satisfies CSSProperties,
 
   headerLabel: {
-    fontFamily:    'var(--font-body)',
-    fontSize:      '8px',
-    letterSpacing: '0.35em',
-    textTransform: 'uppercase',
-    color:         'var(--muted)',
+    color: 'var(--muted)',
   } satisfies CSSProperties,
 
   headerQuote: {
@@ -1195,7 +1191,7 @@ export default function BentoGrid({ eventsLabel = 'Events Ledger' }: BentoGridPr
           <div style={ST.headerWrap}>
             <div style={ST.headerRow}>
               <div style={ST.headerLineL} />
-              <span style={ST.headerLabel}>The 6 Master Logs</span>
+              <div role="heading" aria-level={2} className="section-title" style={ST.headerLabel}>The 6 Master Logs</div>
               <div style={ST.headerLineR} />
             </div>
             <p style={ST.headerQuote}>&ldquo;Refresh your soul, ground your spirit&rdquo;</p>
