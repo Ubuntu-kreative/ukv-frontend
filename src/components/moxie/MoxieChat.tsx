@@ -30,6 +30,7 @@ export default function MoxieChat({ className, inline = false }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const memoryManagerRef = useRef<ConversationMemoryManager | null>(null)
+  const previousPathnameRef = useRef(pathname)
 
   // Store refs for persistence
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
@@ -37,7 +38,6 @@ export default function MoxieChat({ className, inline = false }: Props) {
   // Zustand stores
   const addToCart = useCartStore((s: any) => s.addItem)
   const openCartPanel = useCartStore((s: any) => s.openCart)
-  const moxieIsOpen = useMoxieStore((s) => s.isOpen)
   const closeMoxie = useMoxieStore((s) => s.closeMoxie)
   const storeSessionId = useMoxieStore((s) => s.sessionId)
   const setStoreSessionId = useMoxieStore((s) => s.setSessionId)
@@ -51,7 +51,9 @@ export default function MoxieChat({ className, inline = false }: Props) {
   useEffect(() => {
     // Initialize session ID on first mount
     if (!sessionId) {
-      const sid = storeSessionId || generateSessionId()
+      const sid = (storeSessionId || generateSessionId())
+        .replace(/[^A-Za-z0-9_-]/g, '')
+        .slice(0, 64) || generateSessionId()
       setSessionId(sid)
       setStoreSessionId(sid)
 
@@ -88,13 +90,36 @@ export default function MoxieChat({ className, inline = false }: Props) {
     }
   }, [messages, open])
 
-  // ─── UI SYNC: Sync bubble with global moxie store ──────────────────────
+  useEffect(() => {
+    if (inline) return
+    if (previousPathnameRef.current === pathname) return
+
+    previousPathnameRef.current = pathname
+    setOpen(false)
+    closeMoxie()
+  }, [pathname, inline, closeMoxie])
 
   useEffect(() => {
-    if (!inline) {
-      setOpen(moxieIsOpen)
+    if (inline) return
+    useMoxieStore.setState({ isOpen: false })
+    return useMoxieStore.subscribe((state, previousState) => {
+      if (state.isOpen && !previousState.isOpen) setOpen(true)
+    })
+  }, [inline])
+
+  useEffect(() => {
+    if (inline || !open) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false)
+        closeMoxie()
+      }
     }
-  }, [moxieIsOpen, inline])
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [inline, open, closeMoxie])
 
   // ─── MESSAGE SENDING ───────────────────────────────────────────────────────
 
@@ -116,25 +141,61 @@ export default function MoxieChat({ className, inline = false }: Props) {
     memoryManagerRef.current.addMessage('user', trimmed)
     setMessage('')
     setIsLoading(true)
+    let requestErrorMessage =
+      'I apologize, but I am having trouble connecting right now. Please try again or contact us directly at hello@ubuntuecolodge.com'
 
     try {
       // Get current memory state
-      const recentMessages = memoryManagerRef.current.getRecentMessages(12)
+      const recentMessages = memoryManagerRef.current.getMessages()
+        .filter(({ role }) => role === 'user' || role === 'assistant')
+        .slice(-20)
+        .map(({ role, content }) => ({ role, content: content.slice(0, 2000) }))
       const profile = memoryManagerRef.current.getProfile()
+      const requestProfile = {
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        checkInDate: profile.checkInDate,
+        checkOutDate: profile.checkOutDate,
+        numberOfGuests: profile.numberOfGuests,
+        numberOfChildren: profile.numberOfChildren,
+        occasion: profile.occasion,
+        budget: profile.budget,
+        vibes: profile.vibes,
+        dietary: profile.dietary,
+        allergies: profile.allergies,
+        wellnessInterests: profile.wellnessInterests,
+        roomPreference: profile.roomPreference,
+        viewPreference: profile.viewPreference,
+        timezone: profile.timezone,
+        language: profile.language,
+        createdAt: profile.createdAt,
+        updatedAt: profile.updatedAt,
+      }
+      const requestSessionId = sessionId
+        .replace(/[^A-Za-z0-9_-]/g, '')
+        .slice(0, 64) || generateSessionId()
 
       const response = await fetch('/api/moxie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: recentMessages.map(({ role, content }) => ({ role, content })),
-          sessionId,
+          messages: recentMessages,
+          sessionId: requestSessionId,
           pathname,
           pageContext: pageContext.page,
-          guestProfile: profile,
+          guestProfile: requestProfile,
         }),
       })
 
       if (!response.ok) {
+        if (response.status === 429) {
+          requestErrorMessage = 'Moxie needs a moment, please try again shortly.'
+        } else if (response.status === 400) {
+          requestErrorMessage = 'Moxie could not use that request. Please try again.'
+        } else if (response.status === 413) {
+          requestErrorMessage = 'That message is too long. Please shorten it and try again.'
+        }
         throw new Error(`API error: ${response.status}`)
       }
 
@@ -170,7 +231,7 @@ export default function MoxieChat({ className, inline = false }: Props) {
       const errorMessage: Message = {
         id: `msg_${Date.now()}_error`,
         role: 'assistant',
-        content: 'I apologize, but I am having trouble connecting right now. Please try again or contact us directly at hello@ubuntuecolodge.com',
+        content: requestErrorMessage,
         timestamp: Date.now(),
       }
 
@@ -222,17 +283,30 @@ export default function MoxieChat({ className, inline = false }: Props) {
   // ─── RENDER: Chat Panel ────────────────────────────────────────────────────
 
   const chatPanel = (
-    <div className={styles.chatPanel} role="dialog" aria-label="Moxie chat panel">
+    <div
+      className={styles.chatPanel}
+      data-theme="dark"
+      data-moxie-floating-panel={inline ? undefined : ''}
+      role="dialog"
+      aria-label="Moxie chat panel"
+      style={inline ? undefined : { position: 'relative' }}
+    >
       {!inline && (
-        <button className={styles.moxieExit} onClick={() => {
-          setOpen(false)
-          closeMoxie()
-        }} type="button">
+        <button
+          className={styles.moxieExit}
+          onClick={() => {
+            setOpen(false)
+            closeMoxie()
+          }}
+          type="button"
+          aria-label="Close chat"
+          style={{ top: 8, right: 8, width: 44, height: 44, padding: 0, zIndex: 1 }}
+        >
           ✕
         </button>
       )}
 
-      <div className={styles.chatHeader}>
+      <div className={styles.chatHeader} style={inline ? undefined : { paddingRight: 76 }}>
         <div className={styles.chatHeaderLeft}>
           <div className={styles.moxieAvatar}>🤖</div>
           <div>
@@ -249,7 +323,11 @@ export default function MoxieChat({ className, inline = false }: Props) {
         </button>
       </div>
 
-      <div className={styles.messages} aria-live="polite">
+      <div
+        className={styles.messages}
+        aria-live="polite"
+        style={inline ? undefined : { height: 'auto', minHeight: 0, flex: '1 1 auto' }}
+      >
         {messages.length === 0 ? (
           <div className={styles.welcomeMessage}>
             <p>🌿 Welcome to Ubuntu Kreative Village!</p>
@@ -323,25 +401,64 @@ export default function MoxieChat({ className, inline = false }: Props) {
   }
 
   // Floating bubble mode
+  if (pathname === '/moxie') return null
+
   return (
-    <div className={`${styles.moxieRoot} ${className ?? ''}`.trim()}>
-      {open && chatPanel}
-      <button
-        type="button"
-        onClick={() => {
-          setOpen((current) => !current)
-          // Also update the global store
-          if (!open) {
-            useMoxieStore.setState({ isOpen: true })
-          } else {
-            closeMoxie()
+    <>
+      <style jsx global>{`
+        [data-moxie-floating-root] {
+          position: fixed;
+          right: 1rem;
+          bottom: calc(1rem + env(safe-area-inset-bottom));
+          z-index: 2000;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+        }
+
+        [data-moxie-floating-panel] {
+          display: flex;
+          flex-direction: column;
+          width: min(380px, calc(100vw - 2rem));
+          height: min(560px, calc(100dvh - 7rem));
+          max-height: min(560px, calc(100dvh - 7rem));
+        }
+
+        @media (max-width: 639px) {
+          [data-moxie-floating-root] {
+            left: 0;
+            right: 0;
+            width: 100vw;
           }
-        }}
-        className={`${styles.moxieBubble} ${open ? styles.moxiePulse : ''}`}
-        aria-label={open ? 'Close chat' : 'Open chat'}
+
+          [data-moxie-floating-panel] {
+            width: 100vw;
+            max-width: 100vw;
+            height: min(560px, 80dvh);
+            max-height: 80dvh;
+            border-radius: 24px 24px 0 0;
+          }
+        }
+      `}</style>
+      <div
+        className={`${styles.moxieRoot} ${className ?? ''}`.trim()}
+        data-moxie-floating-root=""
       >
-        {open ? '✕' : '💬'}
-      </button>
-    </div>
+        {open ? chatPanel : (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(true)
+              useMoxieStore.setState({ isOpen: true })
+            }}
+            className={styles.moxieBubble}
+            data-theme="dark"
+            aria-label="Open chat"
+          >
+            💬
+          </button>
+        )}
+      </div>
+    </>
   )
 }

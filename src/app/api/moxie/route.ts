@@ -67,7 +67,7 @@ function updateMemory(sessionId: string, conversation: Message[]): void {
 }
 
 interface Message {
-  role:    'user' | 'assistant' | 'system'
+  role:    'user' | 'assistant'
   content: string
 }
 
@@ -78,20 +78,212 @@ interface GuestProfile {
   checkInDate?: string
   checkOutDate?: string
   numGuests?: number
+  numberOfGuests?: number
+  numberOfChildren?: number
   dietary?: string[]
   allergies?: string[]
   occasion?: string
   budget?: string
   roomPreference?: string
-  [key: string]: any
+  vibes?: string[]
+  wellnessInterests?: string[]
+  viewPreference?: string
+  timezone?: string
+  language?: string
+  createdAt?: number
+  updatedAt?: number
 }
 
 interface RequestBody {
   messages:      Message[]
   sessionId:     string
-  pathname:      string
+  pathname?:     string
   pageContext?:  string // Page name, e.g., 'restaurant', 'spa', 'cottages'
   guestProfile?: GuestProfile
+}
+
+const MAX_REQUEST_BYTES = 20 * 1024
+const rateLimitState = new Map<string, number[]>()
+let rateLimitChecks = 0
+
+function getClientIp(req: NextRequest): string {
+  return req.headers.get('cf-connecting-ip')
+    || req.headers.get('x-real-ip')
+    || req.headers.get('x-forwarded-for')?.split(',')[0].trim()
+    || 'unknown'
+}
+
+function checkRateLimit(ip: string, now = Date.now()): { allowed: boolean; retryAfter: number } {
+  const recent = (rateLimitState.get(ip) || []).filter((time) => now - time < 10 * 60 * 1000)
+  const burst = recent.filter((time) => now - time < 10 * 1000)
+  const retryAfter = Math.max(
+    burst.length >= 5 ? Math.ceil((burst[burst.length - 5] + 10 * 1000 - now) / 1000) : 0,
+    recent.length >= 20 ? Math.ceil((recent[recent.length - 20] + 10 * 60 * 1000 - now) / 1000) : 0,
+  )
+
+  if (retryAfter > 0) {
+    rateLimitState.set(ip, recent)
+    return { allowed: false, retryAfter }
+  }
+
+  recent.push(now)
+  rateLimitState.set(ip, recent)
+
+  rateLimitChecks += 1
+  if (rateLimitChecks % 128 === 0) {
+    for (const [key, timestamps] of rateLimitState) {
+      if (!timestamps.some((time) => now - time < 10 * 60 * 1000)) {
+        rateLimitState.delete(key)
+      }
+    }
+  }
+
+  return { allowed: true, retryAfter: 0 }
+}
+
+async function readBoundedBody(req: NextRequest): Promise<string | null> {
+  const contentLength = Number(req.headers.get('content-length'))
+  if (Number.isFinite(contentLength) && contentLength >= MAX_REQUEST_BYTES) return null
+  if (!req.body) return ''
+
+  const reader = req.body.getReader()
+  const chunks: Uint8Array[] = []
+  let totalBytes = 0
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      if (!value) continue
+
+      totalBytes += value.byteLength
+      if (totalBytes >= MAX_REQUEST_BYTES) {
+        await reader.cancel()
+        return null
+      }
+      chunks.push(value)
+    }
+  } finally {
+    reader.releaseLock()
+  }
+
+  const body = new Uint8Array(totalBytes)
+  let offset = 0
+  for (const chunk of chunks) {
+    body.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return new TextDecoder().decode(body)
+}
+
+function cleanProfileString(value: string): string {
+  return value.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').trim()
+}
+
+function validateRequestBody(value: unknown): { body?: RequestBody; error?: string } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { error: 'Invalid request body' }
+  }
+
+  const input = value as Record<string, unknown>
+  if (typeof input.sessionId !== 'string'
+    || input.sessionId.length > 64
+    || !/^[A-Za-z0-9_-]+$/.test(input.sessionId)) {
+    return { error: 'Invalid sessionId' }
+  }
+  if (!Array.isArray(input.messages) || input.messages.length > 30) {
+    return { error: 'Invalid messages' }
+  }
+
+  const messages: Message[] = []
+  for (const item of input.messages) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      return { error: 'Invalid message' }
+    }
+    const message = item as Record<string, unknown>
+    if ((message.role !== 'user' && message.role !== 'assistant')
+      || typeof message.content !== 'string'
+      || message.content.length > 2000) {
+      return { error: 'Invalid message' }
+    }
+    messages.push({ role: message.role, content: message.content })
+  }
+
+  for (const field of ['pathname', 'pageContext'] as const) {
+    if (input[field] !== undefined
+      && (typeof input[field] !== 'string' || input[field].length > 120)) {
+      return { error: `Invalid ${field}` }
+    }
+  }
+
+  let guestProfile: GuestProfile | undefined
+  if (input.guestProfile !== undefined) {
+    if (!input.guestProfile || typeof input.guestProfile !== 'object' || Array.isArray(input.guestProfile)) {
+      return { error: 'Invalid guestProfile' }
+    }
+
+    const profileInput = input.guestProfile as Record<string, unknown>
+    const stringFields = [
+      'name', 'email', 'phone', 'checkInDate', 'checkOutDate',
+      'occasion', 'budget', 'roomPreference', 'viewPreference',
+      'timezone', 'language',
+    ] as const
+    const profile: GuestProfile = {}
+
+    for (const field of stringFields) {
+      const fieldValue = profileInput[field]
+      if (fieldValue !== undefined) {
+        if (typeof fieldValue !== 'string' || fieldValue.length > 120) {
+          return { error: `Invalid guestProfile.${field}` }
+        }
+        profile[field] = cleanProfileString(fieldValue)
+      }
+    }
+
+    const numericFields = [
+      'numGuests', 'numberOfGuests', 'numberOfChildren', 'createdAt', 'updatedAt',
+    ] as const
+    for (const field of numericFields) {
+      const fieldValue = profileInput[field]
+      if (fieldValue !== undefined) {
+        if (typeof fieldValue !== 'number' || !Number.isFinite(fieldValue)) {
+          return { error: `Invalid guestProfile.${field}` }
+        }
+        profile[field] = fieldValue
+      }
+    }
+
+    const arrayFields = ['dietary', 'allergies', 'vibes', 'wellnessInterests'] as const
+    for (const field of arrayFields) {
+      const fieldValue = profileInput[field]
+      if (fieldValue !== undefined) {
+        if (!Array.isArray(fieldValue) || fieldValue.some(
+          (item) => typeof item !== 'string' || item.length > 120,
+        )) {
+          return { error: `Invalid guestProfile.${field}` }
+        }
+        profile[field] = fieldValue.map(cleanProfileString)
+      }
+    }
+
+    const allowedProfileFields = new Set<string>([
+      ...stringFields, ...numericFields, ...arrayFields,
+    ])
+    if (Object.keys(profileInput).some((field) => !allowedProfileFields.has(field))) {
+      return { error: 'Invalid guestProfile field' }
+    }
+    guestProfile = profile
+  }
+
+  return {
+    body: {
+      messages,
+      sessionId: input.sessionId,
+      pathname: input.pathname as string | undefined,
+      pageContext: input.pageContext as string | undefined,
+      guestProfile,
+    },
+  }
 }
 
 // ── Tool Definitions ──────────────────────────────────────────────────
@@ -166,13 +358,26 @@ const MOXIE_TOOLS = [
 // ── Anthropic API (fallback) ──────────────────────────────────────────
 // Uses OpenAI-compatible format. Swap API key + model for Claude if preferred.
 
+function readKey(name: string): string {
+  const value = process.env[name]
+  if (typeof value !== 'string') return ''
+
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+
+  const first = trimmed.charAt(0)
+  const quoted = trimmed.length >= 2 && (first === '"' || first === "'") && trimmed.charAt(trimmed.length - 1) === first
+  const unwrapped = quoted ? trimmed.slice(1, -1) : trimmed
+  return unwrapped.trim()
+}
+
 async function callLLM(
   messages: Message[],
   systemPrompt: string,
   tools: typeof MOXIE_TOOLS,
 ): Promise<{ text: string; toolCall?: { name: string; args: Record<string, unknown> } }> {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
+  const OPENAI_API_KEY = readKey('OPENAI_API_KEY')
+  const ANTHROPIC_API_KEY = readKey('ANTHROPIC_API_KEY')
 
   // ── Try OpenAI first ──
   if (OPENAI_API_KEY) {
@@ -247,11 +452,31 @@ async function callLLM(
 // ── Route Handler ─────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const { messages, sessionId, pathname, pageContext, guestProfile }: RequestBody = await req.json()
-
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: 'Invalid messages' }, { status: 400 })
+    const rawBody = await readBoundedBody(req)
+    if (rawBody === null) {
+      return NextResponse.json({ error: 'Request body must be under 20 KB' }, { status: 413 })
     }
+
+    const limit = checkRateLimit(getClientIp(req))
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Moxie is receiving many requests. Please try again shortly.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } },
+      )
+    }
+
+    let parsedBody: unknown
+    try {
+      parsedBody = JSON.parse(rawBody)
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
+    const validation = validateRequestBody(parsedBody)
+    if (!validation.body) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+
+    const { messages, sessionId, pathname = '/', guestProfile } = validation.body
 
     // ── Detect intent from last user message ──
     const lastUser = messages.filter(m => m.role === 'user').at(-1)?.content?.toLowerCase() || ''
@@ -272,27 +497,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Build guest profile context ──
-    let profileContext = ''
-    if (guestProfile && Object.keys(guestProfile).length > 0) {
-      const profileLines: string[] = []
-      if (guestProfile.name) profileLines.push(`Name: ${guestProfile.name}`)
-      if (guestProfile.email) profileLines.push(`Email: ${guestProfile.email}`)
-      if (guestProfile.phone) profileLines.push(`Phone: ${guestProfile.phone}`)
-      if (guestProfile.numGuests) profileLines.push(`Guests: ${guestProfile.numGuests}`)
-      if (guestProfile.checkInDate) profileLines.push(`Check-in: ${guestProfile.checkInDate}`)
-      if (guestProfile.checkOutDate) profileLines.push(`Check-out: ${guestProfile.checkOutDate}`)
-      if (guestProfile.dietary?.length) profileLines.push(`Dietary: ${guestProfile.dietary.join(', ')}`)
-      if (guestProfile.allergies?.length) profileLines.push(`Allergies: ${guestProfile.allergies.join(', ')}`)
-      if (guestProfile.occasion) profileLines.push(`Occasion: ${guestProfile.occasion}`)
-      if (guestProfile.budget) profileLines.push(`Budget: ${guestProfile.budget}`)
-      if (guestProfile.roomPreference) profileLines.push(`Room Preference: ${guestProfile.roomPreference}`)
-
-      if (profileLines.length > 0) {
-        profileContext = '\n\nGUEST PROFILE:\n' + profileLines.join('\n')
-      }
-    }
-
     // ── Fetch guest memory ──
     const memory    = getMemory(sessionId)
     const currentHr = new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
@@ -302,7 +506,8 @@ export async function POST(req: NextRequest) {
       pathname,
       guestMemory: memory || undefined,
       currentTime: currentHr,
-    }) + menuContext + profileContext
+      guestProfile,
+    }) + menuContext
 
     // ── Call LLM ──
     const { text, toolCall } = await callLLM(
