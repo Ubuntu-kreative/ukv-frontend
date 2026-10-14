@@ -23,6 +23,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
+import { UBUNTU_TESTIMONIALS } from '@/lib/ubuntu-testimonials'
 
 // ─── Image assignments from real Ubuntu gallery ───────────────────────────────
 // Slot 1: Origin / transformation — lush garden vista
@@ -835,36 +836,113 @@ export default function UbuntuStoryGrid() {
         }}>
 
           {/* Guestbook teaser row */}
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem',
-            padding: '1.25rem 1.5rem',
-            borderRadius: 'clamp(10px,1.2vw,16px)',
-            background: 'var(--bg2)',
-            border: '0.5px solid var(--border2)',
-          }}>
-            <div>
+          <section
+            aria-labelledby="guestbook-title"
+            className="ukv-guestbook"
+            style={{
+              padding: 'clamp(1.5rem,3vw,2.5rem)',
+              borderRadius: 'clamp(10px,1.2vw,18px)',
+              background: 'var(--bg2)',
+              border: '1px solid var(--gold)',
+              marginBottom: gap,
+            }}
+          >
+            <header style={{
+              display: 'flex', alignItems: 'flex-end',
+              justifyContent: 'space-between', flexWrap: 'wrap',
+              gap: '1rem', marginBottom: '1.5rem',
+            }}>
+              <div style={{ maxWidth: '44rem' }}>
+                <p style={{
+                  fontFamily: 'var(--font-body)', fontSize: '0.75rem',
+                  fontWeight: 600, letterSpacing: '0.18em',
+                  textTransform: 'uppercase', color: 'var(--cream)',
+                  marginBottom: '0.5rem',
+                }}>Ubuntu Guestbook · Land, people, possibility</p>
+                <h3 id="guestbook-title" style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(1.5rem,3vw,2.25rem)',
+                  fontWeight: 500, color: 'var(--cream)', lineHeight: 1.12,
+                  marginBottom: '0.75rem',
+                }}>
+                  Regeneration is a living story.
+                </h3>
+                <p style={{
+                  fontFamily: 'var(--font-body)', fontSize: '1rem',
+                  lineHeight: 1.65, color: 'var(--cream)',
+                }}>
+                  From bare, dry earth to a thriving miniforest, Ubuntu’s story
+                  is rooted in the land and shaped by local women, farmers,
+                  artisans, and creative practitioners.
+                </p>
+              </div>
+              <Link href="/journal/voices" className="ukv-guestbook-link ukv-guestbook-primary">
+                Read all stories →
+              </Link>
+            </header>
+
+            <ul className="ukv-guestbook-practices" aria-label="Ubuntu sustainability practices">
+              <li>
+                <strong>Regeneration</strong>
+                <span>Growing a miniforest from land that began bare and dry.</span>
+              </li>
+              <li>
+                <strong>Women and community</strong>
+                <span>Local women, farmers, artisans, and creative practitioners make the village.</span>
+              </li>
+              <li>
+                <strong>Water stewardship</strong>
+                <span>Rainwater harvesting, drip irrigation, and greywater recycling.</span>
+              </li>
+              <li>
+                <strong>Solar and off-grid living</strong>
+                <span>Solar energy and off-grid-capable stays.</span>
+              </li>
+              {/* TODO: Add verified bio-digester details before publishing. */}
+            </ul>
+
+            <div style={{
+              display: 'flex', alignItems: 'baseline',
+              justifyContent: 'space-between', flexWrap: 'wrap',
+              gap: '0.75rem', margin: '1.75rem 0 0.75rem',
+            }}>
+              <h4 style={{
+                fontFamily: 'var(--font-display)', fontSize: '1.25rem',
+                fontWeight: 500, lineHeight: 1.2, color: 'var(--cream)',
+              }}>Guest voices</h4>
               <p style={{
-                fontFamily: 'var(--font-body)', fontSize: '9px',
-                letterSpacing: '0.35em', textTransform: 'uppercase',
-                color: 'var(--gold)', marginBottom: '5px',
-              }}>Ubuntu Guestbook</p>
-              <p style={{
-                fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem,1.8vw,1.4rem)',
-                fontWeight: 300, color: 'var(--cream)', lineHeight: 1.2,
-              }}>
-                Real stories from guests who stayed, ate, healed, and created here.
-              </p>
+                fontFamily: 'var(--font-body)', fontSize: '0.875rem',
+                lineHeight: 1.5, color: 'var(--cream)',
+              }}>Stories from the people who have experienced Ubuntu.</p>
             </div>
-            <Link href="/journal/voices" style={{
-              fontFamily: 'var(--font-body)', fontSize: '9px',
-              letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: 'var(--gold)', textDecoration: 'none',
-              border: '0.5px solid var(--gold)',
-              padding: '10px 22px', borderRadius: '999px',
-              whiteSpace: 'nowrap', flexShrink: 0,
-            }}>Read guest stories →</Link>
-          </div>
+
+            <div className="ukv-guestbook-quotes">
+              {UBUNTU_TESTIMONIALS.filter(testimonial => testimonial.featured).slice(0, 3).map(testimonial => (
+                <article key={testimonial._id} className="ukv-guestbook-quote">
+                  <blockquote>
+                    <p>{testimonial.testimonial}</p>
+                    <footer>
+                      <cite>{testimonial.name}{testimonial.country ? ` · ${testimonial.country}` : ''}</cite>
+                    </footer>
+                  </blockquote>
+                </article>
+              ))}
+            </div>
+
+            <footer style={{
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', flexWrap: 'wrap',
+              gap: '0.75rem', marginTop: '1.5rem',
+            }}>
+              <p style={{
+                fontFamily: 'var(--font-body)', fontSize: '0.875rem',
+                lineHeight: 1.5, color: 'var(--cream)',
+              }}>#MyUbuntuMoment — share your story</p>
+              <Link href="/journal/share-your-story" className="ukv-guestbook-link">
+                Share your story →
+              </Link>
+            </footer>
+          </section>
 
           {/* Moxie + hashtag + CTA row */}
           <div style={{
@@ -911,11 +989,94 @@ export default function UbuntuStoryGrid() {
         a:hover .ukv-hero-img,
         a:hover .ukv-split-img,
         button:hover .ukv-strip-img { transform: scale(1.045) !important; }
+        .ukv-guestbook-practices,
+        .ukv-guestbook-quotes {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: clamp(0.75rem, 1.5vw, 1.25rem);
+          list-style: none;
+          padding: 0;
+        }
+        .ukv-guestbook-practices li,
+        .ukv-guestbook-quote {
+          min-width: 0;
+          padding: clamp(1rem, 1.8vw, 1.5rem);
+          border: 1px solid var(--gold);
+          border-radius: 12px;
+          background: var(--bg);
+        }
+        .ukv-guestbook-practices li {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .ukv-guestbook-practices strong,
+        .ukv-guestbook-quote cite {
+          color: var(--cream);
+          font-family: var(--font-body);
+          font-size: 0.9375rem;
+          font-style: normal;
+          font-weight: 600;
+          line-height: 1.4;
+        }
+        .ukv-guestbook-practices span,
+        .ukv-guestbook-quote blockquote p {
+          color: var(--cream);
+          font-family: var(--font-body);
+          font-size: 0.9375rem;
+          line-height: 1.6;
+        }
+        .ukv-guestbook-quote blockquote {
+          display: flex;
+          height: 100%;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .ukv-guestbook-quote footer { margin-top: auto; }
+        .ukv-guestbook-link {
+          display: inline-flex;
+          min-height: 44px;
+          align-items: center;
+          justify-content: center;
+          padding: 0.625rem 1rem;
+          border: 1px solid var(--cream);
+          border-radius: 999px;
+          background: var(--bg);
+          color: var(--cream);
+          font-family: var(--font-body);
+          font-size: 0.875rem;
+          font-weight: 600;
+          line-height: 1.3;
+          text-decoration: none;
+          transition: background-color 160ms ease, color 160ms ease;
+        }
+        .ukv-guestbook-primary {
+          background: var(--cream);
+          color: var(--bg);
+        }
+        .ukv-guestbook-link:hover {
+          background: var(--cream2);
+          color: var(--bg);
+        }
+        .ukv-guestbook-primary:hover {
+          background: var(--cream2);
+          color: var(--bg);
+        }
+        .ukv-guestbook-link:focus-visible {
+          outline: 3px solid var(--cream);
+          outline-offset: 3px;
+        }
         @media (max-width: 768px) {
           .ukv-exp-grid   { grid-template-columns: 1fr 1fr !important; }
           .ukv-strip-a    { grid-template-columns: 1fr !important; }
           .ukv-split      { grid-template-columns: 1fr !important; }
           .ukv-strip-b    { grid-template-columns: 1fr 1fr !important; }
+          .ukv-guestbook-quotes,
+          .ukv-guestbook-practices { grid-template-columns: minmax(0, 1fr); }
+          .ukv-guestbook > header { align-items: flex-start !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ukv-guestbook-link { transition: none; }
         }
         @media (prefers-reduced-motion: reduce) {
           .ukv-hero-img,.ukv-split-img,.ukv-exp-img,.ukv-strip-img {
