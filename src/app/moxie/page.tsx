@@ -94,7 +94,7 @@ export default function MoxiePage() {
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--cream)] overflow-hidden">
       {/* HERO */}
-      <section className="relative isolate overflow-hidden border-b border-[var(--border2)]">
+      <section className="relative isolate overflow-hidden border-b border-[var(--border2)]" data-theme="dark">
         <div className="absolute inset-0">
           <video
             ref={videoRef}
@@ -106,13 +106,13 @@ export default function MoxiePage() {
             className="h-full w-full object-cover opacity-30"
           />
 
-          <div className="absolute inset-0 bg-[var(--glass-bg)]" />
+          <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--bg)_70%,transparent)]" />
 
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_40%)]" />
         </div>
 
         <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-6 py-32 lg:px-10">
-          <Link href="/" className="absolute top-8 left-6 flex items-center gap-2 rounded-full border border-[var(--border2)] bg-[var(--glass-bg)] px-4 py-2 text-sm backdrop-blur hover:bg-[var(--glass-bg)] transition lg:left-10">
+          <Link href="/" className="absolute top-8 left-6 flex items-center gap-2 rounded-full border border-[var(--border2)] bg-[var(--glass-bg)] px-4 py-2 text-sm backdrop-blur hover:bg-[var(--glass-border)] transition lg:left-10">
             ← Back to Home
           </Link>
           <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-[var(--border2)] bg-[var(--glass-bg)] px-4 py-2 text-sm backdrop-blur">
@@ -144,7 +144,7 @@ export default function MoxiePage() {
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="#chat"
-                className="inline-flex items-center gap-2 rounded-2xl bg-[var(--glass-bg)] px-6 py-4 text-sm font-medium text-black transition hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[var(--cream)] px-6 py-4 text-sm font-medium text-[var(--bg)] transition hover:scale-[1.02]"
               >
                 Talk To Moxie
                 <ArrowRight size={16} />
@@ -152,7 +152,7 @@ export default function MoxiePage() {
 
               <Link
                 href="/cottages"
-                className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--glass-bg)] px-6 py-4 text-sm font-medium text-[var(--cream)] backdrop-blur transition hover:bg-[var(--glass-bg)]"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--glass-bg)] px-6 py-4 text-sm font-medium text-[var(--cream)] backdrop-blur transition hover:bg-[var(--glass-border)]"
               >
                 Explore Residences
               </Link>
@@ -243,7 +243,7 @@ export default function MoxiePage() {
                   className={`w-full rounded-3xl border p-6 text-left transition ${
                     selectedRetreat === item.title
                       ? 'border-[#d9c7a2] bg-[#d9c7a2]/10'
-                      : 'border-[var(--border2)] bg-[var(--glass-bg)] hover:bg-[var(--glass-bg)]'
+                      : 'border-[var(--border2)] bg-[var(--glass-bg)] hover:bg-[var(--glass-border)]'
                   }`}
                 >
                   <h3 className="text-xl font-medium">
@@ -278,7 +278,7 @@ export default function MoxiePage() {
 
               <Link
                 href="/cottages"
-                className="mt-10 inline-flex items-center gap-2 rounded-2xl bg-[var(--glass-bg)] px-5 py-4 text-sm font-medium text-black transition hover:scale-[1.02]"
+                className="mt-10 inline-flex items-center gap-2 rounded-2xl bg-[var(--cream)] px-5 py-4 text-sm font-medium text-[var(--bg)] transition hover:scale-[1.02]"
               >
                 Explore Residences
                 <ArrowRight size={16} />
@@ -354,7 +354,7 @@ export default function MoxiePage() {
                 {suggestions.map((item) => (
                   <button
                     key={item}
-                    className="flex w-full items-center justify-between rounded-2xl border border-[var(--border2)] bg-[var(--glass-bg)] px-5 py-4 text-left transition hover:bg-[var(--glass-bg)]"
+                    className="flex w-full items-center justify-between rounded-2xl border border-[var(--border2)] bg-[var(--glass-bg)] px-5 py-4 text-left transition hover:bg-[var(--glass-border)]"
                   >
                     <span>{item}</span>
                     <MessageCircle size={18} />
@@ -445,7 +445,7 @@ export default function MoxiePage() {
           <div className="mt-12 flex flex-wrap justify-center gap-4">
             <Link
               href="/cottages"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--glass-bg)] px-7 py-4 text-sm font-medium text-black transition hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--cream)] px-7 py-4 text-sm font-medium text-[var(--bg)] transition hover:scale-[1.02]"
             >
               Reserve Your Escape
               <ArrowRight size={16} />
@@ -453,7 +453,7 @@ export default function MoxiePage() {
 
             <Link
               href="/spa"
-              className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--glass-bg)] px-7 py-4 text-sm font-medium text-[var(--cream)] transition hover:bg-[var(--glass-bg)]"
+              className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--glass-bg)] px-7 py-4 text-sm font-medium text-[var(--cream)] transition hover:bg-[var(--glass-border)]"
             >
               Explore The Spa
             </Link>

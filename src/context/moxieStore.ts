@@ -71,9 +71,13 @@ export const useMoxieStore = create<MoxieStore>()(
       // Only persist certain fields (not full messages for size reasons)
       // Messages and profile are managed via ConversationMemoryManager
       partialize: (state) => ({
-        isOpen: state.isOpen,
         sessionId: state.sessionId,
         currentPage: state.currentPage,
+      }),
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...(persistedState as Partial<MoxieStore>),
+        isOpen: false,
       }),
     },
   ),

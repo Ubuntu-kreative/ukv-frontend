@@ -196,6 +196,7 @@ export default function Hero() {
       {/* pt-28 md:pt-32 clears the fixed nav (typically 64–80px tall) */}
       <motion.div
         className="relative w-full max-w-8xl mx-auto px-6 md:px-10 pt-28 md:pt-32 pb-28 md:pb-36"
+        data-theme="dark"
         style={{ zIndex: 5, y: yContent, opacity: heroOpacity }}
       >
 
