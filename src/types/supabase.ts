@@ -40,6 +40,22 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: [
+          {
+            foreignKeyName: 'bookings_guest_id_fkey'
+            columns: ['guest_id']
+            isOneToOne: false
+            referencedRelation: 'guests'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'bookings_resource_id_fkey'
+            columns: ['resource_id']
+            isOneToOne: false
+            referencedRelation: 'resources'
+            referencedColumns: ['id']
+          },
+        ]
       }
       guests: {
         Row: {
@@ -54,6 +70,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       resources: {
         Row: {
@@ -67,6 +84,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       booking_audit_logs: {
         Row: {
@@ -82,6 +100,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       payments: {
         Row: {
@@ -102,11 +121,37 @@ export type Database = {
           failure_code: string | null
           failure_message: string | null
           paid_at: string | null
+          checkout_request_id: string | null
+          merchant_request_id: string | null
+          mpesa_receipt_number: string | null
+          phone_number: string | null
+          transaction_date: string | null
+          result_code: string | null
+          result_desc: string | null
+          query_attempts: number
+          query_last_attempt_at: string | null
+          manual_review_reason: string | null
           created_at: string
           updated_at: string
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: [
+          {
+            foreignKeyName: 'payments_booking_id_fkey'
+            columns: ['booking_id']
+            isOneToOne: false
+            referencedRelation: 'bookings'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payments_guest_id_fkey'
+            columns: ['guest_id']
+            isOneToOne: false
+            referencedRelation: 'guests'
+            referencedColumns: ['id']
+          },
+        ]
       }
       refunds: {
         Row: {
@@ -127,6 +172,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       payment_audit_logs: {
         Row: {
@@ -143,6 +189,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       mpesa_transactions: {
         Row: {
@@ -166,6 +213,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       mpesa_audit_logs: {
         Row: {
@@ -178,6 +226,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       inquiries: {
         Row: {
@@ -197,6 +246,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       admin_profiles: {
         Row: {
@@ -208,6 +258,7 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: []
       }
       receipts: {
         Row: {
@@ -224,6 +275,22 @@ export type Database = {
         }
         Insert: Record<string, unknown>
         Update: Record<string, unknown>
+        Relationships: [
+          {
+            foreignKeyName: 'receipts_booking_id_fkey'
+            columns: ['booking_id']
+            isOneToOne: false
+            referencedRelation: 'bookings'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'receipts_payment_id_fkey'
+            columns: ['payment_id']
+            isOneToOne: false
+            referencedRelation: 'payments'
+            referencedColumns: ['id']
+          },
+        ]
       }
 
       // ── BSF tables (NEW) ─────────────────────────────────────────────────
@@ -248,6 +315,7 @@ export type Database = {
           completed_at?: string | null
           updated_at?:   string
         }
+        Relationships: []
       }
 
       bsf_shipments: {
@@ -280,6 +348,7 @@ export type Database = {
           created_by?:     string | null
         }
         Update: Record<string, unknown>
+        Relationships: []
       }
 
       bsf_production_log: {
@@ -307,6 +376,7 @@ export type Database = {
           logged_by?:     string | null
         }
         Update: Record<string, unknown>
+        Relationships: []
       }
 
       bsf_milestone_status: {
@@ -327,6 +397,7 @@ export type Database = {
           updated_by?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
     }
     Views:     Record<string, never>

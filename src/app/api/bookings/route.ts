@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { calculateBookingPrice } from '@/lib/booking-pricing'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTHORIZATION HELPER
@@ -54,21 +55,58 @@ export async function POST(request: Request) {
     const db = getAdminClient()
     const contact = input.contact
     const bookingInput = input.booking ?? {}
-    const cottage = (input.items ?? []).find((item: { category?: string }) => item.category === 'cottage')
-    const resourceKey = bookingInput.roomId ?? cottage?.resourceId ?? cottage?.id
     const checkIn = bookingInput.checkIn ?? input.checkIn
     const checkOut = bookingInput.checkOut ?? input.checkOut
-    const totalAmount = Number(input.totalAmount)
     const paymentReference = String(input.paymentReference ?? '').trim().toUpperCase()
+    const mpesaEnabled = process.env.MPESA_ENABLED === 'true'
+    const isMpesaStk = input.payment?.method === 'mpesa' && mpesaEnabled
 
-    if (!contact?.name?.trim() || !contact?.email?.trim() || !resourceKey || !checkIn || !checkOut || !paymentReference || !Number.isFinite(totalAmount) || totalAmount <= 0) {
-      return NextResponse.json({ error: 'Guest details, booking dates, resource, amount, and M-Pesa confirmation code are required.' }, { status: 400 })
+    if (!contact?.name?.trim() || !contact?.email?.trim() || !checkIn || !checkOut || (!isMpesaStk && !paymentReference)) {
+      return NextResponse.json({ error: 'Guest details, booking dates, and an M-Pesa confirmation code are required.' }, { status: 400 })
+    }
+
+    let pricing: ReturnType<typeof calculateBookingPrice>
+    try {
+      pricing = calculateBookingPrice({
+        items: input.items,
+        checkIn,
+        checkOut,
+        guests: input.guests ?? 1,
+      })
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Could not calculate booking total' },
+        { status: 400 },
+      )
+    }
+
+    const clientTotal = Number(input.totalAmount)
+    if (!Number.isSafeInteger(clientTotal) || clientTotal <= 0) {
+      return NextResponse.json({ error: 'A valid cart total is required.' }, { status: 400 })
+    }
+
+    const priceDifference = Math.abs(clientTotal - pricing.totalAmount)
+    if (mpesaEnabled && priceDifference > 1) {
+      return NextResponse.json({
+        error: `Your cart total (KES ${clientTotal.toLocaleString()}) does not match the current server total (KES ${pricing.totalAmount.toLocaleString()}). Refresh your cart and try again.`,
+      }, { status: 400 })
+    }
+    if (!mpesaEnabled) {
+      console.info('[Bookings] Cart/server price comparison', {
+        serverTotal: pricing.totalAmount,
+        ...(priceDifference > 0 ? { clientTotal, difference: priceDifference } : {}),
+      })
+    }
+    const bookingTotal = mpesaEnabled ? pricing.totalAmount : clientTotal
+
+    if (!pricing.resourceKey) {
+      return NextResponse.json({ error: 'A cottage booking is required.' }, { status: 400 })
     }
 
     const { data: resource, error: resourceError } = await db
       .from('resources')
       .select('id')
-      .or(`id.eq.${resourceKey},resource_key.eq.${resourceKey}`)
+      .or(`id.eq.${pricing.resourceKey},resource_key.eq.${pricing.resourceKey}`)
       .eq('resource_type', 'cottage')
       .eq('is_active', true)
       .maybeSingle()
@@ -103,13 +141,13 @@ export async function POST(request: Request) {
       check_out_date: checkOut,
       adults: input.guests ?? 1,
       children: 0,
-      rate_per_night: totalAmount,
-      total_amount: totalAmount,
+      rate_per_night: pricing.ratePerNight,
+      total_amount: bookingTotal,
       currency: 'KES',
-      payment_reference: paymentReference,
+      payment_reference: paymentReference || null,
       submitted_at: new Date().toISOString(),
       notes: input.specialRequests || null,
-      status: 'pending_verification',
+      status: isMpesaStk ? 'pending' : 'pending_verification',
     }
 
     const { data: booking, error: bookingError } = await db
@@ -124,7 +162,9 @@ export async function POST(request: Request) {
       success: true,
       data: booking,
       referenceNumber: bookingReference,
-      message: 'Your booking request has been received and is pending payment verification. We\'ll confirm your reservation shortly.',
+      message: isMpesaStk
+        ? 'Your booking is pending M-Pesa payment.'
+        : 'Your booking request has been received and is pending payment verification. We\'ll confirm your reservation shortly.',
     }, { status: 201 })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })

@@ -1,68 +1,59 @@
-// src/app/api/mpesa/callback/route.ts
-// ─────────────────────────────────────────────────────────────────────────────
-// Ubuntu Kreative Village — M-Pesa STK Push Callback Handler
-//
-// Flow:
-//   1. Safaricom POST → this endpoint after STK push completes
-//   2. Verify the payload structure is valid
-//   3. Parse CallbackMetadata (Amount, MpesaReceiptNumber, PhoneNumber, etc.)
-//   4. Update `payments` table  → status paid / failed
-//   5. Update `bookings` table  → status confirmed / payment_failed
-//   6. Insert `receipts` table  → permanent receipt record
-// ─────────────────────────────────────────────────────────────────────────────
-
+import { timingSafeEqual } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient }              from '@supabase/supabase-js'
+import { getAdminClient } from '@/lib/supabase/admin'
+import { isSuccessfulDarajaResult, queryStkPush } from '@/lib/mpesa-daraja'
 
-// ── Supabase admin client (service role — never expose to browser) ────────────
-function getSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !key) {
-    throw new Error('Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY')
-  }
-
-  return createClient(url, key, {
-    auth: { persistSession: false },
-  })
-}
-
-// ── M-Pesa payload types ──────────────────────────────────────────────────────
 interface CallbackMetadataItem {
-  Name:  string
+  Name: string
   Value?: string | number
 }
 
-interface StkCallback {
-  MerchantRequestID: string
-  CheckoutRequestID: string
-  ResultCode:        number   // 0 = success, anything else = failure
-  ResultDesc:        string
-  CallbackMetadata?: {
-    Item: CallbackMetadataItem[]
-  }
-}
-
 interface MpesaCallbackPayload {
-  Body: {
-    stkCallback: StkCallback
+  Body?: {
+    stkCallback?: {
+      MerchantRequestID?: string
+      CheckoutRequestID?: string
+      ResultCode?: number
+      ResultDesc?: string
+      CallbackMetadata?: { Item?: CallbackMetadataItem[] }
+    }
   }
 }
 
-// ── Helper: extract a value from CallbackMetadata by name ────────────────────
-function getMeta(
-  items: CallbackMetadataItem[],
-  name:  string,
-): string | number | undefined {
-  return items.find(i => i.Name === name)?.Value
+function validCallbackToken(receivedToken: string | null): boolean {
+  const expectedToken = process.env.MPESA_CALLBACK_TOKEN
+  if (!expectedToken || !receivedToken) return false
+  const expected = Buffer.from(expectedToken)
+  const received = Buffer.from(receivedToken)
+  return expected.length === received.length && timingSafeEqual(expected, received)
 }
 
-// ── POST handler ──────────────────────────────────────────────────────────────
-export async function POST(req: NextRequest) {
-  let payload: MpesaCallbackPayload
+function metadataValue(items: CallbackMetadataItem[], name: string): string | number | undefined {
+  return items.find(item => item.Name === name)?.Value
+}
 
-  // 1. Parse & validate JSON payload
+function parseAmount(value: string | number | undefined): number | null {
+  if (typeof value === 'number' && Number.isSafeInteger(value)) return value
+  if (typeof value === 'string' && /^\d+$/.test(value)) {
+    const parsed = Number(value)
+    return Number.isSafeInteger(parsed) ? parsed : null
+  }
+  return null
+}
+
+function accepted() {
+  return NextResponse.json({ ResultCode: 0, ResultDesc: 'Callback received' })
+}
+
+export async function POST(req: NextRequest) {
+  if (process.env.MPESA_ENABLED !== 'true') return accepted()
+
+  if (!validCallbackToken(req.nextUrl.searchParams.get('token'))) {
+    console.warn('[M-Pesa Callback] Rejected callback with invalid token')
+    return accepted()
+  }
+
+  let payload: MpesaCallbackPayload
   try {
     payload = await req.json()
   } catch {
@@ -71,137 +62,188 @@ export async function POST(req: NextRequest) {
   }
 
   const callback = payload?.Body?.stkCallback
-
+  const checkoutRequestId = callback?.CheckoutRequestID
   if (
     !callback ||
     typeof callback.MerchantRequestID !== 'string' ||
-    typeof callback.CheckoutRequestID !== 'string' ||
-    typeof callback.ResultCode        !== 'number'
+    typeof checkoutRequestId !== 'string' ||
+    typeof callback.ResultCode !== 'number'
   ) {
-    console.error('[M-Pesa Callback] Malformed payload:', payload)
+    console.error('[M-Pesa Callback] Malformed payload')
     return NextResponse.json({ error: 'Malformed payload' }, { status: 400 })
   }
 
-  const {
-    MerchantRequestID: merchantRequestId,
-    CheckoutRequestID: checkoutRequestId,
-    ResultCode:        resultCode,
-    ResultDesc:        resultDesc,
-    CallbackMetadata,
-  } = callback
-
-  const isSuccess = resultCode === 0
-  console.log(`[M-Pesa Callback] ${checkoutRequestId} — ${isSuccess ? 'SUCCESS' : 'FAILED'} (${resultDesc})`)
-
-  // 2. Parse metadata (only present on success)
-  const items = CallbackMetadata?.Item ?? []
-
-  const amount        = getMeta(items, 'Amount')        as number | undefined
-  const receiptNumber = getMeta(items, 'MpesaReceiptNumber') as string | undefined
-  const transactionDate = getMeta(items, 'TransactionDate')  as string | undefined
-  const phoneNumber   = getMeta(items, 'PhoneNumber')   as string | undefined
-
-  let supabase: ReturnType<typeof getSupabase>
-  try {
-    supabase = getSupabase()
-  } catch (err) {
-    console.error('[M-Pesa Callback] Supabase init failed:', err)
-    return NextResponse.json({ error: 'Server config error' }, { status: 500 })
-  }
-
-  // 3. Find the payment record by CheckoutRequestID
-  const { data: payment, error: paymentFetchError } = await supabase
+  const db = getAdminClient()
+  const { data: payment, error: paymentFetchError } = await db
     .from('payments')
-    .select('id, booking_id, amount')
+    .select('id, booking_id, amount, status, query_attempts')
     .eq('checkout_request_id', checkoutRequestId)
-    .single()
+    .maybeSingle()
 
-  if (paymentFetchError || !payment) {
-    console.error('[M-Pesa Callback] Payment not found for CheckoutRequestID:', checkoutRequestId)
-    // Still return 200 so Safaricom doesn't retry endlessly
-    return NextResponse.json({ message: 'Payment record not found' }, { status: 200 })
+  if (paymentFetchError) {
+    console.error('[M-Pesa Callback] Payment lookup failed:', paymentFetchError)
+    return accepted()
+  }
+  if (!payment || payment.status !== 'pending') return accepted()
+
+  if (callback.ResultCode !== 0) {
+    const { error } = await db
+      .from('payments')
+      .update({
+        status: 'failed',
+        result_code: String(callback.ResultCode),
+        result_desc: callback.ResultDesc ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', payment.id)
+      .eq('status', 'pending')
+    if (error) console.error('[M-Pesa Callback] Failed to record unsuccessful result:', error)
+    return accepted()
   }
 
-  // 4. Update payment record
-  const paymentUpdate = isSuccess
-    ? {
-        status:           'paid',
-        mpesa_receipt:    receiptNumber   ?? null,
-        phone_number:     phoneNumber     ?? null,
-        paid_amount:      amount          ?? payment.amount,
-        transaction_date: transactionDate ?? null,
-        merchant_request_id: merchantRequestId,
-        result_desc:      resultDesc,
-        updated_at:       new Date().toISOString(),
-      }
-    : {
-        status:           'failed',
-        result_code:      resultCode,
-        result_desc:      resultDesc,
-        merchant_request_id: merchantRequestId,
-        updated_at:       new Date().toISOString(),
-      }
+  const items = callback.CallbackMetadata?.Item ?? []
+  const paidAmount = parseAmount(metadataValue(items, 'Amount'))
+  const receiptNumber = metadataValue(items, 'MpesaReceiptNumber')
+  const normalizedReceipt = typeof receiptNumber === 'string' ? receiptNumber.trim() : ''
+  const phoneNumber = metadataValue(items, 'PhoneNumber')
+  const transactionDate = metadataValue(items, 'TransactionDate')
 
-  const { error: paymentUpdateError } = await supabase
+  const manualReviewReason = paidAmount !== payment.amount
+    ? `Callback amount mismatch: expected ${payment.amount}, received ${paidAmount ?? 'missing'}`
+    : !normalizedReceipt
+      ? 'Successful callback omitted MpesaReceiptNumber'
+      : null
+
+  if (manualReviewReason) {
+    const { error } = await db
+      .from('payments')
+      .update({ status: 'pending_review', manual_review_reason: manualReviewReason })
+      .eq('id', payment.id)
+      .eq('status', 'pending')
+    if (error) console.error('[M-Pesa Callback] Failed to flag payment for review:', error)
+    return accepted()
+  }
+
+  if (payment.query_attempts >= 5) {
+    const { error } = await db
+      .from('payments')
+      .update({ manual_review_reason: 'STK Query attempt limit reached' })
+      .eq('id', payment.id)
+      .eq('status', 'pending')
+    if (error) console.error('[M-Pesa Callback] Could not flag query limit:', error)
+    return accepted()
+  }
+
+  const { data: queryAttempt, error: attemptError } = await db
     .from('payments')
-    .update(paymentUpdate)
+    .update({
+      query_attempts: payment.query_attempts + 1,
+      query_last_attempt_at: new Date().toISOString(),
+    })
     .eq('id', payment.id)
+    .eq('status', 'pending')
+    .eq('query_attempts', payment.query_attempts)
+    .select('id')
+    .maybeSingle()
 
-  if (paymentUpdateError) {
-    console.error('[M-Pesa Callback] Failed to update payment:', paymentUpdateError)
+  if (attemptError) {
+    console.error('[M-Pesa Callback] Could not reserve query attempt:', attemptError)
+    return accepted()
   }
+  if (!queryAttempt) return accepted()
 
-  // 5. Update booking record
-  if (payment.booking_id) {
-    const bookingUpdate = isSuccess
-      ? {
-          status:     'confirmed',
-          updated_at: new Date().toISOString(),
-        }
-      : {
-          status:     'payment_failed',
-          updated_at: new Date().toISOString(),
-        }
-
-    const { error: bookingUpdateError } = await supabase
-      .from('bookings')
-      .update(bookingUpdate)
-      .eq('id', payment.booking_id)
-
-    if (bookingUpdateError) {
-      console.error('[M-Pesa Callback] Failed to update booking:', bookingUpdateError)
+  let queryResult
+  try {
+    queryResult = await queryStkPush(checkoutRequestId)
+  } catch (error) {
+    console.error('[M-Pesa Callback] STK Query failed:', error)
+    return accepted()
+  }
+  if (!isSuccessfulDarajaResult(queryResult)) {
+    if (queryResult.ResultCode !== undefined && Number(queryResult.ResultCode) !== 0) {
+      const { error } = await db
+        .from('payments')
+        .update({
+          status: 'pending_review',
+          result_code: String(queryResult.ResultCode),
+          result_desc: queryResult.ResultDesc ?? 'STK Query did not confirm success',
+          manual_review_reason: 'STK Query did not confirm a successful payment',
+        })
+        .eq('id', payment.id)
+        .eq('status', 'pending')
+      if (error) console.error('[M-Pesa Callback] Could not flag query result:', error)
     }
+    return accepted()
   }
 
-  // 6. Generate receipt record (success only)
-  if (isSuccess && receiptNumber) {
-    const receipt = {
-      payment_id:       payment.id,
-      booking_id:       payment.booking_id ?? null,
-      mpesa_receipt:    receiptNumber,
-      amount:           amount ?? payment.amount,
-      phone_number:     phoneNumber ?? null,
-      transaction_date: transactionDate ?? null,
+  const paidAt = new Date().toISOString()
+  const { data: completedPayment, error: completeError } = await db
+    .from('payments')
+    .update({
+      status: 'completed',
+      amount_captured: paidAmount,
+      provider_payment_id: normalizedReceipt,
+      mpesa_receipt_number: normalizedReceipt,
+      phone_number: phoneNumber === undefined ? null : String(phoneNumber),
+      transaction_date: transactionDate === undefined ? null : String(transactionDate),
+      result_code: '0',
+      result_desc: callback.ResultDesc ?? queryResult.ResultDesc ?? null,
+      manual_review_reason: null,
+      paid_at: paidAt,
+      updated_at: paidAt,
+    })
+    .eq('id', payment.id)
+    .eq('status', 'pending')
+    .select('id')
+    .maybeSingle()
+
+  if (completeError || !completedPayment) {
+    if (completeError) console.error('[M-Pesa Callback] Could not complete payment:', completeError)
+    return accepted()
+  }
+
+  const { error: receiptError } = await db
+    .from('receipts')
+    .insert({
+      payment_id: payment.id,
+      booking_id: payment.booking_id,
+      mpesa_receipt: normalizedReceipt,
+      amount: paidAmount,
+      phone_number: phoneNumber === undefined ? null : String(phoneNumber),
+      transaction_date: transactionDate === undefined ? null : String(transactionDate),
       checkout_request_id: checkoutRequestId,
-      merchant_request_id: merchantRequestId,
-      issued_at:        new Date().toISOString(),
-    }
+      merchant_request_id: callback.MerchantRequestID,
+      issued_at: paidAt,
+    })
 
-    const { error: receiptError } = await supabase
-      .from('receipts')
-      .insert(receipt)
-
-    if (receiptError) {
-      // Non-fatal — payment is already marked paid
-      console.error('[M-Pesa Callback] Failed to insert receipt:', receiptError)
-    } else {
-      console.log(`[M-Pesa Callback] Receipt generated: ${receiptNumber}`)
-    }
+  if (receiptError) {
+    console.error('[M-Pesa Callback] Receipt insertion failed:', receiptError)
+    const { error } = await db
+      .from('payments')
+      .update({ status: 'pending_review', manual_review_reason: 'Payment succeeded but receipt persistence failed' })
+      .eq('id', payment.id)
+      .eq('status', 'completed')
+    if (error) console.error('[M-Pesa Callback] Could not flag receipt failure:', error)
+    return accepted()
   }
 
-  // Always return 200 — Safaricom retries on non-200
-  return NextResponse.json({
-    ResultCode: 0,
-    ResultDesc: 'Callback processed successfully',
-  })
+  const { data: confirmedBooking, error: bookingError } = await db
+    .from('bookings')
+    .update({ status: 'confirmed', updated_at: paidAt })
+    .eq('id', payment.booking_id)
+    .in('status', ['pending', 'pending_verification'])
+    .select('id')
+    .maybeSingle()
+
+  if (bookingError || !confirmedBooking) {
+    if (bookingError) console.error('[M-Pesa Callback] Booking confirmation failed:', bookingError)
+    const { error } = await db
+      .from('payments')
+      .update({ status: 'pending_review', manual_review_reason: 'Payment succeeded but booking confirmation failed' })
+      .eq('id', payment.id)
+      .eq('status', 'completed')
+    if (error) console.error('[M-Pesa Callback] Could not flag booking failure:', error)
+  }
+
+  return accepted()
 }
